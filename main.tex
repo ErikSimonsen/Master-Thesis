@@ -1,10 +1,21 @@
 \documentclass[12pt,a4paper]{article}
 
+% Seitengestaltung
 \usepackage[left=3cm,right=2cm,top=2.5cm,bottom=1.5cm,includeheadfoot]{geometry}
+
+% Anpassung von LaTeX an die deutsche Sprache
 \usepackage[english, ngerman]{babel}
+ 
+% Mathematik
 \usepackage{amsmath}
+
+% Grafiken und Bilder
 \usepackage{graphicx}
+\graphicspath{ {resources/} }
+% Schriftfarbe
 \usepackage{xcolor}
+
+% Indexerstellung
 \usepackage{makeidx}
 
 % Blindtext
@@ -13,6 +24,9 @@
 
 % Umlaute
 \usepackage[utf8]{inputenc}
+
+% Zitate an Sprache angepasst
+\usepackage{csquotes}
 
 % Verbesserte Schrift
 \usepackage{microtype}
@@ -30,9 +44,15 @@
 % Figure a b
 \usepackage{subcaption}
 
+% Literaturverzeichniss
 \usepackage[style=authoryear]{biblatex}
+
+% Zeichensatz
 \usepackage[T1]{fontenc}
+
+% Schriftart
 \usepackage{lmodern}
+
 \addbibresource{main.bib}
 \input{pdf}
 \input{tree-definition}
@@ -63,6 +83,4 @@
     \input{mainmatter/fazit}
 
     \printbibliography
-    \newpage
-
 \end{document}
