@@ -1,0 +1,87 @@
+% !TEX root = main.tex
+\section{Vergleich HTTP-basiert und WebRTC}
+\label{sec:Vergleich HTTP-basiert und WebRTC}
+In diesem Kapitel werden der WebRTC-Ansatz und der Ansatz eines HTTP-basierten Streaming-Protokolls
+bezüglich des Anforderungskontext eines web-basierten Konferenzsystems miteinander verglichen.
+Dabei ist es hilfreich, die essentiellen technischen Anforderungen an das genannte Konferenzssystem zu definieren:
+\begin{itemize}
+    \item Sehr geringe Latenz -> Übertragung möglichst nahe an Echtzeit
+    \item Wiedergabequalität als Tradeoff
+    \item Serverlast möglichst gering, besonders bei hohen Teilnehmerzahlen
+    \item Herstellerunabhängigkeit durch offene Standards
+\end{itemize}
+
+\subsection{HTTP-basiertes Streaming}
+\label{subsec:vglHttpBasiertesStreaming}
+Durch die internationale Standardisierung von MPEG-DASH ist die Anforderung der Herstellerunabhängigkeit erfüllt, wobei
+die Auswahl einer geeigneten Implementation hierbei nicht betrachtet wird.
+Problematisch wird es bei der Nutzung dieses Ansatzes für eine Webkonferenz allerdings bei der Latenz und der Skalierbarkeit.
+Wie beim gängigen Live-Streaming, wobei es sich zum eine 1:n Beziehung des Streamers zu seinen Zuschauern handelt, muss von der Quelle (z.B. die Webcam)
+zuerst, mithilfe eines Encoders, ein H.264-encodiertes Video\footnote{Die genutzte Codec ist nicht standardisiert und auch anders gewählt werden.}
+erstellt werden.
+Dieses wird an den Webserver übermittelt und segmentiert, also mehrfach, in unterschiedlichen Bitraten kodiert, auf dem Server hinterlegt.
+Selbst bei dynamischen Netzwerkbedingungen, kann dadurch in der Regel eine flüssige Wiedergabe durch rechtzeitiges Laden von
+Segmenten mit passender Bitrate erfolgen, ohne die Wiedergabequalität zu stark zu beeinträchtigen.
+Die passenden Segmente werden anschließend vom Webserver an die anderen Teilnehmer verteilt.
+
+Dies bringt für diesen Anwendungszweck jedoch mehrere Probleme mit sich.
+Zum Einen entsteht durch die Encodierung, den Transport zum Webserver, und die Segmentierung ein erheblicher Rechenaufwand und
+eine, dadurch bedingte, deutlich spürbare Zeitverzögerung (\textit{delay}).
+Dieser \textit{delay} wird zusätzlich durch das \textit{Buffering}, verstärkt.
+Für eine flüssige Wiedergabe ist ein kurzes Buffering notwendig, um die anfänglichen Mediensegmente zu laden\parencite[3.2 Partial Segments]{Pantos2020}.
+Zudem erfolgt die Übertragung per TCP, um die Vollständigkeit der Datenpakete, und somit eine hohe Wiedergabequalität,
+zu gewährleisten\parencite[4.1 Definition of a Playlist]{Pantos2020}.
+Da es sich bei einer Webkonferenz zudem um eine n:m Beziehung zwischen den Teilnehmern handelt
+könnten Webserver bei höheren Nutzerzahlen schnell das Performance-Bottleneck der Anwendung werden und somit schlecht skalieren.
+Dies würde daran liegen, dass die regelmäßige Segmentierung der encodierten Aufnahmevideos für jeden einzelnen Benutzer erfolgen
+müsste, was bei hohen Benutzer- und Konferenzzahlen einen immensen serverseitigen Rechenaufwand bedeuten würde.
+
+\newpage
+
+\subsection{WebRTC}
+\label{subsec:vglWebRTC}
+Bei WebRTC werden die Daten direkt zwischen den Clients übertragen, man spricht von einer Rechner-zu-Rechner (\textit{Peer-to-Peer}) Kommunikation.
+Der Server ist hierbei nur für die Lokalisierung und Herstellung der Kommunikation (\textit{Signaling}) zwischen den Clients zuständig und verwaltet eine Liste der aktiven Teilnehmer,
+informiert Sie über einen neuen Teilnehmer etc.
+Die Aufnahmequelle des Benutzers wird im Browser über die getUserMedia() API abgerufen und der daraus resultierende \textit{MediaStream}
+kann direkt vom Browser in die benötigte Codec encodiert werden\footnote{Falls der Browser die Codec unterstützt}\parencite{MozWebRtcCodecs}.
+
+Durch die \textit{RTCPeerConnection} API kann der encodierte MediaStream nun direkt an die anderen Clients geschickt werden.
+Da der Webserver, außer für das Signaling, nicht benötigt wird, ist die Serverlast sehr gering.
+Das Encodieren, Dekodieren und Verschlüsseln des \textit{MediaStream}, sowie das Aufrechterhalten der Kommunikation wird komplett
+vom Browser der Nutzer erledigt, wodurch der Prozess verhältnismäßig viele Ressourcen des Rechners benötigt\parencite[5. RTP Media API]{W3WebRTC}.
+Daher ist es durchaus möglich, dass bei vielen Clients Performanceprobleme bei leistungsschwachen Rechnern auftreten können.
+Aufgrund der direkten Kommunikation der Clients sind die Latenzzeiten sehr gering, und erfüllen die weiche Echtzeitanforderung.
+
+Es kann jedoch zu Paketverlust kommen, da die Datenübertragung standardmäßig per UDP erfolgt und sich die Wiedergabequalität somit kurzzeitig verschlechtern
+kann\parencite[14. Accessibility Considerations]{W3WebRTC}.
+Zudem kann die Wiedergabequalität serverseitig nicht beeinflusst werden, sondern ist abhängig von verfügbaren Bandbreite der Nutzer.
+Durch die n:m Beziehung bei Webkonferenzen skaliert auch der WebRTC Ansatz nur begrenzt.
+Da die Hauptlast vom Browser bewältigt wird, gibt es von den verschiedenen Browserherstellern Vorgaben, wieviele gleichzeitige aktive \textit{RTCPeerConnections}
+ein Client haben darf.
+
+\subsection{Fazit}
+\label{subsec:Fazit}
+Basierend auf den genannten Aspekten kommt der Autor zu dem Schluss, dass ein Http-basierter Ansatz sich \textit{nicht} für den Anwendungskontext einer Webkonferenz
+eignet.
+Zum Einen ist der bestehende Delay nicht geeignet für eine Webkonferenz, da diese echtzeitfähig sein muss, und zum Anderen ist die Last auf den/die Webserver sehr hoch,
+wenn die Medienquelle jedes Client segmentiert werden muss, besonders wenn die Nutzerzahl und Anzahl der Konferenzen hoch ist.
+Bitraten-Adaptives Streaming über HTTP eignet sich jedoch hervorragend für On-Demand Streaming und Live Streaming.
+Beim On-Demand Streaming liegen die Mediensegmente des Mediums bereits auf dem Server, und müssen nicht dynamisch generiert werden,
+und werden über ein CDN (Content Deliver Network) an die Clients verschickt.
+Beim Live-Streaming muss die Segmentierung zwar dynamisch durchgeführt werden, allerdings nur für die Medienquelle des Streamers und die Zuschauer
+rufen diese Segmente lediglich ab.
+Bei beiden Streaming-Bereichen herrscht also eine 1:n Beziehung zwischen Quelle und Benutzern und dementsprechend skaliert HTTP-Streaming hier auch besser
+als in einer Webkonferenz.
+Zudem ist eine hohe Wiedergabequalität bei den genannten Bereichen wichtiger als eine niedrige Latenz.
+
+WebRTC eignet sich nach Meinung des Autors hingegen sehr gut.
+Durch die direkte Peer-To-Peer Kommunikation ist die Latenz sehr gering, und erfüllt das Echtzeitkriterium.
+Zudem ist die Serverlast sehr gering, da der rechenintensive (Transcoding und Verschlüsselung des MediaStreams) Teil komplett clientseitig ausgeführt wird
+und lediglich das Signaling serverseitig ausgeführt werden muss.
+Darüber hinaus ersparen die RTCPeerConnection-API und die getUserMedia-API einen erheblichen Teil komplexer Entwicklungsarbeiten, wie beispielsweise das Konvertieren
+von Codecs.
+Der mögliche, auftretende Paketverlust durch den Transport der Datenpakete durch UDP fällt wenig ins Gewicht, kann aber möglicherweise für Enterprise Software
+ein Problem darstellen.
+
+

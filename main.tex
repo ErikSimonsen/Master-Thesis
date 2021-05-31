@@ -1,0 +1,68 @@
+\documentclass[12pt,a4paper]{article}
+
+\usepackage[left=3cm,right=2cm,top=2.5cm,bottom=1.5cm,includeheadfoot]{geometry}
+\usepackage[english, ngerman]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{xcolor}
+\usepackage{makeidx}
+
+% Blindtext
+\usepackage{blindtext}
+\usepackage{lipsum}
+
+% Umlaute
+\usepackage[utf8]{inputenc}
+
+% Verbesserte Schrift
+\usepackage{microtype}
+
+% Verlinkungen
+\usepackage{hyperref}
+
+% Bessere Tabellen
+\usepackage{array}
+%\usepackage[table]{xcolor}
+
+% Abkürzungsverzeichnis
+\usepackage[nolist, nohyperlinks]{acronym}
+
+% Figure a b
+\usepackage{subcaption}
+
+\usepackage[style=authoryear]{biblatex}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\addbibresource{main.bib}
+\input{pdf}
+\input{tree-definition}
+\input{todo-definition}
+\begin{document}
+
+    \pagestyle{empty}
+    \pagenumbering{roman}
+    \input{frontmatter/titlepage}
+    \input{frontmatter/abstract}
+    \input{frontmatter/ehrenwort}
+    \input{frontmatter/toc}
+    \input{frontmatter/abbildungsverzeichnis}
+%\input{frontmatter/stichwortverzeichnis}
+%\input{frontmatter/acronyms}
+
+    \setcounter{page}{1}
+    \pagenumbering{arabic}
+    \pagestyle{headings}
+
+    \input{mainmatter/einleitung}
+    \newpage
+    \input{mainmatter/vergleich_streaming_ansätze}
+    \input{mainmatter/system}
+    \newpage
+    \input{mainmatter/implementierung}
+    \newpage
+    \input{mainmatter/fazit}
+
+    \printbibliography
+    \newpage
+
+\end{document}
