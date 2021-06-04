@@ -3,15 +3,50 @@
 \section{Grundlagen}
 \label{section:grundlagen}
 
+\subsection{Threads \& Prozesse in Java}
+\label{sections:treads_prozesse}
+In der Java-Laufzeitumgebung sind Prozesse und Threads als Betriebssystem-Prozesse realisiert, sog. \textit{native threads} oder auch \textit{Kernelthreads}.
+\footnote{Im Gegensatz zu den ursprünglich implementierten Green-Threads der JVM, //TODO: Verweis auf nachfolgendes Kapitel oder im Text erklären was der Unterschied zwischen Kernel-& Userthreads sind und wie diese Betriebssystemsabhängig sind und unter Windows Fiber heißen}
+Hierbei wird die Ausführungsreihenfolge, die Ausführungszeit und der Prozess- \& Threadwechsel vom Scheduler des Betriebssystems übernommen.
+Die Threading-Abstraktion in Java bietet Entwicklern verhältnismäßig leichten Zugriff auf parallelle Programmierung und Synchronisation von Threads.
+
+Servlet-Container binden üblicherweise jede vom Webserver weitergeleitete Anfrage an einen
+Thread\footnote{Aus einem, im vornherein erzeugten, Thread-Pool} im Servlet-API, welcher die jeweilige Anfrage bearbeitet
+(daher auch \textit{worker thread}).
+
+Um jede Anfrage, und somit jeden Thread, parallel zu bearbeiten wird vom Scheduler des Betriebssystems regelmäßig ein Kontextwechsel zwischen den Threads,
+ein \textit{thread-switch}, durchgeführt. Während bei einem Prozesswechsel der gesamte Programmkontext (Adressraum, Inhalt der CPU-Register,
+Seitentabelle, geöffnete Dateien und Metainformationen)
+gewechselt werden muss, wird bei einem Threadwechsel lediglich der Inhalt der CPU-Register (inkl. Programmzähler) ersetzt.
+Da der Kontextwechsel, im Fall von \textit{native threads}, durch Systemaufrufe, also vom Kernel des Betriebssystems, ausgeführt werden muss, entsteht auch
+bei einem Threadwechsel ein messbarer Zeitverlust.
+
+//Datenbankanbindung
+//Bei krit. Masse an Threads -> weniger Anfragen / sec verarbeitet
+\url{https://de.wikipedia.org/wiki/Systemaufruf}
+\url {https://en.wikipedia.org/wiki/Context_switch}
+\url{https://user.informatik.uni-goettingen.de/~brosenne/vortraege/os2018ws/os20181030.pdf}
+
 \subsection{Reaktive Programmierung}
 \label{section:reaktive_programmierung}
 \subsubsection{Funktionsweise}
-
-\subsubsection{Threads \& Prozesse in Java}
-
+// Reaktive Programmierung vereint Konzepte des Observer Patterns, Iteratoren und Lambdas (funktionaler Programmierung)
+// Asynchronität wesentliche Grundannahme
+// eventbasiert, Stream von Events bei dem eine Aktion ausgeführt werden soll sobald Event entsteht
+// Änderungen werden direkt propagiert und müssen nicht zwischengespeichert werden.
+// zustandslos, da Subscriber keine Kontrolle über Datenfluss hat und Events gepushed bekommt -> keine Kontextwechsel nötig
+// hot \& cold observables (ähnlichkeit zu verarbeitung von collections, elemente sind aber immutable)
+// Event loop https://www.manning.com/books/vertx-in-action
+// \url{https://drek4537l1klr.cloudfront.net/ponge/HighResolutionFigures/table_1-1.png}
+// \url{http://www.reactive-streams.org/}
+// \url{https://www.reactivemanifesto.org/}
 \subsubsection{Vorteile \& Nachteile}
 
 \subsubsection{Alternativen}
+// Project Loom (Java Threads sind keine Betriebssystem Threads mehr, also nicht mehr im Kernel Mode und das Scheduling der Threads wird von der
+// JVM emuliert -> kein Neuladen / Überschreiben von Registern etc. notwendig)
+\subsection{Reaktive Datenströme}
+\label{section.reaktive_datenströme}
 
 \subsection{Reaktive Systeme}
 \label{section:reaktive_systeme}
@@ -21,7 +56,9 @@
 \subsubsection{Anwendungsgebiete}
 
 \subsection{Werkzeuge}
-\label{section:werkzeuge}
 \subsubsection{Java Ökosystem}
-
+// CompletableFuture
+// Reactive streams
+// Flow Api
+// JavaRx, Vert.x \& Mutiny in Quarkus
 \subsubsection{Andere}
