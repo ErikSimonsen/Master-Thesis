@@ -6,30 +6,34 @@
 \subsection{Threads \& Prozesse in Java}
 \label{sections:treads_prozesse}
 In der Java-Laufzeitumgebung sind Prozesse und Threads als Betriebssystem-Prozesse realisiert, sog. \textit{native threads} oder auch \textit{Kernelthreads}.
-\footnote{Im Gegensatz zu den ursprünglich implementierten Green-Threads der JVM, //TODO: Verweis auf nachfolgendes Kapitel oder im Text erklären was der Unterschied zwischen Kernel-& Userthreads sind und wie diese Betriebssystemsabhängig sind und unter Windows Fiber heißen}
-Hierbei wird die Ausführungsreihenfolge, die Ausführungszeit und der Prozess- \& Threadwechsel vom Scheduler des Betriebssystems übernommen.
-Die Threading-Abstraktion in Java bietet Entwicklern verhältnismäßig leichten Zugriff auf parallelle Programmierung und Synchronisation von Threads.
-
+Hierbei wird die Ausführungsreihenfolge, die Ausführungszeit und der Prozess- \& Threadwechsel
+vom Scheduler \& Dispatcher des Betriebssystems übernommen \parencite{Tanenbaum2016}.
+Die Threading-Abstraktion in Java bietet Entwicklern verhältnismäßig leichten Zugriff auf parallelle Programmierung und Synchronisation von Threads.\newline
 Servlet-Container binden üblicherweise jede vom Webserver weitergeleitete Anfrage an einen
 Thread\footnote{Aus einem, im vornherein erzeugten, Thread-Pool} im Servlet-API, welcher die jeweilige Anfrage bearbeitet
-(daher auch \textit{worker thread}).
+(daher auch \textit{worker thread}).\newline
+Der auszuführende Code ist in diesem Ansatz an den jeweiligen Thread gekoppelt, dieser wartet bei
+asynchronen Ereignissen solange, bis er eine Antwort erhält und blockiert die weitere Ausführung des Codes bis dahin.
 
-Um jede Anfrage, und somit jeden Thread, parallel zu bearbeiten wird vom Scheduler des Betriebssystems regelmäßig ein Kontextwechsel zwischen den Threads,
+Um jede Anfrage, und somit jeden Thread, scheinbar parallel zu bearbeiten wird vom Scheduler
+des Betriebssystems regelmäßig ein Kontextwechsel zwischen den Threads,
 ein \textit{thread-switch}, durchgeführt. Während bei einem Prozesswechsel der gesamte Programmkontext (Adressraum, Inhalt der CPU-Register,
 Seitentabelle, geöffnete Dateien und Metainformationen)
-gewechselt werden muss, wird bei einem Threadwechsel lediglich der Inhalt der CPU-Register (inkl. Programmzähler) ersetzt.
+gewechselt werden muss, wird bei einem Threadwechsel lediglich der Inhalt der CPU-Register (inkl. Programmzähler) ersetzt\parencite{Brosenne2021}.
 Da der Kontextwechsel, im Fall von \textit{native threads}, durch Systemaufrufe, also vom Kernel des Betriebssystems, ausgeführt werden muss, entsteht auch
-bei einem Threadwechsel ein messbarer Zeitverlust.
+bei einem Threadwechsel ein messbarer Zeitverlust.\newline
+Weitere Threadwechsel entstehen, wenn ein Thread die zugewiesene Rechenzeit nicht nutzen kann, da er noch durch ein asynchrones Ereignis
+(abgesetzte Datenbankabfragen oder weitere aufgerufene Webservices) blockiert, und diese einem anderen Thread zugeteilt wird.
 
-//Datenbankanbindung
-//Bei krit. Masse an Threads -> weniger Anfragen / sec verarbeitet
-\url{https://de.wikipedia.org/wiki/Systemaufruf}
-\url {https://en.wikipedia.org/wiki/Context_switch}
-\url{https://user.informatik.uni-goettingen.de/~brosenne/vortraege/os2018ws/os20181030.pdf}
+Während dieser Zeitverlust für hoch frequentierte Anwendungen lange Zeit kein Problem darstellte,
+sind die Anforderungen an Webanwendungen in den letzten Jahren durch steigende Nutzerzahlen und Architekturen,
+die stark auf Client-Server-Kommunikation basieren, erheblich gestiegen.
+Ab einer gewissen Menge an Anfragen stellen die Kosten der Threadwechsel von \textit{native threads} ein Performance Bottleneck
+(in Form von Durchsatz) dar.
 
 \subsection{Reaktive Programmierung}
 \label{section:reaktive_programmierung}
-\subsubsection{Funktionsweise}
+
 // Reaktive Programmierung vereint Konzepte des Observer Patterns, Iteratoren und Lambdas (funktionaler Programmierung)
 // Asynchronität wesentliche Grundannahme
 // eventbasiert, Stream von Events bei dem eine Aktion ausgeführt werden soll sobald Event entsteht
@@ -44,6 +48,7 @@ bei einem Threadwechsel ein messbarer Zeitverlust.
 
 \subsubsection{Alternativen}
 // Project Loom (Java Threads sind keine Betriebssystem Threads mehr, also nicht mehr im Kernel Mode und das Scheduling der Threads wird von der
+\footnote{Im Gegensatz zu den ursprünglich implementierten Green-Threads der JVM, //TODO: Verweis auf nachfolgendes Kapitel oder im Text erklären was der Unterschied zwischen Kernel-\& Userthreads sind und wie diese Betriebssystemsabhängig sind und unter Windows Fiber heißen}
 // JVM emuliert -> kein Neuladen / Überschreiben von Registern etc. notwendig)
 \subsection{Reaktive Datenströme}
 \label{section.reaktive_datenströme}
