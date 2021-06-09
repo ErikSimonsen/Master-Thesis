@@ -10,10 +10,10 @@ Hierbei wird die Ausführungsreihenfolge, die Ausführungszeit und der Prozess- 
 vom Scheduler \& Dispatcher des Betriebssystems übernommen \parencite{Tanenbaum2016}.
 Die Threading-Abstraktion in Java bietet Entwicklern verhältnismäßig leichten Zugriff auf parallelle Programmierung und Synchronisation von Threads.\newline
 Servlet-Container binden üblicherweise jede vom Webserver weitergeleitete Anfrage an einen
-Thread\footnote{Aus einem, im vornherein erzeugten, Thread-Pool} im Servlet-API, welcher die jeweilige Anfrage bearbeitet
+Thread\footnote{Aus einem, im vornherein erzeugten, Thread-Pool} im Servlet-API, welcher die jeweilige Anfrage imperativ abarbeitet
 (daher auch \textit{worker thread}).\newline
 Der auszuführende Code ist in diesem Ansatz an den jeweiligen Thread gekoppelt, dieser wartet bei
-asynchronen Ereignissen solange, bis er eine Antwort erhält und blockiert die weitere Ausführung des Codes bis dahin.
+asynchronen Ereignissen solange, bis er eine Antwort erhält und blockiert den Thread bis dahin.
 
 Um jede Anfrage, und somit jeden Thread, scheinbar parallel zu bearbeiten wird vom Scheduler
 des Betriebssystems regelmäßig ein Kontextwechsel zwischen den Threads,
@@ -33,28 +33,71 @@ Ab einer gewissen Menge an Anfragen stellen die Kosten der Threadwechsel von \te
 
 \subsection{Reaktive Programmierung}
 \label{section:reaktive_programmierung}
+Reaktive Programmierung ist ein Programmierparadigma, bei dem der Programmablauf als Sequenz von asynchronen Ereignissen (Events), und
+Daten als -von außen- unveränderliche (immutable) Datenströme (Streams) dargestellt werden.
+Sobald es innerhalb des Datenstroms zu Änderungen kommt werden diese als Events durch einen Publisher veröffentlicht.
+Die eigentliche Programmlogik wird in Funktionen ausgeführt, die auf die veröffentlichten Events hören (Subscriber), sie verarbeiten und wiederrum welche
+veröffentlichen können. Die Grundidee orientiert sich am Observer-Pattern und dessen Ausprägung: dem Publish-Subscribe Pattern, erweitert diese aber
+noch um die Benachrichtigungen des Subscribers:
+\begin{enumerate}
+    \item Sobald keine Events mehr kommen
+    \item Wenn ein Fehler aufgetreten ist
+\end{enumerate}
 
-// Reaktive Programmierung vereint Konzepte des Observer Patterns, Iteratoren und Lambdas (funktionaler Programmierung)
-// Asynchronität wesentliche Grundannahme
-// eventbasiert, Stream von Events bei dem eine Aktion ausgeführt werden soll sobald Event entsteht
-// Änderungen werden direkt propagiert und müssen nicht zwischengespeichert werden.
-// zustandslos, da Subscriber keine Kontrolle über Datenfluss hat und Events gepushed bekommt -> keine Kontextwechsel nötig
-// hot \& cold observables (ähnlichkeit zu verarbeitung von collections, elemente sind aber immutable)
-// Event loop https://www.manning.com/books/vertx-in-action
-// \url{https://drek4537l1klr.cloudfront.net/ponge/HighResolutionFigures/table_1-1.png}
-// \url{http://www.reactive-streams.org/}
-// \url{https://www.reactivemanifesto.org/}
-\subsubsection{Vorteile \& Nachteile}
+Indem Änderungen direkt propagiert werden und Subscriber keine Kontrolle über den Datenfluss haben, sondern lediglich über Änderungen informiert werden,
+können Programme ohne jeglichen Zustand realisiert werden.
+
+Reaktive Programmierung verinnerlicht das Konzept von nicht-blockierender bzw. asynchroner Ein- und Ausgabe (I/O).
+Dabei wird, statt wie bei synchroner bzw. blockierender Ein- und Ausgabe die restliche Ausführung des Programms
+zu blockieren bis die Datenübertragung abgeschlossen ist, nach dem Start der Übertragung bereits begonnen die Teile des
+Programms auszuführen, die nicht von dem Ergebnis der I/O Operation abhängen.
+
+Dadurch können mehrere parallele Anfragen von dem gleichen Thread bearbeitet werden.
+Methoden die blockierende I/O Operationen ausführen, wie Datenbankzugriffe oder Anfragen von externen Services,
+geben beim Aufruf unverzüglich einen Publisher zurück, auf dem sich der Aufrufer registriert (subscribe).
+Dadurch wird der bearbeitende Thread nicht blockiert, und kann die nächste Anfrage bearbeiten.
+Sobald das Ergebnis der I/O Operation bereit ist, wird es dem Publisher in Form eines Events mitgeteilt, von diesem veröffentlicht und die Anfrage kann
+vom Aufrufer bzw. Subscriber weiter bearbeitet werden.
+
+Da durch dieses Modell der auszuführende Code nicht mehr an den jeweils ausführenden Thread gebunden wird, erlaubt es die Nutzung eines einzigen
+Threads (\textit{sog. IO Thread}) statt eines \textit{Threadpools}.
+Dadurch ergeben sich folgende Vorteile:
+
+\begin{enumerate}
+    \item Die Antwortenzeiten sind für eine hohe Last geringer, da keine Threadwechsel gemacht werden müssen
+    \item Der Speicherverbrauch ist geringer, da weniger Threads genutzt werden
+    \item Der Grad der Paralellität ist nicht von der Anzahl der Threads begrenzt
+\end{enumerate}
+
+Allerdings gibt es auch einige gravierende Nachteile:
+
+\begin{enumerate}
+    \item Asynchroner Code ist schwieriger zu schreiben, lesen, testen und zu debuggen als imperativer Code
+    \item Sehr aufwendig in bestehende klassische Anwendungen zu integrieren
+    \item Reaktive Anwendungen müssen in jeder Schicht reaktiv sein (Transaktionen, Security, Datenbanktreiber)
+    \item Da nur ein IO-Thread genutzt wird resultieren blockierende I/O-Operationen in der Blockierung der gesamten Anwendung
+\end{enumerate}
+
+Ein beliebtes Threading-Modell für die Verarbeitung von asynchronen Events ist die Event Loop. Sobald ein Event entsteht wird es einer Warteschlange (Queue)
+in der Event Loop hinzugefügt. Solange der Main-Thread aktiv ist und die Queue noch Events enthält, wird in einer Schleife das nächste Event
+abgerufen und an den, für diesen Eventtyp, registrierten Event-Handler bzw. oben beschriebenen Subscriber weitergeleitet.
+Dies können beispielsweise I/O-Events sein, die signalisieren das Daten bereit zur Weiterverarbeitung sind, aber auch jegliches andere Event.
+Die Event Loop wird in der Regel vom Main-Thread (in diesem Fall dem genannten IO-Thread) ausgeführt, daher darf das Verarbeiten von Events
+keine blockierenden, oder zeitintensiven Operationen beinhalten.
 
 \subsubsection{Alternativen}
 // Project Loom (Java Threads sind keine Betriebssystem Threads mehr, also nicht mehr im Kernel Mode und das Scheduling der Threads wird von der
-\footnote{Im Gegensatz zu den ursprünglich implementierten Green-Threads der JVM, //TODO: Verweis auf nachfolgendes Kapitel oder im Text erklären was der Unterschied zwischen Kernel-\& Userthreads sind und wie diese Betriebssystemsabhängig sind und unter Windows Fiber heißen}
+\footnote{Im Gegensatz zu den ursprünglich implementierten Green-Threads der JVM,
+    //TODO: Verweis auf nachfolgendes Kapitel oder im Text erklären was der Unterschied zwischen
+    Kernel-\& Userthreads sind und wie diese Betriebssystemsabhängig sind und unter Windows Fiber heißen}
 // JVM emuliert -> kein Neuladen / Überschreiben von Registern etc. notwendig)
 \subsection{Reaktive Datenströme}
 \label{section.reaktive_datenströme}
+\url{http://www.reactive-streams.org/}
 
 \subsection{Reaktive Systeme}
 \label{section:reaktive_systeme}
+\url{https://www.reactivemanifesto.org/}
 
 \subsubsection{Eigenschaften}
 
@@ -67,3 +110,4 @@ Ab einer gewissen Menge an Anfragen stellen die Kosten der Threadwechsel von \te
 // Flow Api
 // JavaRx, Vert.x \& Mutiny in Quarkus
 \subsubsection{Andere}
+
