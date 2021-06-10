@@ -19,7 +19,7 @@ Um jede Anfrage, und somit jeden Thread, scheinbar parallel zu bearbeiten wird v
 des Betriebssystems regelmäßig ein Kontextwechsel zwischen den Threads,
 ein \textit{thread-switch}, durchgeführt. Während bei einem Prozesswechsel der gesamte Programmkontext (Adressraum, Inhalt der CPU-Register,
 Seitentabelle, geöffnete Dateien und Metainformationen)
-gewechselt werden muss, wird bei einem Threadwechsel lediglich der Inhalt der CPU-Register (inkl. Programmzähler) ersetzt\parencite{Brosenne2021}.
+gewechselt werden muss, wird bei einem Threadwechsel lediglich der Inhalt der CPU-Register (inkl. Programmzähler) ersetzt\parencite{Brosenne2021}\parencite{Mosberger2002}.
 Da der Kontextwechsel, im Fall von \textit{native threads}, durch Systemaufrufe, also vom Kernel des Betriebssystems, ausgeführt werden muss, entsteht auch
 bei einem Threadwechsel ein messbarer Zeitverlust.\newline
 Weitere Threadwechsel entstehen, wenn ein Thread die zugewiesene Rechenzeit nicht nutzen kann, da er noch durch ein asynchrones Ereignis
@@ -35,7 +35,8 @@ Ab einer gewissen Menge an Anfragen stellen die Kosten der Threadwechsel von \te
 \label{section:reaktive_programmierung}
 Reaktive Programmierung ist ein Programmierparadigma, bei dem der Programmablauf als Sequenz von asynchronen Ereignissen (Events), und
 Daten als -von außen- unveränderliche (immutable) Datenströme (Streams) dargestellt werden.
-Sobald es innerhalb des Datenstroms zu Änderungen kommt werden diese als Events durch einen Publisher veröffentlicht.
+Sobald es innerhalb des Datenstroms zu Änderungen kommt werden diese als Events durch einen Publisher veröffentlicht.\footnote{Änderungen in Datenströmen
+    sind der quasi der Stimulus}
 Die eigentliche Programmlogik wird in Funktionen ausgeführt, die auf die veröffentlichten Events hören (Subscriber), sie verarbeiten und wiederrum welche
 veröffentlichen können. Die Grundidee orientiert sich am Observer-Pattern und dessen Ausprägung: dem Publish-Subscribe Pattern, erweitert diese aber
 noch um die Benachrichtigungen des Subscribers:
@@ -43,9 +44,9 @@ noch um die Benachrichtigungen des Subscribers:
     \item Sobald keine Events mehr kommen
     \item Wenn ein Fehler aufgetreten ist
 \end{enumerate}
-
 Indem Änderungen direkt propagiert werden und Subscriber keine Kontrolle über den Datenfluss haben, sondern lediglich über Änderungen informiert werden,
-können Programme ohne jeglichen Zustand realisiert werden.
+können Programme ohne jeglichen Zustand realisiert werden\parencite{Escoffier2017}.
+
 
 Reaktive Programmierung verinnerlicht das Konzept von nicht-blockierender bzw. asynchroner Ein- und Ausgabe (I/O).
 Dabei wird, statt wie bei synchroner bzw. blockierender Ein- und Ausgabe die restliche Ausführung des Programms
@@ -64,7 +65,7 @@ Threads (\textit{sog. IO Thread}) statt eines \textit{Threadpools}.
 Dadurch ergeben sich folgende Vorteile:
 
 \begin{enumerate}
-    \item Die Antwortenzeiten sind für eine hohe Last geringer, da keine Threadwechsel gemacht werden müssen
+    \item Die Antwortenzeiten sind für eine hohe Last geringer, da deutlich weniger Threadwechsel gemacht werden müssen
     \item Der Speicherverbrauch ist geringer, da weniger Threads genutzt werden
     \item Der Grad der Paralellität ist nicht von der Anzahl der Threads begrenzt
 \end{enumerate}
@@ -83,7 +84,7 @@ in der Event Loop hinzugefügt. Solange der Main-Thread aktiv ist und die Queue 
 abgerufen und an den, für diesen Eventtyp, registrierten Event-Handler bzw. oben beschriebenen Subscriber weitergeleitet.
 Dies können beispielsweise I/O-Events sein, die signalisieren das Daten bereit zur Weiterverarbeitung sind, aber auch jegliches andere Event.
 Die Event Loop wird in der Regel vom Main-Thread (in diesem Fall dem genannten IO-Thread) ausgeführt, daher darf das Verarbeiten von Events
-keine blockierenden, oder zeitintensiven Operationen beinhalten.
+keine blockierenden, oder zeitintensiven Operationen beinhalten\parencite{Ponge2020}.
 
 \subsubsection{Alternativen}
 // Project Loom (Java Threads sind keine Betriebssystem Threads mehr, also nicht mehr im Kernel Mode und das Scheduling der Threads wird von der
@@ -91,6 +92,7 @@ keine blockierenden, oder zeitintensiven Operationen beinhalten.
     //TODO: Verweis auf nachfolgendes Kapitel oder im Text erklären was der Unterschied zwischen
     Kernel-\& Userthreads sind und wie diese Betriebssystemsabhängig sind und unter Windows Fiber heißen}
 // JVM emuliert -> kein Neuladen / Überschreiben von Registern etc. notwendig)
+\parencite{Oracle2021}
 \subsection{Reaktive Datenströme}
 \label{section.reaktive_datenströme}
 \url{http://www.reactive-streams.org/}
