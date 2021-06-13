@@ -93,11 +93,10 @@ gar nicht genutzt. Stattdessen lief die komplette JVM in einem einzigen Prozess.
  dabei ist die Funktionalität
 nicht im Kernel implementiert (wie bei \textit{kernel-/native threads}), sondern in einer Programmbibliothek im \textit{Userspace}.
 Da sich das Betriebssystem nicht um das Scheduling von \textit{user threads} kümmert, wurde dies über einen eigenen Scheduling-Algorithmus der JVM
-geregelt.
+geregelt.\parencite{Oracle2010}
 Ein \textit{green thread} existiert lediglich als Objekt innerhalb der JVM, und durch die virtuelle Speicherverwaltung entfallen somit
  die aufwändigen Betriebssystemaufrufe beim 
 Erstellen eines Threads, sowie bei Thread- bzw. Kontextwechseln, denn der ausführende Main-Thread bleibt gleich.
-\footnote{Jeder Prozess hat mind. einen Thread (kernel-thread) der das Programm ausführt. Dieser wird daher auch als \textit{main-thread} bezeichnet.}
 
 Die Threadwechsel der \textit{user-threads} erfolgten ausschließlich innerhalb des Main-Threads, weswegen keine echte Parallelität realisiert werden konnte, da immer nur ein 
 Prozessorkern genutzt wurde. 
