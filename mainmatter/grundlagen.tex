@@ -132,25 +132,118 @@ die virtuellen Threads nutzen und blockieren den darunterliegenden nativen Threa
 
 \subsection{Reaktive Datenströme}
 \label{section.reaktive_datenströme}
+In einer typischen asynchronen Verarbeitungskette von, potenziell unbegrenzten, Datenströmen
+bestehend aus einem Sender und Empfänger bzw. Publisher und Subscriber kann es vorkommen,
+dass der Sender Daten schneller an den Empfänger verschickt, als dieser sie verarbeiten kann.
+Zwei naive Ansätze mit einer Überlastung des Empfängers umzugehen wären:
+\begin{enumerate}
+    \item Nur der Empfänger reagiert auf eine Überlast. Diese kann sich in einem Speicherüberlauf äußern oder, falls der Puffer des Empfängers eine Größenbeschränkung
+          hat, im Verlust der empfangenen Daten
+    \item Der Sender begrenzt im vornherein die Datenmenge, die er an den Empfänger schickt. Da der Sender allerdings in der Regel nicht weiß wieviel der Empfänger
+          verarbeiten kann, sendet er entweder zuviel (es entsteht eine Überlast), oder er sendet zuwenig wodurch der Durchsatz geringer ist als nötig
+\end{enumerate}\parencite{JavaSpektrum2015}
+Die Lösung für dieses Problem wird \textit{Backpressure} genannt.
+Dabei fordert der Empfänger die Daten entsprechend seiner Kapazitäten an, wodurch der Sender weiß wieviele Daten er maximal versenden darf.
+Diese Mitteilung muss asynchron geschehen, da bei einer synchronen Kommunikation der Backpressure die Vorteile der asynchronen, reaktiven Datenverarbeitung
+negiert würden.
+Da große Anwendungen aus mehreren Schichten bestehen und somit zwischen dem Sender und Empfänger mehrere Komponenten liegen können, muss jedes
+Element der Verarbeitungskette nichtblockierendes, asynchrones Verhalten implementieren, da ansonsten der Rest der Kette blockiert würde.
 
-\url{http://www.reactive-streams.org/}
-\parencite{ReactiveStreams}
+
+Aus der Intention einen Standard für die asynchrone Verarbeitung von Datenströmen mit nicht-blockierender \textit{back pressure}
+zu schaffen, ging die \textit{Reactive Streams}-Initiative hervor.
+Innerhalb dieser Initiative haben sich mehrere Arbeitsgruppen gebildet, welche die grundlegenden Semantiken erarbeitet haben und
+sie in Form einer eigenen Java-Spezifikation namens \textit{Reactive Streams}-API implementiert und veröffentlicht haben.\parencite{ReactiveStreams}
+Diese API wurde anschließend in Java 9, als Schnittstelle namens \textit{Flow-API} dem JDK hinzugefügt.
+
+Die \textit{Flow-API} des JDK entspricht der \textit{Reactive Streams} Spezifikation und stellt (nur) Interfaces zur Verfügung mit denen eine
+asynchrone, nicht blockierende Verarbeitung von (unbegrenzten) Datenströmen mit \textit{back pressure} auf der JVM implementiert werden kann.
+\parencite{OracleFlow}.
+\footnote{Nicht zu Verwechseln mit den Java-Streams durch die Collection-API ab Java 8. Diese sind zur Auswertungszeit in ihrer Größe begrenzt und
+    nach der Abarbeitung liegt statt eines Streams eine Collection}
 
 \subsection{Reaktive Systeme}
 \label{section:reaktive_systeme}
+Anforderungen an große Softwaresysteme haben sich in den letzten Jahren stark verändert:
+\begin{enumerate}
+    \item Antwortzeiten in Millisekunden statt im Sekundenbereich
+    \item Datengrößen in Petabytes statt Gigabytes
+    \item 100\% Verfügbarkeit statt stundenlange Wartungsarbeiten
+    \item Deployment auf einer Vielzahl von Plattformen und cloud-basierten Clustern mit tausenden Multikernprozessoren
+\end{enumerate}
 
-\url{https://www.reactivemanifesto.org/}
-\parencite{ReactiveSystems}
+Unternehmen aus verschiedenen Bereichen haben sich voneinander unabhängig an diese Kriterien angepasst und Architekturmuster
+erarbeitet, mit denen robuste, belastbare und flexible Softwaresysteme entwickelt werden können, die die modernen Anforderungen
+erfüllen.
 
-\subsubsection{Eigenschaften}
+2014 wurde mit dem \textit{Reactive Manifesto} versucht diese Ansätze des Systemdesigns in Form eines Manifests zusammenzuführen
+und daraus allgemeingültige Systemattribute abzuleiten.
+Laut dieses Manifests sind Systeme reaktiv wenn sie:
+\begin{enumerate}
+    \item Reaktionsschnell
+    \item Widerstandsfähig (gegen Fehler)
+    \item Elastisch
+    \item Nachrichtengesteuert
+\end{enumerate}
+sind.
+Solche Systeme sind, laut den Autoren, flexibler, stärker entkoppelt und würden besser skalieren als herkömmliche, nicht-reaktive Systeme.
+Dies mache sie leichter zu entwickeln, zugänglicher für Veränderungen und deutlich fehlertoleranter.
 
-\subsubsection{Anwendungsgebiete}
+Die Autoren definieren die genannten Systemeigenschaften wie folgt:
+
+Reaktionsschnelligkeit: Das System reagiert, falls überhaupt möglich, rechtzeitig. Reaktionsgeschwindigkeit ist dabei die Grundlage von Nutzen und
+Benutzbarkeit und ermöglicht das schnelle Erkennen und Behandeln von Fehlern.
+Der Fokus von reaktionsschnellen Systemen liegt auf konsistenten und schnellen Antwortszeiten. Darüber hinaus schaffen sie
+verlässliche Obergrenzen um eine konsistente Qualität zu erreichen.
+Dieses konsistente und verlässliche Verhalten simplifiziert Fehlerbehandlung, und erhöht das Vertrauen der Benutzer.
+
+Widerstandsfähig/Fehlertolerant: Das System bleibt auch bei Fehlern reaktionsschnell. Das gilt nicht nur geschäftskritische, hochverfügbare Systeme -
+jedes System das nicht Fehlertolerant ist, wird nach Fehlern nicht mehr reaktionsfähig sein.
+Widerstandsfähigkeit wird durch Redundanz, Eingrenzung, Isolation und Delegation erreicht.
+Fehler werden innerhalb einer Komponente eingegrenzt und die Komponenten sind voneinander isoliert. Dadurch bleibt das Gesamtsystem stabil, selbst
+wenn eine einzelne Komponente versagt.
+Die Wiederherstellung jeder Komponente wird an eine andere (möglicherweise externe) Komponente deligiert, und
+Hochverfügbarkeit der Komponenten wird, wo notwendig, durch Redundanz gewährleistet.
+
+Elastisch: Das System bleibt reaktionsschnell unter variierenden Arbeitslasten. Auf Änderungen der Arbeitslast wird durch das Anpassen der
+allokierten Ressourcen reagiert. Das impliziert ein Systemdesign das keine zentralen Performance-Bottlenecks oder Reibunspunkte hat, damit
+Komponenten problemlos repliziert und die Last darauf verteilt werden kann.
+Reaktive Systeme unterstützen prädiktive, skalierende Algorithmen zur Ressourcenberechnung,
+indem Sie die Live-Messungen von Performance relevanten Systemmetriken als Eingabe nutzen.
+
+Nachrichtengesteuert: Reaktive Systeme basieren auf dem asynchronen Austausch von Nachrichten, um die Komponenten voneinander abzugrenzen und dadurch
+eine loose Kopplung, Isolation und eine transparente Lokalisierung der Komponenten zu ermöglichen.
+Aufgrund dieser Abgrenzung werden Fehler als Nachrichten an andere Komponenten delegiert.
+Der Ansatz jegliche Kommunikation der Komponenten durch das Übermitteln von Nachrichten zu implementieren erlaubt Elastizität,
+indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch das Überwachen der Nachrichtenwarteschlangen
+(\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.\parencite{ReactiveSystems}
 
 \subsection{Werkzeuge}
-\subsubsection{Java Ökosystem}
-// CompletableFuture
-// Reactive streams
-// Flow Api
-// JavaRx, Vert.x \& Mutiny in Quarkus
-\subsubsection{Andere}
 
+\subsubsection{Java Ökosystem}
+//Erstmal Unterschied zwischen CompletableFuture und Flow API erklären - Einzelne Asynchrone Vorgänge vs. Verarbeitung von asynchronen (unbegrenzten), nicht
+vorhersagbaren Datenströmen
+// CompletableFuture - Unterstützung von asynchronen Vorgängen und Callbacks
+// FLow API - JDK Implementierung der Reactive Streams API um asynchrone (unbegrenzte) Datenströme mit back pressure zu verarbeiten
+
+
+// JavaRx,  \& Mutiny in Quarkus - Frameworks die Mithilfe der Flow API konkret Reaktive Ströme (keine reaktiven Systeme)
+implementieren (Flow API sind nur Interfaces, keine Implementierungen)
+
+// Vert.x kein Framework - nutzt Futures  - Toollkit für Reaktive Systeme - Event Loops - basiert auf Netty
+// Netty - NIO client server framework  - Entwicklung von Netzwerk anwendungen wie Server und Client Protokolle, Framework für Netzwerkprogrammierung
+wie bspw. TCP und UDP Socket Server Entwicklung
+// Quarkus - Anwendungsorientiertes Framework -
+\parencite{OracleFlow}
+\parencite{OracleFuture}
+\parencite{ReactiveX}
+\parencite{Mutiny}
+
+\parencite{Vert.x}
+\parencite{Netty}
+
+\parencite{Quarkus}
+\subsubsection{Andere}
+//Coroutines (Go, Kotlin), async await (C\#,Javascript)
+\parencite{KotlinCoroutines}
+\parencite{JavascriptAsync}
