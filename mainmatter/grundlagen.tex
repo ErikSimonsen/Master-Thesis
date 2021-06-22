@@ -219,31 +219,45 @@ indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch
 (\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.\parencite{ReactiveSystems}
 
 \subsection{Werkzeuge}
-
 \subsubsection{Java Ökosystem}
-//Erstmal Unterschied zwischen CompletableFuture und Flow API erklären - Einzelne Asynchrone Vorgänge vs. Verarbeitung von asynchronen (unbegrenzten), nicht
-vorhersagbaren Datenströmen
-// CompletableFuture - Unterstützung von asynchronen Vorgängen und Callbacks
-// FLow API - JDK Implementierung der Reactive Streams API um asynchrone (unbegrenzte) Datenströme mit back pressure zu verarbeiten
+Im Java Ökosystem gibt es eine Vielzahl an Frameworks, Libaries und APIs mit denen Reaktive Programmierung und reaktive Systeme umgesetzt
+werden können.
+Um in Java einzelne, asynchrone Prozesse zu implementieren, wird vom JDK die Future-API zur Verfügung gestellt.\parencite{OracleFuture}
+Für die Verarbeitung von asynchronen (unbegrenzten) Datenströmen gibt es die Flow-API.\parencite{OracleFlow}
+Da die Flow-API lediglich Interfaces bereitstellt, gibt es mehrere Implementierungen von \textit{reactive streams}.
 
+Um reaktive Programmierung zu erleichtern, gibt es unter Anderem die folgenden Projekte:
+\begin{enumerate}
+    \item RxJava
+    \item Spring Webflux
+    \item Mutiny
+\end{enumerate}
+Jedes Projekt unterscheidet sich dabei in den verwendeten Klassennamen \footnote{RxJava - Observable; Mutiny - Uni, Multi; Spring Webflux - Mono, Flux},
+Operatoren und dem Grad der funktionalen Programmierung.\parencite{ReactiveX, Mutiny}
+Allerdings sind die meisten Frameworks und Bibliotheken interoperabel, da sie die \textit{reactive streams} Spezifikation implementieren (und damit
+\textit{back pressure}), und bieten Converter-Klassen an.
 
-// JavaRx,  \& Mutiny in Quarkus - Frameworks die Mithilfe der Flow API konkret Reaktive Ströme (keine reaktiven Systeme)
-implementieren (Flow API sind nur Interfaces, keine Implementierungen)
+Für die Entwicklung von reaktiven Systemen bieten sich mehrere Toolkits und Frameworks an.
+Sie implementieren bereits Komponenten und Mechanismen wie Messaging, Event Loops, Dateizugriffe, nichtblockierende Netzwerkanwendungen, Web APIs und mehr.
+Zu den populärsten gehören:
+\begin{enumerate}
+    \item Eclipse Vert.x
+    \item Akka
+    \item Project Reactor
+\end{enumerate}\parencite{Vert.x, Akka, ProjectReactor}
 
-// Vert.x kein Framework - nutzt Futures  - Toollkit für Reaktive Systeme - Event Loops - basiert auf Netty
-// Netty - NIO client server framework  - Entwicklung von Netzwerk anwendungen wie Server und Client Protokolle, Framework für Netzwerkprogrammierung
-wie bspw. TCP und UDP Socket Server Entwicklung
-// Quarkus - Anwendungsorientiertes Framework -
-\parencite{OracleFlow}
-\parencite{OracleFuture}
-\parencite{ReactiveX}
-\parencite{Mutiny}
+Bei dem, in dieser Arbeit verwendeten, Framework Quarkus handelt es sich, laut Hersteller Red Hat, um ein
+benutzerfreundliches, auf Entwickler abgestimmtes Java Framework, welches für Container-, Cloud- und Serverless-Umgebungen optimiert ist und nur wenig
+Konfiguration benötigt.
+Dabei können die Anwendungen sowohl auf einer JVM (JVM-Mode) laufen, als auch, durch native Kompilierung mit vollständigem Stack,
+als \textit{native executable} (native-mode). Dafür nutzt Quarkus eine, von Oracle entwickelte, Technologie namens GraalVM. Dabei handelt es sich um
+eine polyglotte, virtuelle Maschine und Laufzeitumgebung die auf dem OpenJDK basiert, und über JVMCI \textit{Java Virtual Machine Compiler Interface} den
+C2-Compiler der zugrundeliegenden HotSpot-JVM durch den Graal JIT-Compiler ersetzt.\parencite{GraalVM}
 
-\parencite{Vert.x}
-\parencite{Netty}
+Darüber hinaus verspricht Quarkus, durch seine Container-first-Philosophie, bis zu 300 Mal schnellere Startzeiten und nur ein Zehntel des
+Speicherbedarfs im Vergleich zum 'traditionellen' Java, wodurch es eine signifikante Reduzierung der benötigten Ressourcen im Cloud-Umfeld bewirkt.
 
-\parencite{Quarkus}
-\subsubsection{Andere}
-//Coroutines (Go, Kotlin), async await (C\#,Javascript)
-\parencite{KotlinCoroutines}
-\parencite{JavascriptAsync}
+Des Weiteren erlaubt Quarkus die Kombination des imperativen und des reaktiven, nicht-blockierenden Programmierparadigmas.
+Für die reaktive Programmierung bietet Quarkus die bereits genannte Bibliothek Mutiny.
+Quarkus selber ist zudem auch reaktiv, denn 'angetrieben' wird es durch eine nicht-blockierende, reaktive Eclipse Vert.x Engine, die
+alle Netzwerk I/O-Operationen verarbeitet. \parencite{QuarkusReactiveGettingStarted, Quarkus}
