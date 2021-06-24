@@ -1,28 +1,49 @@
 % !TEX root = main.tex
-
 \section {Vergleich reaktive \& imperative Anwendung}
 \label{section:vergleich_reaktiv_imperativ}
+//Was wird hier überhaupt verglichen, kurze Einleitung  -> Vergleich Über HTTP Benchmarks in einem bestimmten Zeitinvervall mit bestimmter
+Anzahl paralleler Rrequets/sec
 
 \subsection{Implementierung \& Systemaufbau}
 \label{section:implementierung}
+//TODO: Erklären wie der Code funktioniert
+Erklären welche Schichten vorhanden sind, Grafiken mit den verschiedenen Layern
+Quarkus- Http Layer
+Vert.x/Netty (Event Loops) -> Routing Layer -> entweder Workerthread-Pool (Imperativer Test) mit IO-Thread (Reactive Test)
+(Undertow (Servlet), Resteasy (Jax-Rs), Reactive Resteasy, Reactive Routes?) oder
+Erstmal unabhängig von Datenbankanbindung
+\url{https://quarkus.io/guides/reactive-routes}
+Libraries etc. erklären, warum reactive, ORM etc. um möglich realistisch am Entwickleralltag zu bleiben (aber auch ohne möglich)
+Code-Beispiele für Reactive zeigen
+erwähnung von http und rest ?
+Verweis auf Github Repository
 
 \subsection{Testbedingungen}
 \label{section:testbedingungen}
+//TODO: Erklären welche Hardware Specs und Software Versionn nötig sind, Dinge wie SSH Zugriff
 
-\subsection{Vorgehen}
+\subsection{Vorgehen / Testaufbau}
 \label{section:vorgehen}
+//TODO: Erklären wie das gesamte System getestet wird, welche Werkzeuge (wrk2 (warum wrk2, latenzmessung im gegensatz zu wrk), top, )
+Systemaufbau (Client-Host, Server-Host, User-Host)
+was genau gemessen wird (welche Metriken) und wie
+diees beeeinflusst werden können
+Jeden größeren Schritt erklären, Bauen der Anwendungen, Warm-Up (JIT), Workload
 
 \subsection{Test: Statische Daten}
 \label{section:statische_daten}
 
 \subsubsection{Systemablauf}
-
+//TODO: Grafik ähnlich zu Grafik in Implementierung aber mit Threadwechseln und exemplarisch mhrere Threads zeigen
+(auch angeben wie Ergebnisse mit komplizierteren Queries aussehen könnten)
 \subsubsection{Resultate}
 
 \subsection{Test: Datenbankzugriffe}
 \label{section:datenbankzugriffe}
 
 \subsubsection{Systemablauf}
+//TODO: Grafik ähnlich zu Grafik in Implementierung aber ohne Threadwechsel dafür Main-Thread mit dahinterliegender Datenbank,
+das Nicht BLockieren bzw. Asynchronität verdeutlichen
 
 \subsubsection{Resultate}
 

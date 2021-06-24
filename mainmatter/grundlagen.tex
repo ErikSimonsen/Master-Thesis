@@ -30,7 +30,7 @@ sind die Anforderungen an Webanwendungen in den letzten Jahren durch steigende N
 die stark auf Client-Server-Kommunikation basieren, erheblich gestiegen.
 Ab einer gewissen Menge an Anfragen stellen die Kosten der Threadwechsel von \textit{native threads} ein Performance Bottleneck
 (in Form von Durchsatz) dar.
-
+\newpage
 \subsection{Reaktive Programmierung}
 \label{section:reaktive_programmierung}
 Reaktive Programmierung ist ein Programmierparadigma, bei dem der Programmablauf als Sequenz von asynchronen Ereignissen (Events), und
@@ -47,7 +47,6 @@ noch um die Benachrichtigungen des Subscribers:
 Indem Änderungen direkt propagiert werden und Subscriber keine Kontrolle über den Datenfluss haben, sondern lediglich über Änderungen informiert werden,
 können Programme ohne jeglichen Zustand realisiert werden\parencite{Escoffier2017}.
 
-
 Reaktive Programmierung verinnerlicht das Konzept von nicht-blockierender bzw. asynchroner Ein- und Ausgabe (I/O).
 Dabei wird, statt wie bei synchroner bzw. blockierender Ein- und Ausgabe die restliche Ausführung des Programms
 zu blockieren bis die Datenübertragung abgeschlossen ist, nach dem Start der Übertragung bereits begonnen die Teile des
@@ -59,7 +58,6 @@ geben beim Aufruf unverzüglich einen Publisher zurück, auf dem sich der Aufruf
 Dadurch wird der bearbeitende Thread nicht blockiert, und kann die nächste Anfrage bearbeiten.
 Sobald das Ergebnis der I/O Operation bereit ist, wird es dem Publisher in Form eines Events mitgeteilt, von diesem veröffentlicht und die Anfrage kann
 vom Aufrufer bzw. Subscriber weiter bearbeitet werden.
-
 Da durch dieses Modell der auszuführende Code nicht mehr an den jeweils ausführenden Thread gebunden wird, erlaubt es die Nutzung eines einzigen
 Threads (\textit{sog. IO Thread}) statt eines \textit{Threadpools}.
 Dadurch ergeben sich folgende Vorteile:
@@ -79,9 +77,16 @@ Allerdings gibt es auch einige gravierende Nachteile:
     \item Da nur ein IO-Thread genutzt wird resultieren blockierende I/O-Operationen in der Blockierung der gesamten Anwendung
 \end{enumerate}
 
-Ein beliebtes Threading-Modell für die Verarbeitung von asynchronen Events ist die Event Loop. Sobald ein Event entsteht wird es einer Warteschlange (Queue)
+Ein beliebtes Threading-Modell für die Verarbeitung von asynchronen Events ist die \textit{Event Loop}.
+Sobald ein Event entsteht wird es einer Warteschlange (Queue)
 in der Event Loop hinzugefügt. Solange der Main-Thread aktiv ist und die Queue noch Events enthält, wird in einer Schleife das nächste Event
 abgerufen und an den, für diesen Eventtyp, registrierten Event-Handler bzw. oben beschriebenen Subscriber weitergeleitet.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{EventLoop}
+    \caption{Exemplarische Abbildung einer Event Loop. \parencite[Kapitel 1.7]{Ponge2020}}
+\end{figure}
+
 Dies können beispielsweise I/O-Events sein, die signalisieren das Daten bereit zur Weiterverarbeitung sind, aber auch jegliches andere Event.
 Die Event Loop wird in der Regel vom Main-Thread (in diesem Fall dem genannten IO-Thread) ausgeführt, daher darf das Verarbeiten von Events
 keine blockierenden, oder zeitintensiven Operationen beinhalten\parencite{Ponge2020}.
@@ -191,13 +196,13 @@ Dies mache sie leichter zu entwickeln, zugänglicher für Veränderungen und deu
 
 Die Autoren definieren die genannten Systemeigenschaften wie folgt:
 
-Reaktionsschnelligkeit: Das System reagiert, falls überhaupt möglich, rechtzeitig. Reaktionsgeschwindigkeit ist dabei die Grundlage von Nutzen und
+\textbf{Reaktionsschnelligkeit}: Das System reagiert, falls überhaupt möglich, rechtzeitig. Reaktionsgeschwindigkeit ist dabei die Grundlage von Nutzen und
 Benutzbarkeit und ermöglicht das schnelle Erkennen und Behandeln von Fehlern.
 Der Fokus von reaktionsschnellen Systemen liegt auf konsistenten und schnellen Antwortszeiten. Darüber hinaus schaffen sie
 verlässliche Obergrenzen um eine konsistente Qualität zu erreichen.
 Dieses konsistente und verlässliche Verhalten simplifiziert Fehlerbehandlung, und erhöht das Vertrauen der Benutzer.
 
-Widerstandsfähig/Fehlertolerant: Das System bleibt auch bei Fehlern reaktionsschnell. Das gilt nicht nur geschäftskritische, hochverfügbare Systeme -
+\textbf{Widerstandsfähig/Fehlertolerant}: Das System bleibt auch bei Fehlern reaktionsschnell. Das gilt nicht nur geschäftskritische, hochverfügbare Systeme -
 jedes System das nicht Fehlertolerant ist, wird nach Fehlern nicht mehr reaktionsfähig sein.
 Widerstandsfähigkeit wird durch Redundanz, Eingrenzung, Isolation und Delegation erreicht.
 Fehler werden innerhalb einer Komponente eingegrenzt und die Komponenten sind voneinander isoliert. Dadurch bleibt das Gesamtsystem stabil, selbst
@@ -205,13 +210,13 @@ wenn eine einzelne Komponente versagt.
 Die Wiederherstellung jeder Komponente wird an eine andere (möglicherweise externe) Komponente deligiert, und
 Hochverfügbarkeit der Komponenten wird, wo notwendig, durch Redundanz gewährleistet.
 
-Elastisch: Das System bleibt reaktionsschnell unter variierenden Arbeitslasten. Auf Änderungen der Arbeitslast wird durch das Anpassen der
+\textbf{Elastisch}: Das System bleibt reaktionsschnell unter variierenden Arbeitslasten. Auf Änderungen der Arbeitslast wird durch das Anpassen der
 allokierten Ressourcen reagiert. Das impliziert ein Systemdesign das keine zentralen Performance-Bottlenecks oder Reibunspunkte hat, damit
 Komponenten problemlos repliziert und die Last darauf verteilt werden kann.
 Reaktive Systeme unterstützen prädiktive, skalierende Algorithmen zur Ressourcenberechnung,
 indem Sie die Live-Messungen von Performance relevanten Systemmetriken als Eingabe nutzen.
 
-Nachrichtengesteuert: Reaktive Systeme basieren auf dem asynchronen Austausch von Nachrichten, um die Komponenten voneinander abzugrenzen und dadurch
+\textbf{Nachrichtengesteuert}: Reaktive Systeme basieren auf dem asynchronen Austausch von Nachrichten, um die Komponenten voneinander abzugrenzen und dadurch
 eine loose Kopplung, Isolation und eine transparente Lokalisierung der Komponenten zu ermöglichen.
 Aufgrund dieser Abgrenzung werden Fehler als Nachrichten an andere Komponenten delegiert.
 Der Ansatz jegliche Kommunikation der Komponenten durch das Übermitteln von Nachrichten zu implementieren erlaubt Elastizität,
@@ -248,16 +253,16 @@ Zu den populärsten gehören:
 
 Bei dem, in dieser Arbeit verwendeten, Framework Quarkus handelt es sich, laut Hersteller Red Hat, um ein
 benutzerfreundliches, auf Entwickler abgestimmtes Java Framework, welches für Container-, Cloud- und Serverless-Umgebungen optimiert ist und nur wenig
-Konfiguration benötigt.
+Konfiguration benötigt, sowie nur die besten und hochwertigsten Java-Bibliotheken und Standards nutzt.
 Dabei können die Anwendungen sowohl auf einer JVM (JVM-Mode) laufen, als auch, durch native Kompilierung mit vollständigem Stack,
 als \textit{native executable} (native-mode). Dafür nutzt Quarkus eine, von Oracle entwickelte, Technologie namens GraalVM. Dabei handelt es sich um
-eine polyglotte, virtuelle Maschine und Laufzeitumgebung die auf dem OpenJDK basiert, und über JVMCI \textit{Java Virtual Machine Compiler Interface} den
+eine polyglotte, virtuelle Maschine und Laufzeitumgebung die auf dem OpenJDK basiert, und über JVMCI \footnote{Java Virtual Machine Compiler Interface} den
 C2-Compiler der zugrundeliegenden HotSpot-JVM durch den Graal JIT-Compiler ersetzt.\parencite{GraalVM}
 
 Darüber hinaus verspricht Quarkus, durch seine Container-first-Philosophie, bis zu 300 Mal schnellere Startzeiten und nur ein Zehntel des
 Speicherbedarfs im Vergleich zum 'traditionellen' Java, wodurch es eine signifikante Reduzierung der benötigten Ressourcen im Cloud-Umfeld bewirkt.
 
 Des Weiteren erlaubt Quarkus die Kombination des imperativen und des reaktiven, nicht-blockierenden Programmierparadigmas.
-Für die reaktive Programmierung bietet Quarkus die bereits genannte Bibliothek Mutiny.
+Für die reaktive Programmierung bietet Quarkus die bereits genannte Bibliothek Mutiny an.
 Quarkus selber ist zudem auch reaktiv, denn 'angetrieben' wird es durch eine nicht-blockierende, reaktive Eclipse Vert.x Engine, die
 alle Netzwerk I/O-Operationen verarbeitet. \parencite{QuarkusReactiveGettingStarted, Quarkus}
