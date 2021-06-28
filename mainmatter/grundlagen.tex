@@ -79,7 +79,7 @@ Allerdings gibt es auch einige gravierende Nachteile:
 
 Ein beliebtes Threading-Modell für die Verarbeitung von asynchronen Events ist die \textit{Event Loop}.
 Sobald ein Event entsteht wird es einer Warteschlange (Queue)
-in der Event Loop hinzugefügt. Solange der Main-Thread aktiv ist und die Queue noch Events enthält, wird in einer Schleife das nächste Event
+in der Event Loop hinzugefügt. Solange der ausführende Thread aktiv ist und die Queue noch Events enthält, wird in einer Schleife das nächste Event
 abgerufen und an den, für diesen Eventtyp, registrierten Event-Handler bzw. oben beschriebenen Subscriber weitergeleitet.
 \begin{figure}[h!]
     \centering
@@ -88,7 +88,7 @@ abgerufen und an den, für diesen Eventtyp, registrierten Event-Handler bzw. obe
 \end{figure}
 
 Dies können beispielsweise I/O-Events sein, die signalisieren das Daten bereit zur Weiterverarbeitung sind, aber auch jegliches andere Event.
-Die Event Loop wird in der Regel vom Main-Thread (in diesem Fall dem genannten IO-Thread) ausgeführt, daher darf das Verarbeiten von Events
+Eine Event Loop wird in der Regel auf einem IO-Thread ausgeführt, daher darf das Verarbeiten von Events
 keine blockierenden, oder zeitintensiven Operationen beinhalten\parencite{Ponge2020}.
 
 \subsubsection{Alternativen}
@@ -151,9 +151,9 @@ Die Lösung für dieses Problem wird \textit{Backpressure} genannt.
 Dabei fordert der Empfänger die Daten entsprechend seiner Kapazitäten an, wodurch der Sender weiß wieviele Daten er maximal versenden darf.
 Diese Mitteilung muss asynchron geschehen, da bei einer synchronen Kommunikation der Backpressure die Vorteile der asynchronen, reaktiven Datenverarbeitung
 negiert würden.
-Da große Anwendungen aus mehreren Schichten bestehen und somit zwischen dem Sender und Empfänger mehrere Komponenten liegen können, muss jedes
+Da große Anwendungen aus mehreren Schichten (bspw. Routing-Schicht, Persistenzschicht, Geschäftslogik) bestehen und somit zwischen 
+dem Sender und Empfänger mehrere Komponenten liegen können, muss jedes
 Element der Verarbeitungskette nichtblockierendes, asynchrones Verhalten implementieren, da ansonsten der Rest der Kette blockiert würde.
-
 
 Aus der Intention einen Standard für die asynchrone Verarbeitung von Datenströmen mit nicht-blockierender \textit{back pressure}
 zu schaffen, ging die \textit{Reactive Streams}-Initiative hervor.
