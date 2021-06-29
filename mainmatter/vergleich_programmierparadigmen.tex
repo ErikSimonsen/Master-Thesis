@@ -35,8 +35,13 @@ sie (zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks) fo
 \end{enumerate}
 
 Diese Abhängigkeiten wurden vom Quarkus Maven-Repository sowohl in blockierender,
-als auch in nicht-blockierender, reaktiver Form bereitgestellt:
-\begin{center}
+als auch in nicht-blockierender, reaktiver Form bereitgestellt: \parencite{MavenQuarkusIO}
+% space between the text and the left/right border of its containing cell is set to 18 pt
+\setlength{\tabcolsep}{18pt}
+% the height of each row is set to 1.5 relative to its default height
+\renewcommand{\arraystretch}{1.5}
+\begin{table}[h!]
+    \centering
     \begin{tabular}{| c | c | c |}
         \hline
                          & Blockierend      & Nicht-blockierend (reaktiv) \\
@@ -50,8 +55,11 @@ als auch in nicht-blockierender, reaktiver Form bereitgestellt:
         JPA-/ORM         & Hibernate-ORM    & Hibernate-Reactive          \\
         \hline
     \end{tabular}
-\end{center}
-Der Projekt-Code dieser Arbeit kann vom Gitlab-Server der Ostfalia unter //TODO Ostfalia Gitlab link? eingesehen und abgerufen werden.
+    \caption{Tabelle mit den verwendeten Anwendungen beider Applikationen}
+    \label{table:dependencies}
+\end{table}
+Der Projekt-Code dieser Arbeit kann vom Gitlab-Server der Ostfalia unter
+\url{//TODO Ostfalia Gitlab link?} eingesehen und abgerufen werden.
 
 \subsection{Testbedingungen}
 \label{section:testbedingungen}
