@@ -61,18 +61,22 @@ als auch in nicht-blockierender, reaktiver Form bereitgestellt: \parencite{Maven
 Der Projekt-Code dieser Arbeit kann vom Gitlab-Server der Ostfalia unter
 \url{//TODO Ostfalia Gitlab link?} eingesehen und abgerufen werden.
 
-\subsection{Testbedingungen}
-\label{section:testbedingungen}
-//TODO: Erklären welche Hardware Specs und Software Versionn nötig sind, Dinge wie SSH Zugriff
+\subsection{Testumgebung}
+\label{section:testumgebung}
+//TODO:
+quarkus version (evtll. erwähnen welche dependency Versionen)
+server hardware specs
+client hardware specs
 
 \subsection{Vorgehen des Tests / Testaufbau}
 \label{section:vorgehen}
-//TODO: Erklären wie das gesamte System getestet wird, welche Werkzeuge (wrk2 (warum wrk2, latenzmessung im gegensatz zu wrk), top, jbang etc.
+//TODO: Erklären wie das gesamte System getestet wird, welche Werkzeuge ssh, (wrk2 (warum wrk2, latenzmessung im gegensatz zu wrk), top, jbang etc.
 docker für reproduzierbare umgebung, lua histogramme dann durch javascript-script zu graphen )
 Systemaufbau (Client-Host, Server-Host, User-Host)
+Architekturaufbau als Grafik
 //eine minute lang http anfragen an zwei Anwendungen, die genau dasselbe machen
 was genau gemessen wird (welche Metriken) und wie
-diees beeeinflusst werden können
+diees beeeinflusst werden können und wie diese durch top & wrk ermittelt werden
 Jeden größeren Schritt erklären, Bauen der Anwendungen, Warm-Up (JIT), Workload
 
 \subsection{Test: Statische Daten}
