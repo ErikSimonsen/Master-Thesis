@@ -30,7 +30,7 @@ sind die Anforderungen an Webanwendungen in den letzten Jahren durch steigende N
 die stark auf Client-Server-Kommunikation basieren, erheblich gestiegen.
 Ab einer gewissen Menge an Anfragen stellen die Kosten der Threadwechsel von \textit{native threads} ein Performance Bottleneck
 (in Form von Durchsatz) dar.
-
+\newpage
 \subsection{Reaktive Programmierung}
 \label{section:reaktive_programmierung}
 Reaktive Programmierung ist ein Programmierparadigma, bei dem der Programmablauf als Sequenz von asynchronen Ereignissen (Events), und
@@ -47,7 +47,6 @@ noch um die Benachrichtigungen des Subscribers:
 Indem Änderungen direkt propagiert werden und Subscriber keine Kontrolle über den Datenfluss haben, sondern lediglich über Änderungen informiert werden,
 können Programme ohne jeglichen Zustand realisiert werden\parencite{Escoffier2017}.
 
-
 Reaktive Programmierung verinnerlicht das Konzept von nicht-blockierender bzw. asynchroner Ein- und Ausgabe (I/O).
 Dabei wird, statt wie bei synchroner bzw. blockierender Ein- und Ausgabe die restliche Ausführung des Programms
 zu blockieren bis die Datenübertragung abgeschlossen ist, nach dem Start der Übertragung bereits begonnen die Teile des
@@ -59,7 +58,6 @@ geben beim Aufruf unverzüglich einen Publisher zurück, auf dem sich der Aufruf
 Dadurch wird der bearbeitende Thread nicht blockiert, und kann die nächste Anfrage bearbeiten.
 Sobald das Ergebnis der I/O Operation bereit ist, wird es dem Publisher in Form eines Events mitgeteilt, von diesem veröffentlicht und die Anfrage kann
 vom Aufrufer bzw. Subscriber weiter bearbeitet werden.
-
 Da durch dieses Modell der auszuführende Code nicht mehr an den jeweils ausführenden Thread gebunden wird, erlaubt es die Nutzung eines einzigen
 Threads (\textit{sog. IO Thread}) statt eines \textit{Threadpools}.
 Dadurch ergeben sich folgende Vorteile:
@@ -79,79 +77,192 @@ Allerdings gibt es auch einige gravierende Nachteile:
     \item Da nur ein IO-Thread genutzt wird resultieren blockierende I/O-Operationen in der Blockierung der gesamten Anwendung
 \end{enumerate}
 
-Ein beliebtes Threading-Modell für die Verarbeitung von asynchronen Events ist die Event Loop. Sobald ein Event entsteht wird es einer Warteschlange (Queue)
-in der Event Loop hinzugefügt. Solange der Main-Thread aktiv ist und die Queue noch Events enthält, wird in einer Schleife das nächste Event
+Ein beliebtes Threading-Modell für die Verarbeitung von asynchronen Events ist die \textit{Event Loop}.
+Sobald ein Event entsteht wird es einer Warteschlange (Queue)
+in der Event Loop hinzugefügt. Solange der ausführende Thread aktiv ist und die Queue noch Events enthält, wird in einer Schleife das nächste Event
 abgerufen und an den, für diesen Eventtyp, registrierten Event-Handler bzw. oben beschriebenen Subscriber weitergeleitet.
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=1.0\textwidth]{EventLoop}
+    \caption{Exemplarische Abbildung einer Event Loop. \parencite[Kapitel 1.7]{Ponge2020}}
+\end{figure}
+
 Dies können beispielsweise I/O-Events sein, die signalisieren das Daten bereit zur Weiterverarbeitung sind, aber auch jegliches andere Event.
-Die Event Loop wird in der Regel vom Main-Thread (in diesem Fall dem genannten IO-Thread) ausgeführt, daher darf das Verarbeiten von Events
+Eine Event Loop wird in der Regel auf einem IO-Thread ausgeführt, daher darf das Verarbeiten von Events
 keine blockierenden, oder zeitintensiven Operationen beinhalten\parencite{Ponge2020}.
 
 \subsubsection{Alternativen}
-In Java 1.1 wurden Threads als sog. \textit{Green Threads} implementiert. Dabei wurde die Möglichkeit Threads vom Betriebssystem verwalten zu lassen 
-gar nicht genutzt. Stattdessen lief die komplette JVM in einem einzigen Prozess. 
+In Java 1.1 wurden Threads als sog. \textit{Green Threads} implementiert. Dabei wurde die Möglichkeit Threads vom Betriebssystem verwalten zu lassen
+gar nicht genutzt. Stattdessen lief die komplette JVM in einem einzigen Prozess.
 \textit{Green threads} waren als \textit{user threads} implementiert \footnote{Auch als \textit{Fiber} oder \textit{virtual thread} bezeichnet},
- dabei ist die Funktionalität
+dabei ist die Funktionalität
 nicht im Kernel implementiert (wie bei \textit{kernel-/native threads}), sondern in einer Programmbibliothek im \textit{Userspace}.
 Da sich das Betriebssystem nicht um das Scheduling von \textit{user threads} kümmert, wurde dies über einen eigenen Scheduling-Algorithmus der JVM
 geregelt.\parencite{Oracle2010}
 Ein \textit{green thread} existiert lediglich als Objekt innerhalb der JVM, und durch die virtuelle Speicherverwaltung entfallen somit
- die aufwändigen Betriebssystemaufrufe beim 
+die aufwändigen Betriebssystemaufrufe beim
 Erstellen eines Threads, sowie bei Thread- bzw. Kontextwechseln, denn der ausführende Main-Thread bleibt gleich.
 
-Die Threadwechsel der \textit{user-threads} erfolgten ausschließlich innerhalb des Main-Threads, weswegen keine echte Parallelität realisiert werden konnte, da immer nur ein 
-Prozessorkern genutzt wurde. 
-Während der Vorteil dieses Modells darin lag, dass es keine 'echten' parallelen Zugriffe auf eine Resource innerhalb des JVM-Prozesses geben konnte und die Synchronisation
-von Datenzugriffen daher leicht war, überwog schließlich der Umstand, dass keine Nutzung von mehreren Prozessorkernen durch Multithreading möglich war
-, weswegen \textit{Green Threads} ab Java 1.3 zugunsten von \textit{native threads} entfernt wurden.
+Die Threadwechsel der \textit{user-threads} erfolgten ausschließlich innerhalb des Main-Threads, weswegen keine echte Parallelität realisiert werden konnte,
+da immer nur ein Prozessorkern genutzt wurde.
+Während der Vorteil dieses Modells darin lag, dass es keine 'echten' parallelen Zugriffe auf eine Resource innerhalb des JVM-Prozesses geben konnte
+und die Synchronisation von Datenzugriffen daher leicht war, überwog schließlich der Umstand, dass keine Nutzung von mehreren Prozessorkernen
+durch Multithreading möglich war, weswegen \textit{Green Threads} ab Java 1.3 zugunsten von \textit{native threads} entfernt wurden.
 
 Mit dem OpenJDK Projekt \textit{Project Loom} ist die Idee von \textit{Green threads}
- wieder aufgegriffen worden, allerdings nun als Ergänzung (statt Alternative) zu \textit{native threads}. 
+wieder aufgegriffen worden, allerdings nun als Ergänzung (statt Alternative) zu \textit{native threads}.
 Statt alle virtuellen Threads auf dem nativen Main-Thread auszuführen, werden diese von einer geringen Anzahl an nativen \textit{worker threads},
 die als Carrier eingesetzt werden, ausgeführt.
-Deren Anzahl ist so gewählt, dass alle CPU Kerne durch Multithreading dauerhaft benutzt werden können 
+Deren Anzahl ist so gewählt, dass alle CPU Kerne durch Multithreading dauerhaft benutzt werden können
 \footnote{In der Praxis laufen natürlich noch andere Prozesse auf dem Server, deren Threads auch ausgeführt werden müssen.}
-, aber so wenig Kontextwechsel wie möglich ausgeführt werden müssen. \footnote{Im Idealfall würde auf jedem CPU Kern ein \textit{worker thread} laufen, ohne jemals
-einen Thread- bzw. Kontextwechsel machen zu müssen.}
-Während ein nativer Thread in einer 64 Bit JVM ca. 1 MB für den Threadstack reserviert und zusätzlich noch Metadaten abspeichert, ist ein virtueller Thread 
-lediglich ein Objekt im virtuellen Speicher der JVM und benötigt darüber hinaus für sich selber extrem wenig Resourcen (da er ja im Hintergrund von einem 
-nativen Thread abgearbeitet wird). 
+, aber so wenig Kontextwechsel wie möglich ausgeführt werden müssen.
+\parencite{Oracle2021} \footnote{Im Idealfall würde auf jedem CPU Kern ein \textit{worker thread} laufen,
+    ohne jemals einen Thread- bzw. Kontextwechsel zu machen.}
+Während ein nativer Thread in einer 64 Bit JVM ca. 1 MB für den Threadstack reserviert und zusätzlich noch Metadaten abspeichert, ist ein virtueller Thread
+lediglich ein Objekt im virtuellen Speicher der JVM und benötigt sehr wenig Resourcen (da er ja im Hintergrund von einem
+nativen Thread abgearbeitet wird).
 Aus diesem Grund können durchaus mehrere Millionen virtueller Threads erzeugt werden (bei entsprechendem allokierten Heap-Speicher der JVM), wohingegen
 die Erstellung von 10.000 nativen Threads entweder den allokierten Speicher weit überschreitet (wodurch der JVM-Prozess abstürzt) oder die Threadgrenze
-des Betriebssystems wird überschritten.
+des Betriebssystems überschreitet.
 
-Sobald ein virtueller Thread nun eine blockierende I/O Operation ausführt signalisiert er dem darunterliegenden nativen Thread, dass er momentan nichts machen kann 
-außer Warten, und erlaubt dem nativen Thread zu einem anderen virtuellen Thread zu wechseln.
+Sobald ein virtueller Thread nun eine blockierende I/O Operation ausführt signalisiert er dem darunterliegenden nativen Thread, dass er momentan nichts machen
+kann außer Warten, und erlaubt dem nativen Thread zu einem anderen virtuellen Thread zu wechseln.
 
 Das große Versprechen des Projektes ist außerdem, das Entwickler keine asynchronen Programmierparadigmen (wie u.A. \textit{Reactive Programming})
- nutzen müssen um die beschriebenen virtuellen Threads (und die damit einhergehenden wesentlichen Performanceverbesserungen) nutzen zu können.
- Um dieses Versprechen zu halten werden virtuelle Threads, statt als Bibliothek eines Drittanbieters, in Form einer eigenen JDK Version bereitgestellt. 
- In dieser Version wurden viele Teile der Standardbibliothek die mit I/O-Operationen arbeiten so angepasst, dass virtuelle Threads statt native Threads 
- genutzt werden. Auf diese Weise können I/O-Operationen, wie beispielsweise der Aufruf einer Netzwerkfunktionalität, ohne Änderungen am Programm
- die virtuellen Threads nutzen und blockieren den darunterliegenden nativen Thread nicht mehr.
+nutzen müssen um die beschriebenen virtuellen Threads (und die damit einhergehenden wesentlichen Performanceverbesserungen) nutzen zu können.
+Um dieses Versprechen zu halten werden virtuelle Threads, statt als Bibliothek eines Drittanbieters, in Form einer eigenen JDK Version bereitgestellt.
+In dieser Version wurden viele Teile der Standardbibliothek die mit I/O-Operationen arbeiten so angepasst, dass virtuelle Threads statt native Threads
+genutzt werden. Auf diese Weise können I/O-Operationen, wie beispielsweise der Aufruf einer Netzwerkfunktionalität, ohne Änderungen am Programm
+die virtuellen Threads nutzen und blockieren den darunterliegenden nativen Thread nicht mehr.
 
-\url{https://jaxenter.de/reactive-programming-82051}
-\url{https://jaxenter.de/java/project-loom-besser-skalieren-durch-virtuelle-threads-2-94424}
-\url{https://blogs.oracle.com/javamagazine/going-inside-javas-project-loom-and-virtual-threads}
-\url{https://inside.java/2021/05/10/networking-io-with-virtual-threads/}
-
-\parencite{Oracle2021}
 \subsection{Reaktive Datenströme}
 \label{section.reaktive_datenströme}
-\url{http://www.reactive-streams.org/}
+In einer typischen asynchronen Verarbeitungskette von, potenziell unbegrenzten, Datenströmen
+bestehend aus einem Sender und Empfänger bzw. Publisher und Subscriber kann es vorkommen,
+dass der Sender Daten schneller an den Empfänger verschickt, als dieser sie verarbeiten kann.
+Zwei naive Ansätze mit einer Überlastung des Empfängers umzugehen wären:
+\begin{enumerate}
+    \item Nur der Empfänger reagiert auf eine Überlast. Diese kann sich in einem Speicherüberlauf äußern oder, falls der Puffer des Empfängers eine Größenbeschränkung
+          hat, im Verlust der empfangenen Daten
+    \item Der Sender begrenzt im vornherein die Datenmenge, die er an den Empfänger schickt. Da der Sender allerdings in der Regel nicht weiß wieviel der Empfänger
+          verarbeiten kann, sendet er entweder zuviel (es entsteht eine Überlast), oder er sendet zuwenig wodurch der Durchsatz geringer ist als nötig
+\end{enumerate}\parencite{JavaSpektrum2015}
+Die Lösung für dieses Problem wird \textit{Backpressure} genannt.
+Dabei fordert der Empfänger die Daten entsprechend seiner Kapazitäten an, wodurch der Sender weiß wieviele Daten er maximal versenden darf.
+Diese Mitteilung muss asynchron geschehen, da bei einer synchronen Kommunikation der Backpressure die Vorteile der asynchronen, reaktiven Datenverarbeitung
+negiert würden.
+Da große Anwendungen aus mehreren Schichten (bspw. Routing-Schicht, Persistenzschicht, Geschäftslogik) bestehen und somit zwischen
+dem Sender und Empfänger mehrere Komponenten liegen können, muss jedes
+Element der Verarbeitungskette nichtblockierendes, asynchrones Verhalten implementieren, da ansonsten der Rest der Kette blockiert würde.
+
+Aus der Intention einen Standard für die asynchrone Verarbeitung von Datenströmen mit nicht-blockierender \textit{back pressure}
+zu schaffen, ging die \textit{Reactive Streams}-Initiative hervor.
+Innerhalb dieser Initiative haben sich mehrere Arbeitsgruppen gebildet, welche die grundlegenden Semantiken erarbeitet haben und
+sie in Form einer eigenen Java-Spezifikation namens \textit{Reactive Streams}-API implementiert und veröffentlicht haben.\parencite{ReactiveStreams}
+Diese API wurde anschließend in Java 9, als Schnittstelle namens \textit{Flow-API} dem JDK hinzugefügt.
+
+Die \textit{Flow-API} des JDK entspricht der \textit{Reactive Streams} Spezifikation und stellt (nur) Interfaces zur Verfügung mit denen eine
+asynchrone, nicht blockierende Verarbeitung von (unbegrenzten) Datenströmen mit \textit{back pressure} auf der JVM implementiert werden kann.
+\parencite{OracleFlow}.
+\footnote{Nicht zu Verwechseln mit den Java-Streams durch die Collection-API ab Java 8. Diese sind zur Auswertungszeit in ihrer Größe begrenzt und
+    nach der Abarbeitung liegt statt eines Streams eine Collection}
 
 \subsection{Reaktive Systeme}
 \label{section:reaktive_systeme}
-\url{https://www.reactivemanifesto.org/}
+Anforderungen an große Softwaresysteme haben sich in den letzten Jahren stark verändert:
+\begin{enumerate}
+    \item Antwortzeiten in Millisekunden statt im Sekundenbereich
+    \item Datengrößen in Petabytes statt Gigabytes
+    \item 100\% Verfügbarkeit statt stundenlange Wartungsarbeiten
+    \item Deployment auf einer Vielzahl von Plattformen und cloud-basierten Clustern mit tausenden Multikernprozessoren
+\end{enumerate}
 
-\subsubsection{Eigenschaften}
+Unternehmen aus verschiedenen Bereichen haben sich voneinander unabhängig an diese Kriterien angepasst und Architekturmuster
+erarbeitet, mit denen robuste, belastbare und flexible Softwaresysteme entwickelt werden können, die die modernen Anforderungen
+erfüllen.
 
-\subsubsection{Anwendungsgebiete}
+2014 wurde mit dem \textit{Reactive Manifesto} versucht diese Ansätze des Systemdesigns in Form eines Manifests zusammenzuführen
+und daraus allgemeingültige Systemattribute abzuleiten.
+Laut dieses Manifests sind Systeme reaktiv wenn sie:
+\begin{enumerate}
+    \item Reaktionsschnell
+    \item Widerstandsfähig (gegen Fehler)
+    \item Elastisch
+    \item Nachrichtengesteuert
+\end{enumerate}
+sind.
+Solche Systeme sind, laut den Autoren, flexibler, stärker entkoppelt und würden besser skalieren als herkömmliche, nicht-reaktive Systeme.
+Dies mache sie leichter zu entwickeln, zugänglicher für Veränderungen und deutlich fehlertoleranter.
+
+Die Autoren definieren die genannten Systemeigenschaften wie folgt:
+
+\textbf{Reaktionsschnelligkeit}: Das System reagiert, falls überhaupt möglich, rechtzeitig. Reaktionsgeschwindigkeit ist dabei die Grundlage von Nutzen und
+Benutzbarkeit und ermöglicht das schnelle Erkennen und Behandeln von Fehlern.
+Der Fokus von reaktionsschnellen Systemen liegt auf konsistenten und schnellen Antwortszeiten. Darüber hinaus schaffen sie
+verlässliche Obergrenzen um eine konsistente Qualität zu erreichen.
+Dieses konsistente und verlässliche Verhalten simplifiziert Fehlerbehandlung, und erhöht das Vertrauen der Benutzer.
+
+\textbf{Widerstandsfähig/Fehlertolerant}: Das System bleibt auch bei Fehlern reaktionsschnell. Das gilt nicht nur geschäftskritische, hochverfügbare Systeme -
+jedes System das nicht Fehlertolerant ist, wird nach Fehlern nicht mehr reaktionsfähig sein.
+Widerstandsfähigkeit wird durch Redundanz, Eingrenzung, Isolation und Delegation erreicht.
+Fehler werden innerhalb einer Komponente eingegrenzt und die Komponenten sind voneinander isoliert. Dadurch bleibt das Gesamtsystem stabil, selbst
+wenn eine einzelne Komponente versagt.
+Die Wiederherstellung jeder Komponente wird an eine andere (möglicherweise externe) Komponente deligiert, und
+Hochverfügbarkeit der Komponenten wird, wo notwendig, durch Redundanz gewährleistet.
+
+\textbf{Elastisch}: Das System bleibt reaktionsschnell unter variierenden Arbeitslasten. Auf Änderungen der Arbeitslast wird durch das Anpassen der
+allokierten Ressourcen reagiert. Das impliziert ein Systemdesign das keine zentralen Performance-Bottlenecks oder Reibunspunkte hat, damit
+Komponenten problemlos repliziert und die Last darauf verteilt werden kann.
+Reaktive Systeme unterstützen prädiktive, skalierende Algorithmen zur Ressourcenberechnung,
+indem Sie die Live-Messungen von Performance relevanten Systemmetriken als Eingabe nutzen.
+
+\textbf{Nachrichtengesteuert}: Reaktive Systeme basieren auf dem asynchronen Austausch von Nachrichten, um die Komponenten voneinander abzugrenzen und dadurch
+eine loose Kopplung, Isolation und eine transparente Lokalisierung der Komponenten zu ermöglichen.
+Aufgrund dieser Abgrenzung werden Fehler als Nachrichten an andere Komponenten delegiert.
+Der Ansatz jegliche Kommunikation der Komponenten durch das Übermitteln von Nachrichten zu implementieren erlaubt Elastizität,
+indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch das Überwachen der Nachrichtenwarteschlangen
+(\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.\parencite{ReactiveSystems}
 
 \subsection{Werkzeuge}
 \subsubsection{Java Ökosystem}
-// CompletableFuture
-// Reactive streams
-// Flow Api
-// JavaRx, Vert.x \& Mutiny in Quarkus
-\subsubsection{Andere}
+Im Java Ökosystem gibt es eine Vielzahl an Frameworks, Libaries und APIs mit denen Reaktive Programmierung und reaktive Systeme umgesetzt
+werden können.
+Um in Java einzelne, asynchrone Prozesse zu implementieren, wird vom JDK die Future-API zur Verfügung gestellt.\parencite{OracleFuture}
+Für die Verarbeitung von asynchronen (unbegrenzten) Datenströmen gibt es die Flow-API.\parencite{OracleFlow}
+Da die Flow-API lediglich Interfaces bereitstellt, gibt es mehrere Implementierungen von \textit{reactive streams}.
 
+Um reaktive Programmierung zu erleichtern, gibt es unter Anderem die folgenden Projekte:
+\begin{enumerate}
+    \item RxJava
+    \item Spring Webflux
+    \item Mutiny
+\end{enumerate}
+Jedes Projekt unterscheidet sich dabei in den verwendeten Klassennamen \footnote{RxJava - Observable; Mutiny - Uni, Multi; Spring Webflux - Mono, Flux},
+Operatoren und dem Grad der funktionalen Programmierung.\parencite{ReactiveX, Mutiny}
+Allerdings sind die meisten Frameworks und Bibliotheken interoperabel, da sie die \textit{reactive streams} Spezifikation implementieren (und damit
+\textit{back pressure}), und bieten Converter-Klassen an.
+
+Für die Entwicklung von reaktiven Systemen bieten sich mehrere Toolkits und Frameworks an.
+Sie implementieren bereits Komponenten und Mechanismen wie Messaging, Event Loops, Dateizugriffe, nichtblockierende Netzwerkanwendungen, Web APIs und mehr.
+Zu den populärsten gehören:
+\begin{enumerate}
+    \item Eclipse Vert.x
+    \item Akka
+    \item Project Reactor
+\end{enumerate}\parencite{Vert.x, Akka, ProjectReactor}
+
+Bei dem, in dieser Arbeit verwendeten, Framework Quarkus handelt es sich, laut Hersteller Red Hat, um ein
+benutzerfreundliches, auf Entwickler abgestimmtes Java Framework, welches für Container-, Cloud- und Serverless-Umgebungen optimiert ist und nur wenig
+Konfiguration benötigt, sowie nur die besten und hochwertigsten Java-Bibliotheken und Standards nutzt.
+Dabei können die Anwendungen sowohl auf einer JVM (JVM-Mode) laufen, als auch, durch native Kompilierung mit vollständigem Stack,
+als \textit{native executable} (native-mode). Dafür nutzt Quarkus eine, von Oracle entwickelte, Technologie namens GraalVM. Dabei handelt es sich um
+eine polyglotte, virtuelle Maschine und Laufzeitumgebung die auf dem OpenJDK basiert, und über JVMCI \footnote{Java Virtual Machine Compiler Interface} den
+C2-Compiler der zugrundeliegenden HotSpot-JVM durch den Graal JIT-Compiler ersetzt.\parencite{GraalVM}
+
+Darüber hinaus verspricht Quarkus, durch seine Container-first-Philosophie, bis zu 300 Mal schnellere Startzeiten und nur ein Zehntel des
+Speicherbedarfs im Vergleich zum 'traditionellen' Java, wodurch es eine signifikante Reduzierung der benötigten Ressourcen im Cloud-Umfeld bewirkt.
+
+Des Weiteren erlaubt Quarkus die Kombination des imperativen und des reaktiven, nicht-blockierenden Programmierparadigmas.
+Für die reaktive Programmierung bietet Quarkus die bereits genannte Bibliothek Mutiny an.
+Quarkus selber ist zudem auch reaktiv, denn 'angetrieben' wird es durch eine nicht-blockierende, reaktive Eclipse Vert.x Engine, die
+alle Netzwerk I/O-Operationen verarbeitet. \parencite{QuarkusReactiveGettingStarted, Quarkus}
