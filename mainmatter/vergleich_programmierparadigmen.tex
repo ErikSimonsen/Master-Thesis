@@ -60,16 +60,64 @@ als auch in nicht-blockierender, reaktiver Form bereitgestellt: \parencite{Maven
 \end{table}
 Der Projekt-Code dieser Arbeit kann vom Gitlab-Server der Ostfalia unter
 \url{//TODO Ostfalia Gitlab link?} eingesehen und abgerufen werden.
-
 \subsection{Testumgebung}
 \label{section:testumgebung}
-//TODO:
-quarkus version (evtll. erwähnen welche dependency Versionen)
-server hardware specs
-client hardware specs
+Für die Testumgebung werden zwei Systeme benötigt: der Client-Host und der Server-Host.
+Dabei muss es sich um UNIX-Systeme handeln, da eine einige der verwendeten Werkzeuge nur 
+auf diesen Systemen verfügbar sind.
+Zudem müssen beide Systeme per SSH von einem (idealerweise vorhandenem) dritten System \footnote{Dies kann allerdings auch der Client-Host selber sein} 
+erreicht werden können, damit dieses den Testablauf in der korrekten Abfolge ausführen kann. 
+Der Einfachheit halber empfiehlt es sich, dass sich alle Geräte im gleichen Netzwerk befinden.
+Beiden Anwendungen verwenden Version 2 des Quarkus Frameworks. //TODO: Anwendungen testen nach Umstellung auf V2
+
+Die vom Autor genutzten Client- und Server-Host Systeme zur Durchführung der Tests haben die folgenden Systemspezifikationen:
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | c |}
+        \hline
+        Server-Host\\
+        \hline
+        CPU's           & Resteasy         \\
+        \hline
+        RAM            & Resteasy-Jackson \\
+        \hline
+        Speicher & JDBC-Post        \\
+        \hline
+        Betriebssystem         & Hibernate-ORM    \\
+        \hline
+        Kernel &
+        \hline
+    \end{tabular}
+    \caption{Tabelle mit den verwendeten Anwendungen beider Applikationen}
+    \label{table:dependencies}
+\end{table}
+
+\begin{table}[h!]
+    \centering
+    \begin{tabular}{| c | c |}
+        \hline
+        Client-Host\\
+        Hardware & Acer Aspire VN7-591G \\
+        \hline
+        CPU      & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4          \\
+        \hline
+        RAM      & 8GB \\
+        \hline
+        Speicher & 500 GB   \\
+        \hline
+        Betriebssystem  & Fedora 34 (Workstation Edition)   \\
+        \hline
+        Kernel & Linux version 5.12.13-300.fc34.x86_64 (mockbuild@bkernel01.iad2.fedoraproject.org) #1 SMP Wed Jun 23 16:18:11 UTC 2021
+        \hline
+    \end{tabular}
+    \caption{Systemspezifikationen der verwendeten Client-Maschine}
+    \label{table:dependencies}
+\end{table}
 
 \subsection{Vorgehen des Tests / Testaufbau}
 \label{section:vorgehen}
+//Erwähnen das Testaufbau auf einem von Red Hat durchgeführten Versuch basiert und stark erweitert wurde vom Author
 //TODO: Erklären wie das gesamte System getestet wird, welche Werkzeuge ssh, (wrk2 (warum wrk2, latenzmessung im gegensatz zu wrk), top, jbang etc.
 docker für reproduzierbare umgebung, lua histogramme dann durch javascript-script zu graphen )
 Systemaufbau (Client-Host, Server-Host, User-Host)
@@ -78,7 +126,7 @@ Architekturaufbau als Grafik
 was genau gemessen wird (welche Metriken) und wie
 diees beeeinflusst werden können und wie diese durch top & wrk ermittelt werden
 Jeden größeren Schritt erklären, Bauen der Anwendungen, Warm-Up (JIT), Workload
-
+//TODO: Grafik zur Visualisierung (Illustrator)
 \subsection{Test: Statische Daten}
 \label{section:statische_daten}
 
