@@ -1,8 +1,12 @@
-% !TEX root = main.tex
 \section {Vergleich reaktive \& imperative Anwendung}
 \label{section:vergleich_reaktiv_imperativ}
 Um zu prüfen, ob Leistungsfähigkeit und Skalierbarkeit einer reaktiven Anwendung tatsächlich die einer traditionellen, imperativen Anwendung
 übertrifft, werden in diesem Kapitel beide Ansätze hinsichtlich verschiedener Metriken in einem festen Zeitintervall miteinander verglichen.
+
+TODO: Erwähnen welche Tests stattfinden (bereits früher, vor dem Kapitel ? 
+(Statische Daten: JVM-Mode und Native; Dynamische Daten (mit DB): JVM-Mode und Native)
+\& welche Metriken gemessen werden wie diese beeinflusst werden können (weil die Ergebnisse z.b. durch Hardware beeinflusst werden können
+wird im folgenden die Implementierung sowie die Testumgebung und deren Ablauf dargestellt.).
 
 \subsection{Implementierung \& Systemaufbau}
 \label{section:implementierung}
@@ -23,7 +27,7 @@ auszulösen sobald die Operationen abgeschlossen sind.
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1.0\textwidth]{Quarkus_HTTP_Layer}
-    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
+    \caption{Quarkus HTTP-Schicht \cite{QuarkusReactiveRoutes}}
 \end{figure}
 
 Damit sich beide Anwendungen nahe an einer realen Java-EE REST-API orientieren, haben
@@ -36,7 +40,7 @@ sie (zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks) fo
 \end{enumerate}
 
 Diese Abhängigkeiten wurden vom Quarkus Maven-Repository sowohl in blockierender,
-als auch in nicht-blockierender, reaktiver Form bereitgestellt: \parencite{MavenQuarkusIO}
+als auch in nicht-blockierender, reaktiver Form bereitgestellt: \cite{MavenQuarkusIO}
 % space between the text and the left/right border of its containing cell is set to 18 pt
 \setlength{\tabcolsep}{18pt}
 % the height of each row is set to 1.5 relative to its default height
@@ -59,8 +63,11 @@ als auch in nicht-blockierender, reaktiver Form bereitgestellt: \parencite{Maven
     \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
     \label{table:dependencies}
 \end{table}
+
+TODO: Unterschied in Programmcode zeigen durch lstlisting nur zwei Ausschnitte
 Der Projekt-Code dieser Arbeit kann vom Gitlab-Server der Ostfalia unter
 \url{//TODO Ostfalia Gitlab link?} eingesehen und abgerufen werden.
+
 \subsection{Testumgebung}
 \label{section:testumgebung}
 Für die Testumgebung werden zwei Systeme benötigt: der Client-Host und der Server-Host.
@@ -70,14 +77,15 @@ Zudem müssen beide Systeme per SSH von einem (idealerweise vorhandenem) dritten
 \footnote{Dies kann allerdings auch der Client-Host selber sein} 
 erreicht werden können, damit dieses den Testablauf in der korrekten Abfolge ausführen kann. 
 Der Einfachheit halber empfiehlt es sich, dass sich alle Geräte im gleichen Netzwerk befinden.
-Beiden Anwendungen verwenden Version 2 des Quarkus Frameworks. 
+Beiden Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks. 
 
 Um eine reproduzierbare Anwendungsumgebung und Ressourcenallokation zu ermöglichen, laufen beide Anwendungen auf dem Server-Host in
 jeweils einem Docker-Container mit fest definierten Ressourcen:
 \begin{itemize}
     \item Nutzung von 4 CPU-Kernen
     \item 1024 MB RAM
-    \item \textit{-Xmx512m} Heap Größe für den Java-Prozess
+    \item 256 MB Heap Größe für den Java-Prozess
+     \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \cite{Java10ReleaseNotes}}
 \end{itemize}
 Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
 \begin{itemize}
@@ -138,7 +146,7 @@ Die vom Autor genutzten Client- und Server-Host Systeme zur Durchführung der Te
 \label{section:vorgehen}
 Der im Folgenden erläuterte Versuchsaufbau basiert auf einer, vom Autor erweiterten, Architektur die vom Quarkus-Entwicklerteam 
   zur Erstellung von verschiedenen Benchmarks für den Quarkus Technologie-Stack genutzt wurde. 
-  \parencite{QuarkusBlog, QuarkusJohnaohara}
+  \cite{QuarkusBlog, QuarkusJohnaohara}
 
   Um den gesamten Versuchsablauf zu automatisieren und über mehrere Server zu steuern wird ein Tool namens qDup eingesetzt.
   Damit können Shell-Kommandos als Skripte gruppiert, und verschiedenen Hosts je nach Rolle zugewiesen werden.
@@ -168,40 +176,76 @@ angepasst werden.}
   \begin{enumerate}
       \item Konstanter \textit{workload} Durchsatz
       \item Korrekteres Messverfahren der Antwort-Latenz
-      \item Exaktes Messen durch HdrHistogramme (High dynamic range histograms)
-      \footnote{Histogramme die das Aufnehmen und Analysieren von 
-      ausgewählten Daten über eine konfigurierbare, ganzzahlige Reichweite und eine konfigurierbare 
-      Genauigkeit innerhalb dieser Reichweite ermöglichen \parencite{HdrHistogram}}
-  \end{enumerate}\parencite{Wrk2, Wrk}
+      \item Exaktes Messen durch \Glsuseri{hdrHistogramm}
+  \end{enumerate}\cite{Wrk2, Wrk}
 
   Pro Test werden Benchmarks für eine ganze Reihe an \textit{workloads} gemessen.
   Jede \textit{workload} wird über einen Zeitraum von 60 Sekunden über 100 offene HTTP-Verbindungen an den Server-Host übermittelt.
-  Dafür arbeitet \textit{wrk2} auf 4 Threads.
+  In den Tests nutzt \textit{wrk2} für das Generieren und Übermitteln der \textit{workload}, sowie das Messen der Antwortszeit
+  4 Threads.
   
   Damit der Anwendungscode des angesteuerten HTTP-Endpunkts durch den JIT-Compiler der JVM optimiert wird, 
   findet pro \textit{workload} vor der eigentlichen Mess-Phase eine identische Warmup-Phase statt.
-  \begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.8\textwidth]{Generate-Load Auszug}
-    \caption{qDup \textit{generate load}-Auszug: Aufruf von wrk2 mit den beschriebenen Parametern
-     (RUN\_RATE enthält die aktuelle \textit{workload}) für die Warmup-Phase und die Mess-Phase}
-  \end{figure} 
 
-  //ausgabe von wrk
-  //signal an server-host für das starten von top 
-  //ausgabe von top
+  Listing \ref*{lst:generateLoad} zeigt den Aufruf von \textit{wrk2} mit den beschriebenen Parametern in der Warmup- und Mess-Phase,
+   \verb|${RUN_RATE}| enthält die \textit{workload}
+
+  \begin{lstlisting}[caption=Auszug des qDup Skripts generate load, captionpos=b, label=lst:generateLoad]
+    - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-START
+    - sh: wrk -t 4 -c 100 -d 60s -R ${{RUN_RATE}} ${{TEST_DYNAMIC_ENDPOINT}} > ${{CLIENT_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP.wrk2.out
+    - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-END
+    - sh: sleep 5s
+    - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-START
+    - sh: wrk -t 4 -c 100 -d 60s -R ${{RUN_RATE}} --latency ${{TEST_DYNAMIC_ENDPOINT}} > ${{CLIENT_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE.wrk2.out
+    - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-END
+   \end{lstlisting}
   
- //TODO: Erklären wie das gesamte System getestet wird, welche Werkzeuge ssh, (wrk2 (warum wrk2,
-  latenzmessung im gegensatz zu wrk), top, jbang etc.
-docker für reproduzierbare umgebung, )
+   Die Ausgabe von wrk enthält Informationen zur \Gls{latenz}\footnote{Pro verwendetem Thread und Gesamt},
+   zum \Gls{durchsatz} und der \Gls{perzentile} der \Gls{latenz} (durch ein \Gls{hdrHistogramm} dargestellt).
+   Listing \ref*{lst:wrk-listing} zeigt die umgeleitete Ausgabe von \textit{wrk} ohne die genaue Darstellung der Perzentile.
+ 
+   \begin{lstlisting}[caption=Beispiel für Ausgabe von wrk,captionpos=b, label=lst:wrk-listing]
+    Running 1m test @ http://erik-pc.local:8080/greeting/Bob
+    4 threads and 100 connections
+    Thread calibration: mean lat.: 310.434ms, rate sampling interval: 1047ms
+    Thread calibration: mean lat.: 330.365ms, rate sampling interval: 1127ms
+    Thread calibration: mean lat.: 298.671ms, rate sampling interval: 994ms
+    Thread calibration: mean lat.: 333.465ms, rate sampling interval: 1123ms
+    Thread Stats   Avg      Stdev     Max   +/- Stdev
+      Latency     1.76s   738.93ms   4.12s    62.98%
+      Req/Sec    28.58k   633.82    30.09k    66.49%
+    6839722 requests in 1.00m, 476.17MB read
+   Requests/sec: 113929.77
+   Transfer/sec:      7.93MB
+   \end{lstlisting}\footnote{Die Resultate der Tests sind auch im Quellcodeverzeichnis unter \textit{\/results} zu finden}
+
+  Bevor die Warmup-Phase und die Belastungs-Phase mit \textit{wrk} vom Client-Host ausgeführt werden, wird dem Server-Host signalisiert, dass
+  er das Skript \textit{capture platform stats} ausführen soll.
+  In diesem Skript wird die Observation des Anwendungs-Prozesses durch das Kommandozeilenprogramm \textit{top} gestartet.
+  \textit{Top} wird dabei im Batch-Modus gestartet mit einer Wiederholrate von einer Sekunde.
+
+  Die Prozess-Zeile der Ausgabe von \textit{top} enthält eine Vielzahl an Informationen zu dem beobachteten Prozess, von besonderem
+  Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des Prozesses.
+
+  \begin{lstlisting}[language=sh, caption=Auszug des qDup Skripts capture-platform-stats, captionpos=b]
+    - wait-for: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-START
+    - sh: top -b  -d 1 -p ${{RUN.JAVA_APP_PID}} | grep java > ${{SERVER_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-top.out &
+    - sh: export TOP_PID=$!
+    - wait-for: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-END
+    - sh: kill -9 $TOP_PID
+    - wait-for: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-START
+    - sh: top -b  -d 1 -p ${{RUN.JAVA_APP_PID}} | grep java > ${{SERVER_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-top.out &
+    - sh: export TOP_PID=$!
+    - wait-for: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-END
+    - sh: kill -9 $TOP_PID
+  \end{lstlisting}
+  TODO
+  //nach tests alle daten (wrk ausgaben, top ausgaben, mean time to first request ausgaben)
+  //und per jbang java skript aufbereitet bzw. gefiltert
+  //anschließend über node js skript /npm package -> graphen
+ 
 Systemaufbau (Client-Host, Server-Host, User-Host)
 Architekturaufbau als Grafik
-was genau gemessen wird (welche Metriken) und wie (mean start time to first request als uber-jar in jvm mode)
-diees beeeinflusst werden können und wie diese durch top \& wrk ermittelt werden
-Jeden größeren Schritt erklären, Bauen der Anwendungen, Warm-Up (JIT), Workload
-Download der umgeleiteten Ausgaben auf Host der das qDup Script ausführt -> weitere Verarbeitung
-lua histogramme und top ausgaben durch java jbang skript berechnet und werte in json file 
-json file dann von npm package -> graphen
 
 //TODO: Grafik zur Visualisierung (Illustrator)
 \subsection{Test: Statische Daten}
@@ -223,6 +267,7 @@ das Nicht BLockieren bzw. Asynchronität verdeutlichen
 
 //auch erwähnen dss beide paradigmen gemischt werden können, und vert.x dann entweder die anfrage an den worker thread pool dispatched
 // (auch mit kosten verbunden)
-// oder auf dem io thread ausführt -> muss nicht komplett reaktiv oder blockierend sein x
+// oder auf dem io thread ausführt also muss nicht komplett reaktiv oder blockierend sein x
 \subsection{Auswertung}
+
 \label{section:auswertung}
