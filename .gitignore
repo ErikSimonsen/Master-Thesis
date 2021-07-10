@@ -12,7 +12,11 @@
 *.cb2
 .*.lb
 main.pdf
-
+## Glossary
+.acn
+main-blx.bib
+*.ist
+*.out
 ## Intermediate documents:
 *.dvi
 *.xdv

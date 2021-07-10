@@ -38,46 +38,63 @@
 \usepackage{array}
 %\usepackage[table]{xcolor}
 
-% Abkürzungsverzeichnis
-\usepackage[nolist, nohyperlinks]{acronym}
-
-% Figure a b
-\usepackage{subcaption}
-
-% Literaturverzeichniss
-\usepackage[style=authoryear]{biblatex}
-
 % Zeichensatz
 \usepackage[T1]{fontenc}
 
 % Schriftart
 \usepackage{lmodern}
 
+% Figure a b
+\usepackage{subcaption}
+
+% Code Highlighting
+\usepackage{listings}
+
+% Acronyme und Glossar
+\usepackage[acronym, toc]{glossaries}
+
+% Literaturverzeichniss
+\usepackage[backend=bibtex,style=authoryear]{biblatex}
+
 \addbibresource{main.bib}
+\makeglossaries
+\input{glossary}
+
 \input{pdf}
-\input{tree-definition}
 \input{todo-definition}
 \begin{document}
 
-\pagestyle{empty}
-\pagenumbering{roman}
 \input{frontmatter/titlepage}
 \input{frontmatter/abstract}
 \input{frontmatter/ehrenwort}
-\input{frontmatter/toc}
-\input{frontmatter/abbildungsverzeichnis}
-%\input{frontmatter/stichwortverzeichnis}
-%\input{frontmatter/acronyms}
+\tableofcontents
+% Verzeichnis von Abbildungen
+\listoffigures
+% Verzeichnis von Listings
+\lstlistoflistings 
+% Verzeichnis von Tabellen
+\listoftables
 
 \setcounter{page}{1}
 \pagenumbering{arabic}
 \pagestyle{headings}
 
 \input{mainmatter/einleitung}
-\newpage
 \input{mainmatter/grundlagen}
-\input{mainmatter/vergleich_programmierparadigmen.tex}
+% Definiere Style für Text Listings.
+\lstdefinestyle{text}{
+    basicstyle=\ttfamily\footnotesize
+}
+% Verwende Style 
+\lstset{style=text}
+\input{mainmatter/vergleich_programmierparadigmen}
 \input{mainmatter/fazit}
 
+%Glossar und Acronyme ohne Seitenzahl anzeigen, auf denen die Begriffe auftauchen
+\printglossary[nonumberlist]
+\printglossary[type=\acronymtype, nonumberlist]
+
+%Literaturverzeichnis in Inhaltsverzeichnis zeigen
+\addcontentsline{toc}{section}{Literaturverzeichnis}
 \printbibliography
 \end{document}
