@@ -3,9 +3,19 @@
 Um zu prüfen, ob Leistungsfähigkeit und Skalierbarkeit einer reaktiven Anwendung tatsächlich die einer traditionellen, imperativen Anwendung
 übertrifft, werden in diesem Kapitel beide Ansätze hinsichtlich verschiedener Metriken in einem festen Zeitintervall miteinander verglichen.
 
-TODO: Erwähnen welche Tests stattfinden (bereits früher, vor dem Kapitel ? 
-(Statische Daten: JVM-Mode und Native; Dynamische Daten (mit DB): JVM-Mode und Native)
-\& welche Metriken gemessen werden wie diese beeinflusst werden können (weil die Ergebnisse z.b. durch Hardware beeinflusst werden können
+Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung zwei Lasttests unterzogen:
+\begin{enumerate}
+    \item Abfrage von Statische Daten 
+    \item Abfrage von dynamischen Daten mit Datenbankanbindung
+\end{enumerate}
+Dabei wird eine Reihe an Lasten bzw. \textit{workloads} von einem Client-Host generiert und über eine feste Dauer in kleinen Zeitinvervallen
+ an einen ausgewählten HTTP-Endpunkt der Anwendung gesendet.
+In dieser Zeit wird das Zeitinvervall vom Starten der Anwendung bis zur Beantwortung der ersten Anfrage, 
+der benötigte Arbeitsspeicher und CPU-Auslastung des Prozesses, der Durchsatz, sowie die Latenz gemessen.
+
+TODO:
+JVM-Mode und Native (wegen Containerumgebungen und Cloud))
+\& welche Metriken gemessen werden wie diese beeinflusst werden können (weil die Ergebnisse z.B. durch Hardware beeinflusst werden können
 wird im folgenden die Implementierung sowie die Testumgebung und deren Ablauf dargestellt.).
 
 \subsection{Implementierung \& Systemaufbau}
@@ -73,9 +83,9 @@ Der Projekt-Code dieser Arbeit kann vom Gitlab-Server der Ostfalia unter
 Für die Testumgebung werden zwei Systeme benötigt: der Client-Host und der Server-Host.
 Dabei muss es sich um UNIX-Systeme handeln, da eine einige der verwendeten Werkzeuge nur 
 auf diesen Systemen verfügbar sind.
-Zudem müssen beide Systeme per SSH von einem (idealerweise vorhandenem) dritten System 
+Zudem müssen beide Systeme per SSH von einem (idealerweise vorhandenem) dritten System, dem User-Host
 \footnote{Dies kann allerdings auch der Client-Host selber sein} 
-erreicht werden können, damit dieses den Testablauf in der korrekten Abfolge ausführen kann. 
+erreichbar sein, damit dieses den Testablauf in der korrekten Abfolge ausführen kann. 
 Der Einfachheit halber empfiehlt es sich, dass sich alle Geräte im gleichen Netzwerk befinden.
 Beiden Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks. 
 
@@ -239,15 +249,16 @@ angepasst werden.}
     - wait-for: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-END
     - sh: kill -9 $TOP_PID
   \end{lstlisting}
-  TODO
-  //nach tests alle daten (wrk ausgaben, top ausgaben, mean time to first request ausgaben)
-  //und per jbang java skript aufbereitet bzw. gefiltert
-  //anschließend über node js skript /npm package -> graphen
- 
-Systemaufbau (Client-Host, Server-Host, User-Host)
-Architekturaufbau als Grafik
 
-//TODO: Grafik zur Visualisierung (Illustrator)
+  Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host, welches das qDup Skript ausgeführt hat, kopiert.
+  In einem \verb|.sh|-Skript werden anschließend die Daten über ein Java-Skript, das mit dem Tool \textit{JBang} ausgeführt 
+  wird \footnote{JBang erlaubt das direkte Ausführen von .java Dateien},
+   geparsed und die relevanten Daten bezüglich des Durchsatzes, Speicherverbrauches und CPU-Auslastung ermittelt.
+  Diese werden dann für die visuelle Darstellung in eine \verb|.json|-Datei geschrieben.
+
+  Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \textit{d3node-linechart} in Form von Graphen visuell dargestellt.
+  
+    //TODO: Grafik zur Visualisierung (Illustrator)
 \subsection{Test: Statische Daten}
 \label{section:statische_daten}
 
