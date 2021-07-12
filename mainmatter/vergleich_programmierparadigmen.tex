@@ -5,18 +5,19 @@ Um zu prüfen, ob Leistungsfähigkeit und Skalierbarkeit einer reaktiven Anwendu
 
 Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung zwei Lasttests unterzogen:
 \begin{enumerate}
-    \item Abfrage von Statische Daten 
+    \item Abfrage von Statische Daten
     \item Abfrage von dynamischen Daten mit Datenbankanbindung
 \end{enumerate}
 Dabei wird eine Reihe an Lasten bzw. \textit{workloads} von einem Client-Host generiert und über eine feste Dauer in kleinen Zeitinvervallen
- an einen ausgewählten HTTP-Endpunkt der Anwendung gesendet.
-In dieser Zeit wird das Zeitinvervall vom Starten der Anwendung bis zur Beantwortung der ersten Anfrage, 
+an einen ausgewählten HTTP-Endpunkt der Anwendung gesendet.
+In dieser Zeit wird das Zeitinvervall vom Starten der Anwendung bis zur Beantwortung der ersten Anfrage,
 der benötigte Arbeitsspeicher und CPU-Auslastung des Prozesses, der Durchsatz, sowie die Latenz gemessen.
 
-TODO:
-JVM-Mode und Native (wegen Containerumgebungen und Cloud))
-\& welche Metriken gemessen werden wie diese beeinflusst werden können (weil die Ergebnisse z.B. durch Hardware beeinflusst werden können
-wird im folgenden die Implementierung sowie die Testumgebung und deren Ablauf dargestellt.).
+Für Container- und Cloud-Umgebungen eignen sich, primär aus Kostengründen, Anwendungen die, statt auf hohen Durchsatz und lange Laufzeiten, auf
+schnelle Startzeiten und geringen Ressourcenverbrauch setzen.
+Aus diesem Grund werden die beiden Anwendungen sowohl im \textit{JVM mode} als auch im \textit{native mode}
+(siehe \ref{section:java_tooling}) den Lasttests unterzogen. Ingesamt ergeben sich also 4 Testszenarien.
+
 
 \subsection{Implementierung \& Systemaufbau}
 \label{section:implementierung}
@@ -31,7 +32,7 @@ Je nachdem welcher Ansatz zur Implementierung des jeweiligen HTTP-Endpunktes gew
 wird der abzuarbeitende Code dann auf einem blockierenden \textit{worker thread} aus dem \textit{worker thread pool}
 \footnote{Auch als \textit{Dispatch} bezeichnet} (Servlet, JAX-RS) oder einem der
 \textit{IO threads} (Reactive Routes, Reactive Resteasy) ausgeführt.
-Die \textit{IO threads} sind dafür zuständig alle IO-Operationen asynchron auszuführen und die jeweiligen EventListener bzw. Subscriber 
+Die \textit{IO threads} sind dafür zuständig alle IO-Operationen asynchron auszuführen und die jeweiligen EventListener bzw. Subscriber
 auszulösen sobald die Operationen abgeschlossen sind.
 \newpage
 \begin{figure}[h!]
@@ -81,13 +82,13 @@ Der Projekt-Code dieser Arbeit kann vom Gitlab-Server der Ostfalia unter
 \subsection{Testumgebung}
 \label{section:testumgebung}
 Für die Testumgebung werden zwei Systeme benötigt: der Client-Host und der Server-Host.
-Dabei muss es sich um UNIX-Systeme handeln, da eine einige der verwendeten Werkzeuge nur 
+Dabei muss es sich um UNIX-Systeme handeln, da eine einige der verwendeten Werkzeuge nur
 auf diesen Systemen verfügbar sind.
 Zudem müssen beide Systeme per SSH von einem (idealerweise vorhandenem) dritten System, dem User-Host
-\footnote{Dies kann allerdings auch der Client-Host selber sein} 
-erreichbar sein, damit dieses den Testablauf in der korrekten Abfolge ausführen kann. 
+\footnote{Dies kann allerdings auch der Client-Host selber sein}
+erreichbar sein, damit dieses den Testablauf in der korrekten Abfolge ausführen kann.
 Der Einfachheit halber empfiehlt es sich, dass sich alle Geräte im gleichen Netzwerk befinden.
-Beiden Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks. 
+Beiden Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks.
 
 Um eine reproduzierbare Anwendungsumgebung und Ressourcenallokation zu ermöglichen, laufen beide Anwendungen auf dem Server-Host in
 jeweils einem Docker-Container mit fest definierten Ressourcen:
@@ -95,7 +96,7 @@ jeweils einem Docker-Container mit fest definierten Ressourcen:
     \item Nutzung von 4 CPU-Kernen
     \item 1024 MB RAM
     \item 256 MB Heap Größe für den Java-Prozess
-     \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \cite{Java10ReleaseNotes}}
+          \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \cite{Java10ReleaseNotes}}
 \end{itemize}
 Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
 \begin{itemize}
@@ -104,26 +105,26 @@ Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
 \end{itemize}
 
 Die Anwendung, die auf dem Client-Host die \textit{work load} für die beiden zu testenden Anwendungen generiert,
- nutzt in dieser Testumgebung 4 Threads.
-Welche Laufzeitumgebungen und Tools für die Tests auf den jeweiligen Hosts vorhanden sein müssen, 
+nutzt in dieser Testumgebung 4 Threads.
+Welche Laufzeitumgebungen und Tools für die Tests auf den jeweiligen Hosts vorhanden sein müssen,
 wird in der Readme.md-Datei des Projektverzeichnisses genau beschrieben.
-Die vom Autor genutzten Client- und Server-Host Systeme zur Durchführung der Tests haben die folgenden Systemspezifikationen:
-
+Da die Messergebnisse je nach verwendeter Hardware der Client- und Server-Hosts durchaus variieren können werden im Folgenden
+die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
 \begin{table}[ht!]
     \centering
     \begin{tabular}{| c | c |}
         \hline
-        Server-Host \\
+        Server-Host                                                  \\
         \hline
-        CPU's    & AMD Ryzen 7 2700x eight-core processor x 16  \\
+        CPU's          & AMD Ryzen 7 2700x eight-core processor x 16 \\
         \hline
-        RAM      & 16GB \\
+        RAM            & 16GB                                        \\
         \hline
-        Speicher & 1,5 TB \\
+        Speicher       & 1,5 TB                                      \\
         \hline
-        Betriebssystem   & Fedora 34 (Workstation Edition)  \\
+        Betriebssystem & Fedora 34 (Workstation Edition)             \\
         \hline
-        Kernel & Linux version \verb|5.12.14-300.fc34.x86_64|\\
+        Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64|    \\
         \hline
     \end{tabular}
     \caption{Systemspezifikationen der verwendeten Server-Maschine}
@@ -134,18 +135,18 @@ Die vom Autor genutzten Client- und Server-Host Systeme zur Durchführung der Te
     \centering
     \begin{tabular}{| c | c |}
         \hline
-        Client-Host\\
-        Hardware & Acer Aspire VN7-591G \\
+        Client-Host                                               \\
+        Hardware       & Acer Aspire VN7-591G                     \\
         \hline
-        CPU      & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4  \\
+        CPU            & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4  \\
         \hline
-        RAM      & 8GB \\
+        RAM            & 8GB                                      \\
         \hline
-        Speicher & 500 GB   \\
+        Speicher       & 500 GB                                   \\
         \hline
-        Betriebssystem  & Fedora 34 (Workstation Edition)   \\
+        Betriebssystem & Fedora 34 (Workstation Edition)          \\
         \hline
-        Kernel & Linux version \verb|5.12.14-300.fc34.x86_64| \\
+        Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64| \\
         \hline
     \end{tabular}
     \caption{Systemspezifikationen der verwendeten Client-Maschine}
@@ -154,53 +155,53 @@ Die vom Autor genutzten Client- und Server-Host Systeme zur Durchführung der Te
 
 \subsection{Testvorgehen / Testaufbau}
 \label{section:vorgehen}
-Der im Folgenden erläuterte Versuchsaufbau basiert auf einer, vom Autor erweiterten, Architektur die vom Quarkus-Entwicklerteam 
-  zur Erstellung von verschiedenen Benchmarks für den Quarkus Technologie-Stack genutzt wurde. 
-  \cite{QuarkusBlog, QuarkusJohnaohara}
+Der im Folgenden erläuterte Versuchsaufbau basiert auf einer, vom Autor erweiterten, Architektur die vom Quarkus-Entwicklerteam
+zur Erstellung von verschiedenen Benchmarks für den Quarkus Technologie-Stack genutzt wurde.
+\cite{QuarkusBlog, QuarkusJohnaohara}
 
-  Um den gesamten Versuchsablauf zu automatisieren und über mehrere Server zu steuern wird ein Tool namens qDup eingesetzt.
-  Damit können Shell-Kommandos als Skripte gruppiert, und verschiedenen Hosts je nach Rolle zugewiesen werden.
-  Um dem Ablauf korrekt zu steuern
-  \footnote{Beispielsweise sollte der Server-Host erst anfangen den Java-Prozess zu überwachen, sobald der Client-Host die \textit{workload}
-  generiert und nicht bereits davor}
-  , werden Signale definiert die ein Host sendet, und auf die die anderen Hosts warten um ihrerseits
-  weitere Skripte auszuführen.
-  \footnote{Die qDup Skripte mit dem gesamten Testablauf können im Verzeichnis \textit{/scripts/qDup} des Quellcodeverzeichnisses eingesehen und
-angepasst werden.}
+Um den gesamten Versuchsablauf zu automatisieren und über mehrere Server zu steuern wird ein Tool namens qDup eingesetzt.
+Damit können Shell-Kommandos als Skripte gruppiert, und verschiedenen Hosts je nach Rolle zugewiesen werden.
+Um dem Ablauf korrekt zu steuern
+\footnote{Beispielsweise sollte der Server-Host erst anfangen den Java-Prozess zu überwachen, sobald der Client-Host die \textit{workload}
+    generiert und nicht bereits davor}
+, werden Signale definiert die ein Host sendet, und auf die die anderen Hosts warten um ihrerseits
+weitere Skripte auszuführen.
+\footnote{Die qDup Skripte mit dem gesamten Testablauf können im Verzeichnis \textit{/scripts/qDup} des Quellcodeverzeichnisses eingesehen und
+    angepasst werden.}
 
-  Wie bereits in \ref{section:testumgebung} erwähnt, nutzt qDup SSH um mit den jeweiligen Servern zu kommunizieren.
+Wie bereits in \ref{section:testumgebung} erwähnt, nutzt qDup SSH um mit den jeweiligen Servern zu kommunizieren.
 
-  Im ersten Schritt \textit{build applications} wird auf dem Server-Host das Quellcodeverzeichnis geklont und beide Anwendungen werden gebaut
-   (je nach Test entweder als uber-jar oder als \textit{native executable}). Anschließend wird über ein JavaScript-Skript,
-    welches in der Laufzeitumgebung Node.js läuft, das durchschnittliche Zeitintervall zwischem dem Start einer Anwendung bis 
-    zur Verarbeitung der ersten Anfrage gemessen
-   (\textit{Mean Start Time to First Request}). Darüber hinaus werden die Docker-Container der Datenbank
-   \footnote{Nur beim Test mit dynamischen Daten} und der beiden REST-APIs gebaut.
-   
-  Beim zweiten Schritt \textit{run applications} wird der Docker-Container der jeweiligen Anwendung gestartet und anschließend signalisiert,
-  dass die Anwendung nun bereit ist. 
-  Daraufhin wird auf dem Client-Host das Skript \textit{generate load} gestartet.
-  Die \textit{workload} ist hier definiert als die Anzahl der, an den Server-Host, versendeten \textit{HTTP-Anfragen pro Sekunde}.
-  Für das Generieren und Übermitteln der \textit{workload} wird das Werkzeug \textit{wrk2} genutzt, welches das 
-  bewährte HTTP-Benchmarking Tool \textit{wrk} um folgende Funktionen erweitert:
-  \begin{enumerate}
-      \item Konstanter \textit{workload} Durchsatz
-      \item Korrekteres Messverfahren der Antwort-Latenz
-      \item Exaktes Messen durch \Glsuseri{hdrHistogramm}
-  \end{enumerate}\cite{Wrk2, Wrk}
+Im ersten Schritt \textit{build applications} wird auf dem Server-Host das Quellcodeverzeichnis geklont und beide Anwendungen werden gebaut
+(je nach Test entweder als uber-jar oder als \textit{native executable}). Anschließend wird über ein JavaScript-Skript,
+welches in der Laufzeitumgebung Node.js läuft, das durchschnittliche Zeitintervall zwischem dem Start einer Anwendung bis
+zur Verarbeitung der ersten Anfrage gemessen
+(\textit{Mean Start Time to First Request}). Darüber hinaus werden die Docker-Container der Datenbank
+\footnote{Nur beim Test mit dynamischen Daten} und der beiden REST-APIs gebaut.
 
-  Pro Test werden Benchmarks für eine ganze Reihe an \textit{workloads} gemessen.
-  Jede \textit{workload} wird über einen Zeitraum von 60 Sekunden über 100 offene HTTP-Verbindungen an den Server-Host übermittelt.
-  In den Tests nutzt \textit{wrk2} für das Generieren und Übermitteln der \textit{workload}, sowie das Messen der Antwortszeit
-  4 Threads.
-  
-  Damit der Anwendungscode des angesteuerten HTTP-Endpunkts durch den JIT-Compiler der JVM optimiert wird, 
-  findet pro \textit{workload} vor der eigentlichen Mess-Phase eine identische Warmup-Phase statt.
+Beim zweiten Schritt \textit{run applications} wird der Docker-Container der jeweiligen Anwendung gestartet und anschließend signalisiert,
+dass die Anwendung nun bereit ist.
+Daraufhin wird auf dem Client-Host das Skript \textit{generate load} gestartet.
+Die \textit{workload} ist hier definiert als die Anzahl der, an den Server-Host, versendeten \textit{HTTP-Anfragen pro Sekunde}.
+Für das Generieren und Übermitteln der \textit{workload} wird das Werkzeug \textit{wrk2} genutzt, welches das
+bewährte HTTP-Benchmarking Tool \textit{wrk} um folgende Funktionen erweitert:
+\begin{enumerate}
+    \item Konstanter \textit{workload} Durchsatz
+    \item Korrekteres Messverfahren der Antwort-Latenz
+    \item Exaktes Messen durch \Glsuseri{hdrHistogramm}
+\end{enumerate}\cite{Wrk2, Wrk}
 
-  Listing \ref*{lst:generateLoad} zeigt den Aufruf von \textit{wrk2} mit den beschriebenen Parametern in der Warmup- und Mess-Phase,
-   \verb|${RUN_RATE}| enthält die \textit{workload}
+Pro Test werden Benchmarks für eine ganze Reihe an \textit{workloads} gemessen.
+Jede \textit{workload} wird über einen Zeitraum von 60 Sekunden über 100 offene HTTP-Verbindungen an den Server-Host übermittelt.
+In den Tests nutzt \textit{wrk2} für das Generieren und Übermitteln der \textit{workload}, sowie das Messen der Antwortszeit
+4 Threads.
 
-  \begin{lstlisting}[caption=Auszug des qDup Skripts generate load, captionpos=b, label=lst:generateLoad]
+Damit der Anwendungscode des angesteuerten HTTP-Endpunkts durch den JIT-Compiler der JVM optimiert wird,
+findet pro \textit{workload} vor der eigentlichen Mess-Phase eine identische Warmup-Phase statt.
+
+Listing \ref*{lst:generateLoad} zeigt den Aufruf von \textit{wrk2} mit den beschriebenen Parametern in der Warmup- und Mess-Phase,
+\verb|${RUN_RATE}| enthält die \textit{workload}
+
+\begin{lstlisting}[caption=Auszug des qDup Skripts generate load, captionpos=b, label=lst:generateLoad]
     - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-START
     - sh: wrk -t 4 -c 100 -d 60s -R ${{RUN_RATE}} ${{TEST_DYNAMIC_ENDPOINT}} > ${{CLIENT_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP.wrk2.out
     - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-END
@@ -209,12 +210,12 @@ angepasst werden.}
     - sh: wrk -t 4 -c 100 -d 60s -R ${{RUN_RATE}} --latency ${{TEST_DYNAMIC_ENDPOINT}} > ${{CLIENT_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE.wrk2.out
     - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-END
    \end{lstlisting}
-  
-   Die Ausgabe von wrk enthält Informationen zur \Gls{latenz}\footnote{Pro verwendetem Thread und Gesamt},
-   zum \Gls{durchsatz} und der \Gls{perzentile} der \Gls{latenz} (durch ein \Gls{hdrHistogramm} dargestellt).
-   Listing \ref*{lst:wrk-listing} zeigt die umgeleitete Ausgabe von \textit{wrk} ohne die genaue Darstellung der Perzentile.
- 
-   \begin{lstlisting}[caption=Beispiel für Ausgabe von wrk,captionpos=b, label=lst:wrk-listing]
+
+Die Ausgabe von wrk enthält Informationen zur \Gls{latenz}\footnote{Pro verwendetem Thread und Gesamt},
+zum \Gls{durchsatz} und der \Gls{perzentile} der \Gls{latenz} (durch ein \Gls{hdrHistogramm} dargestellt).
+Listing \ref*{lst:wrk-listing} zeigt die umgeleitete Ausgabe von \textit{wrk} ohne die genaue Darstellung der Perzentile.
+
+\begin{lstlisting}[caption=Beispiel für Ausgabe von wrk,captionpos=b, label=lst:wrk-listing]
     Running 1m test @ http://erik-pc.local:8080/greeting/Bob
     4 threads and 100 connections
     Thread calibration: mean lat.: 310.434ms, rate sampling interval: 1047ms
@@ -229,15 +230,15 @@ angepasst werden.}
    Transfer/sec:      7.93MB
    \end{lstlisting}\footnote{Die Resultate der Tests sind auch im Quellcodeverzeichnis unter \textit{\/results} zu finden}
 
-  Bevor die Warmup-Phase und die Belastungs-Phase mit \textit{wrk} vom Client-Host ausgeführt werden, wird dem Server-Host signalisiert, dass
-  er das Skript \textit{capture platform stats} ausführen soll.
-  In diesem Skript wird die Observation des Anwendungs-Prozesses durch das Kommandozeilenprogramm \textit{top} gestartet.
-  \textit{Top} wird dabei im Batch-Modus gestartet mit einer Wiederholrate von einer Sekunde.
+Bevor die Warmup-Phase und die Belastungs-Phase mit \textit{wrk} vom Client-Host ausgeführt werden, wird dem Server-Host signalisiert, dass
+er das Skript \textit{capture platform stats} ausführen soll.
+In diesem Skript wird die Observation des Anwendungs-Prozesses durch das Kommandozeilenprogramm \textit{top} gestartet.
+\textit{Top} wird dabei im Batch-Modus gestartet mit einer Wiederholrate von einer Sekunde.
 
-  Die Prozess-Zeile der Ausgabe von \textit{top} enthält eine Vielzahl an Informationen zu dem beobachteten Prozess, von besonderem
-  Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des Prozesses.
+Die Prozess-Zeile der Ausgabe von \textit{top} enthält eine Vielzahl an Informationen zu dem beobachteten Prozess, von besonderem
+Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des Prozesses.
 
-  \begin{lstlisting}[language=sh, caption=Auszug des qDup Skripts capture-platform-stats, captionpos=b]
+\begin{lstlisting}[language=sh, caption=Auszug des qDup Skripts capture-platform-stats, captionpos=b]
     - wait-for: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-START
     - sh: top -b  -d 1 -p ${{RUN.JAVA_APP_PID}} | grep java > ${{SERVER_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-top.out &
     - sh: export TOP_PID=$!
@@ -250,15 +251,15 @@ angepasst werden.}
     - sh: kill -9 $TOP_PID
   \end{lstlisting}
 
-  Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host, welches das qDup Skript ausgeführt hat, kopiert.
-  In einem \verb|.sh|-Skript werden anschließend die Daten über ein Java-Skript, das mit dem Tool \textit{JBang} ausgeführt 
-  wird \footnote{JBang erlaubt das direkte Ausführen von .java Dateien},
-   geparsed und die relevanten Daten bezüglich des Durchsatzes, Speicherverbrauches und CPU-Auslastung ermittelt.
-  Diese werden dann für die visuelle Darstellung in eine \verb|.json|-Datei geschrieben.
+Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host, welches das qDup Skript ausgeführt hat, kopiert.
+In einem \verb|.sh|-Skript werden anschließend die Daten über ein Java-Skript, das mit dem Tool \textit{JBang} ausgeführt
+wird \footnote{JBang erlaubt das direkte Ausführen von .java Dateien},
+geparsed und die relevanten Daten bezüglich des Durchsatzes, Speicherverbrauches und CPU-Auslastung ermittelt.
+Diese werden dann für die visuelle Darstellung in eine \verb|.json|-Datei geschrieben.
 
-  Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \textit{d3node-linechart} in Form von Graphen visuell dargestellt.
-  
-    //TODO: Grafik zur Visualisierung (Illustrator)
+Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \textit{d3node-linechart} in Form von Graphen visuell dargestellt.
+
+//TODO: Grafik zur Visualisierung (Illustrator)
 \subsection{Test: Statische Daten}
 \label{section:statische_daten}
 

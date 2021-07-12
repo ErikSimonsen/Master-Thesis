@@ -134,7 +134,7 @@ genutzt werden. Auf diese Weise können I/O-Operationen, wie beispielsweise der 
 die virtuellen Threads nutzen und blockieren den darunterliegenden nativen Thread nicht mehr.
 
 \subsection{Reaktive Datenströme}
-\label{section.reaktive_datenströme}
+\label{section:reaktive_datenströme}
 In einer typischen asynchronen Verarbeitungskette von, potenziell unbegrenzten, Datenströmen
 bestehend aus einem Sender und Empfänger bzw. Publisher und Subscriber kann es vorkommen,
 dass der Sender Daten schneller an den Empfänger verschickt, als dieser sie verarbeiten kann.
@@ -221,8 +221,8 @@ Der Ansatz jegliche Kommunikation der Komponenten durch das Übermitteln von Nac
 indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch das Überwachen der Nachrichtenwarteschlangen
 (\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.\cite{ReactiveSystems}
 
-\subsection{Werkzeuge}
-\subsubsection{Java Ökosystem}
+\subsection{Java Ökosystem}
+\label{section:java_tooling}
 Im Java Ökosystem gibt es eine Vielzahl an Frameworks, Libaries und APIs mit denen Reaktive Programmierung und reaktive Systeme umgesetzt
 werden können.
 Um in Java einzelne, asynchrone Prozesse zu implementieren, wird vom JDK die Future-API zur Verfügung gestellt.\cite{OracleFuture}
@@ -252,15 +252,17 @@ Zu den populärsten gehören:
 Bei dem, in dieser Arbeit verwendeten, Framework Quarkus handelt es sich, laut Hersteller Red Hat, um ein
 benutzerfreundliches, auf Entwickler abgestimmtes Java Framework, welches für Container-, Cloud- und Serverless-Umgebungen optimiert ist und nur wenig
 Konfiguration benötigt, sowie nur die besten und hochwertigsten Java-Bibliotheken und Standards nutzt.
-Dabei können die Anwendungen sowohl auf einer JVM (JVM-Mode) laufen, als auch, durch native Kompilierung mit vollständigem Stack,
-als \textit{native executable} (native-mode). Dafür nutzt Quarkus eine, von Oracle entwickelte, Technologie namens GraalVM. Dabei handelt es sich um
-eine polyglotte, virtuelle Maschine und Laufzeitumgebung die auf dem OpenJDK basiert, und über JVMCI \footnote{Java Virtual Machine Compiler Interface} den
-C2-Compiler der zugrundeliegenden HotSpot-JVM durch den Graal JIT-Compiler ersetzt.\cite{GraalVM}
+Dabei können die Anwendungen sowohl auf einer JVM (JVM mode) laufen, als auch, durch native Kompilierung mit vollständigem Stack,
+als nativ ausführbare Anwendung: dem \textit{native image} (native mode). Dafür nutzt Quarkus eine, von Oracle entwickelte, Technologie namens GraalVM.
+Dabei handelt es sich um eine polyglotte, virtuelle Maschine und Laufzeitumgebung die auf dem OpenJDK basiert, und über
+JVMCI \footnote{Java Virtual Machine Compiler Interface} den C2-Compiler der zugrundeliegenden HotSpot-JVM durch den Graal JIT-Compiler ersetzt.\cite{GraalVM}
 
-Darüber hinaus verspricht Quarkus, durch seine Container-first-Philosophie, bis zu 300 Mal schnellere Startzeiten und nur ein Zehntel des
-Speicherbedarfs im Vergleich zum 'traditionellen' Java, wodurch es eine signifikante Reduzierung der benötigten Ressourcen im Cloud-Umfeld bewirkt.
+Darüber hinaus verspricht Quarkus mit seiner Container-first-Philosophie, durch \textit{native images} bis zu 300 Mal schnellere Startzeiten
+und nur ein Zehntel des
+Speicherbedarfs im Vergleich zu traditionellen Java-Frameworks wie Spring Boot, wodurch es eine signifikante Reduzierung der benötigten Ressourcen und Kosten
+im Cloud-Umfeld bewirkt. \cite{RedHatQuarkusInfografik}
 
 Des Weiteren erlaubt Quarkus die Kombination des imperativen und des reaktiven, nicht-blockierenden Programmierparadigmas.
 Für die reaktive Programmierung bietet Quarkus die bereits genannte Bibliothek Mutiny an.
-Quarkus selber ist zudem auch reaktiv, denn 'angetrieben' wird es durch eine nicht-blockierende, reaktive Eclipse Vert.x Engine, die
+Quarkus selber ist zudem auch reaktiv, denn es basiert auf der nicht-blockierenden, reaktive Eclipse Vert.x Engine, die
 alle Netzwerk I/O-Operationen verarbeitet. \cite{QuarkusReactiveGettingStarted, Quarkus}
