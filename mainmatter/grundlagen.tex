@@ -5,46 +5,68 @@
 \label{sections:treads_prozesse}
 In der Java-Laufzeitumgebung sind Prozesse und Threads als Betriebssystem-Prozesse realisiert, sog. \textit{native threads} oder auch \textit{Kernelthreads}.
 Hierbei wird die Ausführungsreihenfolge, die Ausführungszeit und der Prozess- \& Threadwechsel
-vom Scheduler \& Dispatcher des Betriebssystems übernommen \cite{Tanenbaum2016}.
-Die Threading-Abstraktion in Java bietet Entwicklern verhältnismäßig leichten Zugriff auf parallelle Programmierung und Synchronisation von Threads.\newline
+vom Scheduler \& Dispatcher des Betriebssystems übernommen\parencite[Kapitel 2]{Tanenbaum2016}.
+Die Threading-Abstraktion in Java bietet Entwicklern verhältnismäßig leichten Zugriff auf parallelle Programmierung und Synchronisation von Threads.
 Servlet-Container binden üblicherweise jede vom Webserver weitergeleitete Anfrage an einen
 Thread\footnote{Aus einem, im vornherein erzeugten, Thread-Pool} im Servlet-API, welcher die jeweilige Anfrage imperativ abarbeitet
-(daher auch \textit{worker thread}).\newline
-Der auszuführende Code ist in diesem Ansatz an den jeweiligen Thread gekoppelt, dieser wartet bei
-asynchronen Ereignissen solange, bis er eine Antwort erhält und blockiert den Thread bis dahin.
+(daher auch \textit{worker thread}).
+Der auszuführende Code ist in diesem Ansatz an den jeweiligen Thread gekoppelt. Sobald im Code ein asynchrones Ereigniss aufgerufen wird
+, wird die weitere Abarbeitung der Instruktionen vom Thread blockiert, bis es abgeschlossen ist.
 
+\noindent
+TODO: Move following text to Threadwechseln?
 Um jede Anfrage, und somit jeden Thread, scheinbar parallel zu bearbeiten wird vom Scheduler
 des Betriebssystems regelmäßig ein Kontextwechsel zwischen den Threads,
-ein \textit{thread-switch}, durchgeführt. Während bei einem Prozesswechsel der gesamte Programmkontext (Adressraum, Inhalt der CPU-Register,
+ein \textit{Threadwechsel} (\textit{thread-switch}), durchgeführt.
+Während bei einem Prozesswechsel der gesamte Programmkontext (Adressraum, Inhalt der CPU-Register,
 Seitentabelle, geöffnete Dateien und Metainformationen)
-gewechselt werden muss, wird bei einem Threadwechsel lediglich der Inhalt der CPU-Register (inkl. Programmzähler) ersetzt\cite{Brosenne2021}\cite{Mosberger2002}.
-Da der Kontextwechsel, im Fall von \textit{native threads}, durch Systemaufrufe, also vom Kernel des Betriebssystems, ausgeführt werden muss, entsteht auch
-bei einem Threadwechsel ein messbarer Zeitverlust.\newline
-Weitere Threadwechsel entstehen, wenn ein Thread die zugewiesene Rechenzeit nicht nutzen kann, da er noch durch ein asynchrones Ereignis
-(abgesetzte Datenbankabfragen oder weitere aufgerufene Webservices) blockiert, und diese einem anderen Thread zugeteilt wird.
+gewechselt werden muss, wird bei einem Threadwechsel lediglich der Inhalt der CPU-Register (inkl. Programmzähler)
+ersetzt\parencite{Brosenne2021}\parencite{Mosberger2002}.
 
-Während dieser Zeitverlust für hoch frequentierte Anwendungen lange Zeit kein Problem darstellte,
+\noindent
+Da der Threadwechsel, im Fall von \textit{native threads}, durch Systemaufrufe, also vom Kernel des Betriebssystems, ausgeführt werden muss, entsteht
+bei einem Threadwechsel trotzdem ein messbarer Zeitverlust.
+Dies ist durch die geringe Geschwindigkeit und den Overhead des notwendigen Softwareinterrupts bedingt.
+Der Softwareinterrupt erfolgt, um die Programmausführung im Benutzer-Modus zu unterbrechen und die Ausführung des Interrupt-Handlers im
+Kernel-Modus (Kontextwechsel auf privilegierten Ring 0) zu erzwingen , sowie auf dessen Beendigung zu warten.
+Weitere Threadwechsel entstehen, wenn ein Thread die zugewiesene Rechenzeit nicht nutzen kann, da er noch durch eine I/O-Operation
+blockiert, und diese vom Scheduler einem anderen Thread zugeteilt wird.
+
+\noindent
+Bei Client-Server Kommunikation kann das Blockieren einer I/O-Operation zwei Gründe haben:
+\begin{enumerate}
+	\item Eine Lese-Operation wartet auf Daten, die über das Netzwerk transportiert werden
+	\item Eine Schreib-Operation muss warten bis die Puffer des Ziels (wieder) aufnahmebereit sind
+\end{enumerate}
+
+\noindent
+Während die Zeitverluste von \textit{thread switches} für, nach früheren Standards, hoch frequentierte Anwendungen lange Zeit kein Problem darstellte,
 sind die Anforderungen an Webanwendungen in den letzten Jahren durch steigende Nutzerzahlen und Architekturen,
-die stark auf Client-Server-Kommunikation basieren, erheblich gestiegen.
-Ab einer gewissen Menge an Anfragen stellen die Kosten der Threadwechsel von \textit{native threads} ein Performance Bottleneck
-(in Form von Durchsatz) dar.
-\newpage
+die stark auf Client-Server-Kommunikation basieren, wie Microservices und SPAs, erheblich gestiegen.
+
+\noindent
+Sobald die Last eine realistische, kritische Grenze erreicht, erfolgen die \textit{thread switches} bei \textit{native threads} vom Betriebssystem
+nicht mehr schnell genug, um jede Anfrage innerhalb einer akzeptablen Zeit zu bearbeiten.
+Die Kosten der Threadwechsel von \textit{native threads} können also zu einem Performance Problem führen, welches sich in nicht
+ausreichend, skalierendem Durchsatz äußert.
+
 \subsection{Reaktive Programmierung}
 \label{section:reaktive_programmierung}
 Reaktive Programmierung ist ein Programmierparadigma, bei dem der Programmablauf als Sequenz von asynchronen Ereignissen (Events), und
-Daten als -von außen- unveränderliche (immutable) Datenströme (Streams) dargestellt werden.
-Sobald es innerhalb des Datenstroms zu Änderungen kommt werden diese als Events durch einen Publisher veröffentlicht.\footnote{Änderungen in Datenströmen
-    sind der quasi der Stimulus}
+Daten als, von außen unveränderliche (immutable), Datenströme (Streams) dargestellt werden.
+Sobald es innerhalb des Datenstroms zu Änderungen kommt werden diese als Events durch einen Publisher veröffentlicht.
+\footnote{Änderungen in Datenströmen sind der quasi der Stimulus}
 Die eigentliche Programmlogik wird in Funktionen ausgeführt, die auf die veröffentlichten Events hören (Subscriber), sie verarbeiten und wiederrum welche
-veröffentlichen können. Die Grundidee orientiert sich am Observer-Pattern und dessen Ausprägung: dem Publish-Subscribe Pattern, erweitert diese aber
+veröffentlichen können. Die Grundidee orientiert sich am Observer-Pattern und dessen Ausprägung dem Publish-Subscribe Pattern, erweitert diese aber
 noch um die Benachrichtigungen des Subscribers:
 \begin{enumerate}
-    \item Sobald keine Events mehr kommen
-    \item Wenn ein Fehler aufgetreten ist
+	\item Sobald keine Events mehr kommen
+	\item Wenn ein Fehler aufgetreten ist
 \end{enumerate}
 Indem Änderungen direkt propagiert werden und Subscriber keine Kontrolle über den Datenfluss haben, sondern lediglich über Änderungen informiert werden,
-können Programme ohne jeglichen Zustand realisiert werden\cite{Escoffier2017}.
-
+können Programme ohne jeglichen Zustand realisiert werden\parencite{Escoffier2017}.
+TODO: Abgrenzung zu Event-Driven Programming als subchapter https://stackoverflow.com/questions/34495117/how-is-reactive-programming-different-than-event-driven-programming
+TODO: \& Ähnlihckeit zu Event Listener \& Event Handler aus JS-Jargonn
 Reaktive Programmierung verinnerlicht das Konzept von nicht-blockierender bzw. asynchroner Ein- und Ausgabe (I/O).
 Dabei wird, statt wie bei synchroner bzw. blockierender Ein- und Ausgabe die restliche Ausführung des Programms
 zu blockieren bis die Datenübertragung abgeschlossen ist, nach dem Start der Übertragung bereits begonnen die Teile des
@@ -55,39 +77,44 @@ Methoden die blockierende I/O Operationen ausführen, wie Datenbankzugriffe oder
 geben beim Aufruf unverzüglich einen Publisher zurück, auf dem sich der Aufrufer registriert (subscribe).
 Dadurch wird der bearbeitende Thread nicht blockiert, und kann die nächste Anfrage bearbeiten.
 Sobald das Ergebnis der I/O Operation bereit ist, wird es dem Publisher in Form eines Events mitgeteilt, von diesem veröffentlicht und die Anfrage kann
-vom Aufrufer bzw. Subscriber weiter bearbeitet werden.
+vom Aufrufer bzw. Subscriber weiter bearbeitet werden.//TODO: von publisher verarbeitet und neue event ausgelöst
 Da durch dieses Modell der auszuführende Code nicht mehr an den jeweils ausführenden Thread gebunden wird, erlaubt es die Nutzung eines einzigen
 Threads (\textit{sog. IO Thread}) statt eines \textit{Threadpools}.
+//TODO: in eigenes subchapter, und mehr als nur stichpunkte
 Dadurch ergeben sich folgende Vorteile:
 
 \begin{enumerate}
-    \item Die Antwortenzeiten sind für eine hohe Last geringer, da deutlich weniger Threadwechsel gemacht werden müssen
-    \item Der Speicherverbrauch ist geringer, da weniger Threads genutzt werden
-    \item Der Grad der Paralellität ist nicht von der Anzahl der Threads begrenzt
+	\item Die Antwortenzeiten sind für eine hohe Last geringer, da deutlich weniger Threadwechsel gemacht werden müssen
+	\item Der Speicherverbrauch ist geringer, da weniger Threads genutzt werden
+	\item Der Grad der Parallellität ist nicht von der Anzahl der Threads begrenzt
 \end{enumerate}
 
 Allerdings gibt es auch einige gravierende Nachteile:
 
 \begin{enumerate}
-    \item Asynchroner Code ist schwieriger zu schreiben, lesen, testen und zu debuggen als imperativer Code
-    \item Sehr aufwendig in bestehende klassische Anwendungen zu integrieren
-    \item Reaktive Anwendungen müssen in jeder Schicht reaktiv sein (Transaktionen, Security, Datenbanktreiber)
-    \item Da nur ein IO-Thread genutzt wird resultieren blockierende I/O-Operationen in der Blockierung der gesamten Anwendung
+	\item Asynchroner Code ist schwieriger zu schreiben, lesen, testen und zu debuggen als imperativer Code //TODO:  Warum? Beispiel
+	\item Sehr aufwendig in bestehende klassische Anwendungen zu integrieren //TODO:  Warum? Da jede Schicht reaktiv sein muss und
+	\item ges—the callbacks or combinators—are anonymous, i.e. not addressable.
+	      This means that they usually handle success or failure directly without signaling it to the outside world. This lack of addressability makes recovery
+	      of individual stages harder to achieve as it is typically unclear where exceptions should, or even could, be propagated.
+	\item Reaktive Anwendungen müssen in jeder Schicht reaktiv sein (Transaktionen, Security, Datenbanktreiber) und daher schwer in klassische Anwendungen
+	\item zu integrieren, besonders ohne Dispatching Mechanismus
+	\item Da nur ein IO-Thread genutzt wird resultieren blockierende I/O-Operationen in der Blockierung der gesamten Anwendung
 \end{enumerate}
 
-Ein beliebtes Threading-Modell für die Verarbeitung von asynchronen Events ist die \textit{Event Loop}.
+Ein beliebtes Threading-Modell für die Verarbeitung von asynchronen Events ist die \textit{Event Loop}. //TODO Event Loop selber ist natürlich imperativ
 Sobald ein Event entsteht wird es einer Warteschlange (Queue)
 in der Event Loop hinzugefügt. Solange der ausführende Thread aktiv ist und die Queue noch Events enthält, wird in einer Schleife das nächste Event
 abgerufen und an den, für diesen Eventtyp, registrierten Event-Handler bzw. oben beschriebenen Subscriber weitergeleitet.
 \begin{figure}[h!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{EventLoop}
-    \caption{Exemplarische Abbildung einer Event Loop. \cite[Kapitel 1.7]{Ponge2020}}
+	\centering
+	\includegraphics[width=1.0\textwidth]{EventLoop}
+	\caption{Exemplarische Abbildung einer Event Loop. \parencite[Kapitel 1.7]{Ponge2020}}
 \end{figure}
 
 Dies können beispielsweise I/O-Events sein, die signalisieren das Daten bereit zur Weiterverarbeitung sind, aber auch jegliches andere Event.
 Eine Event Loop wird in der Regel auf einem IO-Thread ausgeführt, daher darf das Verarbeiten von Events
-keine blockierenden, oder zeitintensiven Operationen beinhalten\cite{Ponge2020}.
+keine blockierenden, oder zeitintensiven Operationen beinhalten\parencite{Ponge2020}.
 
 \subsubsection{Alternativen}
 In Java 1.1 wurden Threads als sog. \textit{Green Threads} implementiert. Dabei wurde die Möglichkeit Threads vom Betriebssystem verwalten zu lassen
@@ -96,7 +123,7 @@ gar nicht genutzt. Stattdessen lief die komplette JVM in einem einzigen Prozess.
 dabei ist die Funktionalität
 nicht im Kernel implementiert (wie bei \textit{kernel-/native threads}), sondern in einer Programmbibliothek im \textit{Userspace}.
 Da sich das Betriebssystem nicht um das Scheduling von \textit{user threads} kümmert, wurde dies über einen eigenen Scheduling-Algorithmus der JVM
-geregelt.\cite{Oracle2010}
+geregelt.\parencite{Oracle2010}
 Ein \textit{green thread} existiert lediglich als Objekt innerhalb der JVM, und durch die virtuelle Speicherverwaltung entfallen somit
 die aufwändigen Betriebssystemaufrufe beim
 Erstellen eines Threads, sowie bei Thread- bzw. Kontextwechseln, denn der ausführende Main-Thread bleibt gleich.
@@ -114,8 +141,8 @@ die als Carrier eingesetzt werden, ausgeführt.
 Deren Anzahl ist so gewählt, dass alle CPU Kerne durch Multithreading dauerhaft benutzt werden können
 \footnote{In der Praxis laufen natürlich noch andere Prozesse auf dem Server, deren Threads auch ausgeführt werden müssen.}
 , aber so wenig Kontextwechsel wie möglich ausgeführt werden müssen.
-\cite{Oracle2021} \footnote{Im Idealfall würde auf jedem CPU Kern ein \textit{worker thread} laufen,
-    ohne jemals einen Thread- bzw. Kontextwechsel zu machen.}
+\parencite{Oracle2021} \footnote{Im Idealfall würde auf jedem CPU Kern ein \textit{worker thread} laufen,
+	ohne jemals einen Thread- bzw. Kontextwechsel zu machen.}
 Während ein nativer Thread in einer 64 Bit JVM ca. 1 MB für den Threadstack reserviert und zusätzlich noch Metadaten abspeichert, ist ein virtueller Thread
 lediglich ein Objekt im virtuellen Speicher der JVM und benötigt sehr wenig Resourcen (da er ja im Hintergrund von einem
 nativen Thread abgearbeitet wird).
@@ -140,11 +167,11 @@ bestehend aus einem Sender und Empfänger bzw. Publisher und Subscriber kann es 
 dass der Sender Daten schneller an den Empfänger verschickt, als dieser sie verarbeiten kann.
 Zwei naive Ansätze mit einer Überlastung des Empfängers umzugehen wären:
 \begin{enumerate}
-    \item Nur der Empfänger reagiert auf eine Überlast. Diese kann sich in einem Speicherüberlauf äußern oder, falls der Puffer des Empfängers eine Größenbeschränkung
-          hat, im Verlust der empfangenen Daten
-    \item Der Sender begrenzt im vornherein die Datenmenge, die er an den Empfänger schickt. Da der Sender allerdings in der Regel nicht weiß wieviel der Empfänger
-          verarbeiten kann, sendet er entweder zuviel (es entsteht eine Überlast), oder er sendet zuwenig wodurch der Durchsatz geringer ist als nötig
-\end{enumerate}\cite{JavaSpektrum2015}
+	\item Nur der Empfänger reagiert auf eine Überlast. Diese kann sich in einem Speicherüberlauf äußern oder, falls der Puffer des Empfängers eine Größenbeschränkung
+	      hat, im Verlust der empfangenen Daten
+	\item Der Sender begrenzt im vornherein die Datenmenge, die er an den Empfänger schickt. Da der Sender allerdings in der Regel nicht weiß wieviel der Empfänger
+	      verarbeiten kann, sendet er entweder zuviel (es entsteht eine Überlast), oder er sendet zuwenig wodurch der Durchsatz geringer ist als nötig
+\end{enumerate}\parencite{JavaSpektrum2015}
 Die Lösung für dieses Problem wird \textit{Backpressure} genannt.
 Dabei fordert der Empfänger die Daten entsprechend seiner Kapazitäten an, wodurch der Sender weiß wieviele Daten er maximal versenden darf.
 Diese Mitteilung muss asynchron geschehen, da bei einer synchronen Kommunikation der Backpressure die Vorteile der asynchronen, reaktiven Datenverarbeitung
@@ -156,23 +183,23 @@ Element der Verarbeitungskette nichtblockierendes, asynchrones Verhalten impleme
 Aus der Intention einen Standard für die asynchrone Verarbeitung von Datenströmen mit nicht-blockierender \textit{back pressure}
 zu schaffen, ging die \textit{Reactive Streams}-Initiative hervor.
 Innerhalb dieser Initiative haben sich mehrere Arbeitsgruppen gebildet, welche die grundlegenden Semantiken erarbeitet haben und
-sie in Form einer eigenen Java-Spezifikation namens \textit{Reactive Streams}-API implementiert und veröffentlicht haben.\cite{ReactiveStreams}
+sie in Form einer eigenen Java-Spezifikation namens \textit{Reactive Streams}-API implementiert und veröffentlicht haben.\parencite{ReactiveStreams}
 Diese API wurde anschließend in Java 9, als Schnittstelle namens \textit{Flow-API} dem JDK hinzugefügt.
 
 Die \textit{Flow-API} des JDK entspricht der \textit{Reactive Streams} Spezifikation und stellt (nur) Interfaces zur Verfügung mit denen eine
 asynchrone, nicht blockierende Verarbeitung von (unbegrenzten) Datenströmen mit \textit{back pressure} auf der JVM implementiert werden kann.
-\cite{OracleFlow}.
+\parencite{OracleFlow}.
 \footnote{Nicht zu Verwechseln mit den Java-Streams durch die Collection-API ab Java 8. Diese sind zur Auswertungszeit in ihrer Größe begrenzt und
-    nach der Abarbeitung liegt statt eines Streams eine Collection}
+	nach der Abarbeitung liegt statt eines Streams eine Collection}
 
 \subsection{Reaktive Systeme}
 \label{section:reaktive_systeme}
 Anforderungen an große Softwaresysteme haben sich in den letzten Jahren stark verändert:
 \begin{enumerate}
-    \item Antwortzeiten in Millisekunden statt im Sekundenbereich
-    \item Datengrößen in Petabytes statt Gigabytes
-    \item 100\% Verfügbarkeit statt stundenlange Wartungsarbeiten
-    \item Deployment auf einer Vielzahl von Plattformen und cloud-basierten Clustern mit tausenden Multikernprozessoren
+	\item Antwortzeiten in Millisekunden statt im Sekundenbereich
+	\item Datengrößen in Petabytes statt Gigabytes
+	\item 100\% Verfügbarkeit statt stundenlange Wartungsarbeiten
+	\item Deployment auf einer Vielzahl von Plattformen und cloud-basierten Clustern mit tausenden Multikernprozessoren
 \end{enumerate}
 
 Unternehmen aus verschiedenen Bereichen haben sich voneinander unabhängig an diese Kriterien angepasst und Architekturmuster
@@ -183,10 +210,10 @@ erfüllen.
 und daraus allgemeingültige Systemattribute abzuleiten.
 Laut dieses Manifests sind Systeme reaktiv wenn sie:
 \begin{enumerate}
-    \item Reaktionsschnell
-    \item Widerstandsfähig (gegen Fehler)
-    \item Elastisch
-    \item Nachrichtengesteuert
+	\item Reaktionsschnell
+	\item Widerstandsfähig (gegen Fehler)
+	\item Elastisch
+	\item Nachrichtengesteuert
 \end{enumerate}
 sind.
 Solche Systeme sind, laut den Autoren, flexibler, stärker entkoppelt und würden besser skalieren als herkömmliche, nicht-reaktive Systeme.
@@ -219,50 +246,61 @@ eine loose Kopplung, Isolation und eine transparente Lokalisierung der Komponent
 Aufgrund dieser Abgrenzung werden Fehler als Nachrichten an andere Komponenten delegiert.
 Der Ansatz jegliche Kommunikation der Komponenten durch das Übermitteln von Nachrichten zu implementieren erlaubt Elastizität,
 indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch das Überwachen der Nachrichtenwarteschlangen
-(\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.\cite{ReactiveSystems}
-
+(\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.\parencite{ReactiveSystems}
+//TODO: Unterschied Nachricht/Message vs Event-Driven -> Nachricht hat klares Ziel, Event nicht nur für andere zum beobachten
+//TODO: WIe steht das im Zusammenhang mit Reactive Programming https://www.oreilly.com/radar/reactive-programming-vs-reactive-systems/
 \subsection{Java Ökosystem}
 \label{section:java_tooling}
 Im Java Ökosystem gibt es eine Vielzahl an Frameworks, Libaries und APIs mit denen Reaktive Programmierung und reaktive Systeme umgesetzt
 werden können.
-Um in Java einzelne, asynchrone Prozesse zu implementieren, wird vom JDK die Future-API zur Verfügung gestellt.\cite{OracleFuture}
-Für die Verarbeitung von asynchronen (unbegrenzten) Datenströmen gibt es die Flow-API.\cite{OracleFlow}
+Um in Java einzelne, asynchrone Prozesse zu implementieren, wird vom JDK die Future-API zur Verfügung gestellt.\parencite{OracleFuture}
+Für die Verarbeitung von asynchronen (unbegrenzten) Datenströmen gibt es die Flow-API.\parencite{OracleFlow}
 Da die Flow-API lediglich Interfaces bereitstellt, gibt es mehrere Implementierungen von \textit{reactive streams}.
 
 Um reaktive Programmierung zu erleichtern, gibt es unter Anderem die folgenden Projekte:
 \begin{enumerate}
-    \item RxJava
-    \item Spring Webflux
-    \item Mutiny
+	\item RxJava
+	\item Spring Webflux
+	\item Mutiny
 \end{enumerate}
 Jedes Projekt unterscheidet sich dabei in den verwendeten Klassennamen \footnote{RxJava - Observable; Mutiny - Uni, Multi; Spring Webflux - Mono, Flux},
-Operatoren und dem Grad der funktionalen Programmierung.\cite{ReactiveX, Mutiny}
+Operatoren und dem Grad der funktionalen Programmierung.\parencite{ReactiveX, Mutiny}
 Allerdings sind die meisten Frameworks und Bibliotheken interoperabel, da sie die \textit{reactive streams} Spezifikation implementieren (und damit
-\textit{back pressure}), und bieten Converter-Klassen an.
+\textit{back pressure}) und Converter-Klassen anbieten.
 
 Für die Entwicklung von reaktiven Systemen bieten sich mehrere Toolkits und Frameworks an.
 Sie implementieren bereits Komponenten und Mechanismen wie Messaging, Event Loops, Dateizugriffe, nichtblockierende Netzwerkanwendungen, Web APIs und mehr.
 Zu den populärsten gehören:
 \begin{enumerate}
-    \item Eclipse Vert.x
-    \item Akka
-    \item Project Reactor
-\end{enumerate}\cite{Vert.x, Akka, ProjectReactor}
+	\item Eclipse Vert.x
+	\item Akka
+	\item Project Reactor
+\end{enumerate}\parencite{Vert.x, Akka, ProjectReactor}
 
-Bei dem, in dieser Arbeit verwendeten, Framework Quarkus handelt es sich, laut Hersteller Red Hat, um ein
+Bei dem, in dieser Arbeit verwendeten, Framework Quarkus handelt es sich laut Hersteller Red Hat, um ein
 benutzerfreundliches, auf Entwickler abgestimmtes Java Framework, welches für Container-, Cloud- und Serverless-Umgebungen optimiert ist und nur wenig
 Konfiguration benötigt, sowie nur die besten und hochwertigsten Java-Bibliotheken und Standards nutzt.
 Dabei können die Anwendungen sowohl auf einer JVM (JVM mode) laufen, als auch, durch native Kompilierung mit vollständigem Stack,
-als nativ ausführbare Anwendung: dem \textit{native image} (native mode). Dafür nutzt Quarkus eine, von Oracle entwickelte, Technologie namens GraalVM.
+als nativ ausführbare Anwendung: dem \textit{native image} (native mode).
+
+Dafür nutzt Quarkus eine, von Oracle entwickelte, Technologie namens GraalVM.
 Dabei handelt es sich um eine polyglotte, virtuelle Maschine und Laufzeitumgebung die auf dem OpenJDK basiert, und über
-JVMCI \footnote{Java Virtual Machine Compiler Interface} den C2-Compiler der zugrundeliegenden HotSpot-JVM durch den Graal JIT-Compiler ersetzt.\cite{GraalVM}
+JVMCI \footnote{Java Virtual Machine Compiler Interface} den C2-Compiler der zugrundeliegenden HotSpot-JVM durch den polyglotten Graal JIT-Compiler ersetzt.\parencite{GraalVM}
+//TODO genauer erklären wie native image generiert wird, was für anpassugnen an bibliotheken notwendig sind und was der c2 compiler ist und jit compiler
 
 Darüber hinaus verspricht Quarkus mit seiner Container-first-Philosophie, durch \textit{native images} bis zu 300 Mal schnellere Startzeiten
 und nur ein Zehntel des
 Speicherbedarfs im Vergleich zu traditionellen Java-Frameworks wie Spring Boot, wodurch es eine signifikante Reduzierung der benötigten Ressourcen und Kosten
-im Cloud-Umfeld bewirkt. \cite{RedHatQuarkusInfografik}
+im Cloud-Umfeld bewirkt. \parencite{RedHatQuarkusInfografik}
 
 Des Weiteren erlaubt Quarkus die Kombination des imperativen und des reaktiven, nicht-blockierenden Programmierparadigmas.
+TODO: Vorwärsverweis auf Dispatching von Vert.x auf worker/io thread
 Für die reaktive Programmierung bietet Quarkus die bereits genannte Bibliothek Mutiny an.
 Quarkus selber ist zudem auch reaktiv, denn es basiert auf der nicht-blockierenden, reaktive Eclipse Vert.x Engine, die
-alle Netzwerk I/O-Operationen verarbeitet. \cite{QuarkusReactiveGettingStarted, Quarkus}
+alle Netzwerk I/O-Operationen verarbeitet. \parencite{QuarkusReactiveGettingStarted, Quarkus}
+
+TODO: Noch genauer auf Quarkus eingehen? Erwähnen dass alle Bibliotheken speziell für Quarkus angepasst werden müssen, damit
+die native Kompilierung auch funktioniert
+TODO: Genauer auf Vert.x eingehen siehe Ponge Buch
+
+TODO: Generell, Entscheidungen mehr begründen (bspw. warum Uber-Jar)

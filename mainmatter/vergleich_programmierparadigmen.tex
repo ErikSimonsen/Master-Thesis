@@ -38,7 +38,7 @@ auszulösen sobald die Operationen abgeschlossen sind.
 \begin{figure}[h!]
     \centering
     \includegraphics[width=1.0\textwidth]{Quarkus_HTTP_Layer}
-    \caption{Quarkus HTTP-Schicht \cite{QuarkusReactiveRoutes}}
+    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
 \end{figure}
 
 Damit sich beide Anwendungen nahe an einer realen Java-EE REST-API orientieren, haben
@@ -51,7 +51,7 @@ sie (zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks) fo
 \end{enumerate}
 
 Diese Abhängigkeiten wurden vom Quarkus Maven-Repository sowohl in blockierender,
-als auch in nicht-blockierender, reaktiver Form bereitgestellt: \cite{MavenQuarkusIO}
+als auch in nicht-blockierender, reaktiver Form bereitgestellt: \parencite{MavenQuarkusIO}
 % space between the text and the left/right border of its containing cell is set to 18 pt
 \setlength{\tabcolsep}{18pt}
 % the height of each row is set to 1.5 relative to its default height
@@ -119,6 +119,7 @@ Zudem müssen beide Systeme per SSH von einem (idealerweise vorhandenem) dritten
 \footnote{Dies kann allerdings auch der Client-Host selber sein}
 erreichbar sein, damit dieses den Testablauf in der korrekten Abfolge ausführen kann.
 Der Einfachheit halber empfiehlt es sich, dass sich alle Geräte im gleichen Netzwerk befinden.
+//TODO warum -> aufwendige netzwerkkommunikation ?
 Beiden Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks.
 
 Um eine reproduzierbare Anwendungsumgebung und Ressourcenallokation zu ermöglichen, laufen beide Anwendungen auf dem Server-Host in
@@ -127,7 +128,7 @@ jeweils einem Docker-Container mit fest definierten Ressourcen:
     \item Nutzung von 4 CPU-Kernen
     \item 1024 MB RAM
     \item 256 MB Heap Größe für den Java-Prozess
-          \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \cite{Java10ReleaseNotes}}
+          \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \parencite{Java10ReleaseNotes}}
 \end{itemize}
 Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
 \begin{itemize}
@@ -188,22 +189,22 @@ die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
 \label{section:vorgehen}
 Der im Folgenden erläuterte Versuchsaufbau basiert auf einer, vom Autor erweiterten, Architektur die vom Quarkus-Entwicklerteam
 zur Erstellung von verschiedenen Benchmarks für den Quarkus Technologie-Stack genutzt wurde.
-\cite{QuarkusBlog, QuarkusJohnaohara}
+\parencite{QuarkusBlog, QuarkusJohnaohara}
 
 Um den gesamten Versuchsablauf zu automatisieren und über mehrere Server zu steuern wird ein Tool namens qDup eingesetzt.
 Damit können Shell-Kommandos als Skripte gruppiert, und verschiedenen Hosts je nach Rolle zugewiesen werden.
-Um dem Ablauf korrekt zu steuern
-\footnote{Beispielsweise sollte der Server-Host erst anfangen den Java-Prozess zu überwachen, sobald der Client-Host die \textit{workload}
-    generiert und nicht bereits davor}
-, werden Signale definiert die ein Host sendet, und auf die die anderen Hosts warten um ihrerseits
-weitere Skripte auszuführen.
 \footnote{Die qDup Skripte mit dem gesamten Testablauf können im Verzeichnis \textit{/scripts/qDup} des Quellcodeverzeichnisses eingesehen und
     angepasst werden.}
+Um dem Ablauf korrekt zu steuern werden Signale definiert die ein Host sendet, und auf die die anderen Hosts warten um ihrerseits
+weitere Skripte auszuführen.
+\footnote{Beispielsweise sollte der Server-Host erst anfangen den Java-Prozess zu überwachen, sobald der Client-Host die \textit{workload}
+    generiert und nicht bereits davor}
+
 
 Wie bereits in \ref{section:testumgebung} erwähnt, nutzt qDup SSH um mit den jeweiligen Servern zu kommunizieren.
 
 Im ersten Schritt \textit{build applications} wird auf dem Server-Host das Quellcodeverzeichnis geklont und beide Anwendungen werden gebaut
-(je nach Test entweder als uber-jar oder als \textit{native executable}). Anschließend wird über ein JavaScript-Skript,
+(je nach Test entweder als uber-jar (//TODO: Warum Uber-Jar) oder als \textit{native executable}). Anschließend wird über ein JavaScript-Skript,
 welches in der Laufzeitumgebung Node.js läuft, das durchschnittliche Zeitintervall zwischem dem Start einer Anwendung bis
 zur Verarbeitung der ersten Anfrage gemessen
 (\textit{Mean Start Time to First Request}). Darüber hinaus werden die Docker-Container der Datenbank
@@ -219,7 +220,7 @@ bewährte HTTP-Benchmarking Tool \textit{wrk} um folgende Funktionen erweitert:
     \item Konstanter \textit{workload} Durchsatz
     \item Korrekteres Messverfahren der Antwort-Latenz
     \item Exaktes Messen durch \Glsuseri{hdrHistogramm}
-\end{enumerate}\cite{Wrk2, Wrk}
+\end{enumerate}\parencite{Wrk2, Wrk}
 
 Pro Test werden Benchmarks für eine ganze Reihe an \textit{workloads} gemessen.
 Jede \textit{workload} wird über einen Zeitraum von 60 Sekunden über 100 offene HTTP-Verbindungen an den Server-Host übermittelt.
@@ -294,12 +295,12 @@ In einem \verb|.sh|-Skript werden anschließend die Daten über ein Java-Skript,
 wird \footnote{JBang erlaubt das direkte Ausführen von .java Dateien},
 geparsed und die relevanten Daten bezüglich des Durchsatzes, Speicherverbrauches und CPU-Auslastung ermittelt.
 Diese werden dann für die visuelle Darstellung in eine \verb|.json|-Datei geschrieben.
-
+TODO genauer das filtern erklären (welcche sind die relevanten daten und wwas wird gefiltert)
 Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \textit{d3node-linechart} in Form von Graphen visuell dargestellt.
 
 \subsection{Test: Statische Daten}
 \label{section:statische_daten}
-
+TODO: Arbeit formattieren und vorherige TODOs abarbeiten bevor anfangen
 \subsubsection{Systemablauf}
 //TODO: Grafik ähnlich zu Grafik in Implementierung aber mit Threadwechseln und exemplarisch mhrere Threads zeigen
 (auch angeben wie Ergebnisse mit komplizierteren Queries aussehen könnten)
