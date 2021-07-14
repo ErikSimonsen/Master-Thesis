@@ -1,36 +1,36 @@
 \newglossaryentry{benchmark}
 {
     name=benchmark,
-    description={TODO}
+    description={Ein Benchmark im Software Performance Testing ist
+            eine Metrik oder ein Bezugspunkt, mit dem Softwareprodukte oder -dienstleistungen verglichen werden können, um deren Qualität zu bewerten.
+            Beliebte Benchmarks sind beispielsweise CPU-Auslastung, Speicherverbrauch, Durchsatz, Startzeiten aber auch Fehlerrate und Fehlertoleranz.
+        }
 }
 \newglossaryentry{latenz}
 {
     name=latenz,
     description={
-            \url{https://github.com/opendocs-md/do-tutorials/blob/master/md/en/an-introduction-to-load-testing.md}
-            is a measure of how fast a server responds to requests from the client.
-            Typically measured in milliseconds (ms), latency is often referred to as response time.
-            Lower numbers indicate faster responses. Latency is measured on the client side, from the
-            time the request is sent until the response is received. Network overhead is included in this number}
+            Die Latenz ist ein Maß dafür, wie schnell ein Server auf Anfragen des Clients reagiert.
+            Die Latenz wird normalerweise in Millisekunden (ms) gemessen und wird oft als Antwortzeit bezeichnet.
+            Niedrigere Zahlen bedeuten schnellere Antworten. Die Latenz wird clientseitig gemessen, von der
+            Zeit, zu der die Anfrage gesendet wird, bis die Antwort eingeht. Netzwerk-Overhead ist in dieser Zahl enthalten.}
 }
 \newglossaryentry{durchsatz}
 {
     name=durchsatz,
-    description={is how many requests the server can handle during a specific time interval, usually reported as requests per second}
+    description={Der Durchsatz gibt an wieviele Anfragen während eines spezifischen Zeit Intervalls von einem Server verarbeitet werden konnen.
+            Der Durchsatz wird normalerweise in Anfragen pro Sekunde (requests/sec) angegeben.}
 }
 
 \newglossaryentry{perzentile}
 {
     name=perzentile,
-    description={are a way of grouping results by their percentage of the whole sample set.
-            If your 50th percentile response time is 100ms, that means
-            50\% of the requests were returned in 100ms or less. The graph below shows why it’s useful to look at your measurements by percentile}
+    description=
+        {In der Statistik ist ein Perzentil (oder ein Zentil) ein Wert, unter den ein bestimmter Prozentsatz von Werten in seiner Häufigkeitsverteilung fällt.
+            Wenn die Antwortzeit im 50. Perzentil 100ms beträgt, bedeutet dies, dass 50\% der Anfragen in 100ms oder weniger zurückgegeben wurden.
+        }
 }
-\newglossaryentry{histogram}
-{
-    name=,
-    description={}
-}
+
 \newglossaryentry{hdrHistogramm}{
     name=hdrHistogramm,
     description={Histogramme die das Aufnehmen und Analysieren von
@@ -38,18 +38,8 @@
             Genauigkeit innerhalb dieser Reichweite ermöglichen \cite{HdrHistogramm}},
     user1={hdrHistogramme}
 }
-\newglossaryentry{lasttest}{
-    name=lasttest,
-    description={\url{https://de.wikipedia.org/wiki/Lasttest_(Computer)}}
-}
-\newglossaryentry{CPU}{
-    name=,
-    description={}
-}
-\newglossaryentry{RAM}{
-    name=,
-    description={}
-}
 
 \newacronym{http}{HTTP}{Hypertext Transfer Protocol}
-\newacronym{hdrhistogram}{HdrHistogramm}{}
+\newacronym{hdrhistogram}{HdrHistogramm}{High dynamic range histogram}
+\newacronym{cpu}{CPU}{Central processing unit}
+\newacronym{ram}{RAM}{Random-access memory}

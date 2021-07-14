@@ -74,8 +74,39 @@ als auch in nicht-blockierender, reaktiver Form bereitgestellt: \cite{MavenQuark
     \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
     \label{table:dependencies}
 \end{table}
+TODO add some text to listings
+\begin{lstlisting}[caption=Update Methode der reaktiven Anwendung, language=Java, captionpos=b, label=lst:generateLoad]
+    @PUT
+    @Path("{id}")
+    public Uni<Response> update(Long id, Fruit fruit) {
+        if (fruit == null || fruit.getName() == null) {
+            return Uni.createFrom().item(Response.status(422).build());
+        }
+        return fruitRepository.findById(id).onItem()
+        .ifNotNull().invoke(storedFruit -> storedFruit.setName(fruit.getName())
+        ).call(storedFruit -> fruitRepository.update(storedFruit))
+                .onItem().ifNotNull().transform(storedFruit ->
+                 Response.ok(storedFruit).build())
+                .onItem().ifNull().continueWith(Response.status(Status.NOT_FOUND).build());
+    }
+   \end{lstlisting}
+\begin{lstlisting}[caption=Update Methode der nicht-reaktiven Anwendung, language=Java, captionpos=b, label=lst:generateLoad]
+    @PUT
+    @Path("/{id}")
+    public Response update(Fruit fruit, @PathParam("id") Long id) {
+        if (fruit == null || fruit.getName() == null) {
+            return Response.status(422).build();
+        }
+        Fruit storedFruit = fruitRepository.findById(id);
+        if (storedFruit == null) {
+            return Response.status(Response.Status.NOT_FOUND).build();
+        }
+        storedFruit.setName(fruit.getName());
+        fruitRepository.update(storedFruit);
+        return Response.status(Response.Status.OK).build();
+    }
+   \end{lstlisting}
 
-TODO: Unterschied in Programmcode zeigen durch lstlisting nur zwei Ausschnitte
 Der Projekt-Code dieser Arbeit kann vom Gitlab-Server der Ostfalia unter
 \url{//TODO Ostfalia Gitlab link?} eingesehen und abgerufen werden.
 
@@ -252,6 +283,13 @@ Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des
   \end{lstlisting}
 
 Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host, welches das qDup Skript ausgeführt hat, kopiert.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Testaufbau}
+    \caption{Testaufbau}
+\end{figure}
+
 In einem \verb|.sh|-Skript werden anschließend die Daten über ein Java-Skript, das mit dem Tool \textit{JBang} ausgeführt
 wird \footnote{JBang erlaubt das direkte Ausführen von .java Dateien},
 geparsed und die relevanten Daten bezüglich des Durchsatzes, Speicherverbrauches und CPU-Auslastung ermittelt.
@@ -259,7 +297,6 @@ Diese werden dann für die visuelle Darstellung in eine \verb|.json|-Datei gesch
 
 Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \textit{d3node-linechart} in Form von Graphen visuell dargestellt.
 
-//TODO: Grafik zur Visualisierung (Illustrator)
 \subsection{Test: Statische Daten}
 \label{section:statische_daten}
 
