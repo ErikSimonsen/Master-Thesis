@@ -1,44 +1,46 @@
 \newglossaryentry{benchmark}
 {
-    name=benchmark,
-    description={Ein Benchmark im Software Performance Testing ist
-            eine Metrik oder ein Bezugspunkt, mit dem Softwareprodukte oder -dienstleistungen verglichen werden können, um deren Qualität zu bewerten.
-            Beliebte Benchmarks sind beispielsweise CPU-Auslastung, Speicherverbrauch, Durchsatz, Startzeiten aber auch Fehlerrate und Fehlertoleranz.
-        }
+  name=benchmark,
+  description={Ein Benchmark im Software Performance Testing ist
+      eine Metrik oder ein Bezugspunkt, mit dem Softwareprodukte oder -dienstleistungen verglichen werden können, um deren Qualität zu bewerten.
+      Beliebte Benchmarks sind beispielsweise CPU-Auslastung, Speicherverbrauch, Durchsatz, Startzeiten aber auch Fehlerrate und Fehlertoleranz.
+    }
 }
 \newglossaryentry{latenz}
 {
-    name=latenz,
-    description={
-            Die Latenz ist ein Maß dafür, wie schnell ein Server auf Anfragen des Clients reagiert.
-            Die Latenz wird normalerweise in Millisekunden (ms) gemessen und wird oft als Antwortzeit bezeichnet.
-            Niedrigere Zahlen bedeuten schnellere Antworten. Die Latenz wird clientseitig gemessen, von der
-            Zeit, zu der die Anfrage gesendet wird, bis die Antwort eingeht. Netzwerk-Overhead ist in dieser Zahl enthalten.}
+  name=latenz,
+  description={
+      Die Latenz ist ein Maß dafür, wie schnell ein Server auf Anfragen des Clients reagiert.
+      Die Latenz wird normalerweise in Millisekunden (ms) gemessen und wird oft als Antwortzeit bezeichnet.
+      Niedrigere Zahlen bedeuten schnellere Antworten. Die Latenz wird clientseitig gemessen, von der
+      Zeit, zu der die Anfrage gesendet wird, bis die Antwort eingeht. Netzwerk-Overhead ist in dieser Zahl enthalten.}
 }
 \newglossaryentry{durchsatz}
 {
-    name=durchsatz,
-    description={Der Durchsatz gibt an wieviele Anfragen während eines spezifischen Zeit Intervalls von einem Server verarbeitet werden konnen.
-            Der Durchsatz wird normalerweise in Anfragen pro Sekunde (requests/sec) angegeben.}
+  name=durchsatz,
+  description={Der Durchsatz gibt an wieviele Anfragen während eines spezifischen Zeit Intervalls von einem Server verarbeitet werden konnen.
+      Der Durchsatz wird normalerweise in Anfragen pro Sekunde (requests/sec) angegeben.}
 }
 
 \newglossaryentry{perzentile}
 {
-    name=perzentile,
-    description=
-        {In der Statistik ist ein Perzentil (oder ein Zentil) ein Wert, unter den ein bestimmter Prozentsatz von Werten in seiner Häufigkeitsverteilung fällt.
-            Wenn die Antwortzeit im 50. Perzentil 100ms beträgt, bedeutet dies, dass 50\% der Anfragen in 100ms oder weniger zurückgegeben wurden.
-        }
+  name=perzentile,
+  description=
+    {In der Statistik ist ein Perzentil (oder ein Zentil) ein Wert, unter den ein bestimmter Prozentsatz von Werten in seiner Häufigkeitsverteilung fällt.
+      Wenn die Antwortzeit im 50. Perzentil 100ms beträgt, bedeutet dies, dass 50\% der Anfragen in 100ms oder weniger zurückgegeben wurden.
+    }
 }
 
 \newglossaryentry{hdrHistogramm}{
-    name=hdrHistogramm,
-    description={Histogramme die das Aufnehmen und Analysieren von
-            ausgewählten Daten über eine konfigurierbare, ganzzahlige Reichweite und eine konfigurierbare
-            Genauigkeit innerhalb dieser Reichweite ermöglichen \parencite{HdrHistogramm}
-            TODO: Add JavaEE APIS jax rs, orm, json, publisher, subscriber, IO Operationen, SPA, Servlet-Container
-        },
-    user1={hdrHistogramme}
+  name=hdrHistogramm,
+  description={Histogramme die das Aufnehmen und Analysieren von
+      ausgewählten Daten über eine konfigurierbare, ganzzahlige Reichweite und eine konfigurierbare
+      Genauigkeit innerhalb dieser Reichweite ermöglichen \parencite{HdrHistogramm}
+      TODO: Add JavaEE APIS jax rs, orm, json, publisher, subscriber, IO Operationen, SPA, Servlet-Container,
+      callback (The answer is that you instead pass a callback[7]
+      (a lambda) to f as an additional argument, and the body of f spawns a task that calls this lambda with the result when it’s ready)
+    },
+  user1={hdrHistogramme}
 }
 \newacronym{http}{HTTP}{Hypertext Transfer Protocol}
 \newacronym{hdrhistogram}{HdrHistogramm}{High dynamic range histogram}

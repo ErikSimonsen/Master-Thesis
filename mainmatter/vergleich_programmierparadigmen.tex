@@ -2,7 +2,7 @@
 \label{section:vergleich_reaktiv_imperativ}
 Um zu prüfen, ob Leistungsfähigkeit und Skalierbarkeit einer reaktiven Anwendung tatsächlich die einer traditionellen, imperativen Anwendung
 übertrifft, werden in diesem Kapitel beide Ansätze hinsichtlich verschiedener Metriken in einem festen Zeitintervall miteinander verglichen.
-
+//TODO auslagern in kapitel testmethodik und kapitel ergebnisse?
 Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung zwei Lasttests unterzogen: //TODO: Testreihen?
 \begin{enumerate}
 	\item Abfrage von Statische Daten
@@ -135,7 +135,11 @@ Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
 	\item 4 CPU-Kerne
 	\item 2048 MB RAM
 \end{itemize}
-
+//TODO: Größe von Event-Loop Thread Pool (4/8) und Worker Thread Pool(20) in Vert.x nennen und begründen warum Event-Loop Thread Pool Size explizit
+gesetzt werden muss (Vert.x Version )
+//TODO: Readme in Java-Projekt anpassen und Hinzufügen das Event-Loop Thread Pool Size explizit gesetzt werden muss da Vert.x die Limitierungen d
+//TODO: Komplett neue Tests (diesmal als Testreihe) durchführen durch Korrektur der Event-Loop Thread Pool Size
+des Containers nicht berücksichtigt
 Die Anwendung, die auf dem Client-Host die \textit{work load} für die beiden zu testenden Anwendungen generiert,
 nutzt in dieser Testumgebung 4 Threads.
 Welche Laufzeitumgebungen und Tools für die Tests auf den jeweiligen Hosts vorhanden sein müssen,
