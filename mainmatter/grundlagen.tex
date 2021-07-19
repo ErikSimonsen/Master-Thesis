@@ -7,15 +7,21 @@ Java-Threads werdem vom Betriebssystem verwaltet, sog. \textit{native threads} o
 Hierbei wird die Steuerung der Ausführungsreihenfolge, die Zuweisung der Rechenzeit und der Prozess- \& Threadwechsel
 vom Scheduler \& Dispatcher des Betriebssystems übernommen\parencite[Kapitel 2]{Tanenbaum2016}.
 Die Threading-Abstraktion in Java bietet Entwicklern verhältnismäßig leichten Zugriff auf parallelle Programmierung und Synchronisation von Threads.
-Servlet-Container binden üblicherweise jede vom Webserver weitergeleitete Anfrage an einen
+
+Sobald im Code eine I/O-Operation, beispielsweise eine Datenbankanfrage, aufgerufen wird, wird die Abarbeitung der nachfolgenden Instruktionen
+vom Thread blockiert, bis die Operation abgeschlossen ist.
+Deshalb wird diese Art von I/O-Operationen auch als \verb|Blocking-I/O| bezeichnet.
+
+Webserver die Blocking-I/O nutzen können daher nicht mehrere Anfragen auf einem Thread bearbeiten, da jede blockierende I/O-Operation den
+Thread, und damit die weiteren Anfragen, blockieren würde.
+Aus diesem Grund binden Servlet-Container üblicherweise jede vom Webserver weitergeleitete Anfrage an einen
 Thread\footnote{Aus einem, im vornherein erzeugten, Thread-Pool} im Servlet-API, welcher die jeweilige Anfrage imperativ abarbeitet
-(daher auch \textit{worker thread} bezeichnet). Sie nutzen das \verb|Thread per Request|-Modell.
-Der auszuführende Code ist in diesem Ansatz an den jeweiligen Thread gekoppelt. Sobald im Code ein asynchrones Ereignis aufgerufen wird
-, wird die weitere Abarbeitung der Instruktionen vom Thread blockiert, bis es abgeschlossen ist.
+(daher auch als\textit{worker thread} bezeichnet). Sie nutzen das \verb|Thread per Request|-Modell.
+Der auszuführende Code ist in diesem Ansatz an den jeweiligen Thread gekoppelt.
 
 \noindent
 Um jede Anfrage, und somit jeden Thread, möglichst parallel zu bearbeiten wird vom Scheduler
-des Betriebssystems für jeden Prozessorkern regelmäßig ein Kontextwechsel zwischen den Threads,
+des Betriebssystems für jeden logischen CPU regelmäßig ein Kontextwechsel zwischen den zugeordneten Threads,
 ein \textit{Threadwechsel} (\textit{thread-switch}), veranlasst.
 Der Dispatcher entzieht dabei dem derzeit aktiven Thread die CPU und teilt sie anschließend dem nächsten Thread zu.
 
@@ -127,7 +133,7 @@ restliche Programmausführung nicht blockieren. Wenn statt \verb|hello world| ve
 darzustellen wäre das Ergebnis in der Regel eine Exception oder \verb|null|, da die Anfragen zur Zeit der Ausführung von Zeile 5 noch nicht notwendigerweise
 abgeschlossen sind. Das ist ein sehr weit verbreiter Fehler beim Arbeiten mit asynchronen, nicht-blockierenden I/O-Operationen.
 
-Methoden die blockierende I/O Operationen ausführen, wie Datenbankzugriffe oder Anfragen von externen Services,
+Methoden die normalerweise \verb|Blocking-I/O| ausführen, wie Datenbankzugriffe oder Anfragen von externen Services,
 geben beim Aufruf unverzüglich einen Publisher zurück, auf dem sich der Aufrufer als \verb|Subscriber| registriert.
 Dadurch wird der bearbeitende Thread nicht blockiert, und kann die nächste Anfrage bearbeiten.
 Sobald das Ergebnis der I/O Operation bereit ist, wird es dem Publisher in Form eines Events mitgeteilt, von diesem veröffentlicht und die Anfrage kann
@@ -397,24 +403,50 @@ indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch
 //TODO: Unterschied Nachricht/Message vs Event-Driven -> Nachricht hat klares Ziel, Event nicht nur für andere zum beobachten
 //TODO: WIe steht das im Zusammenhang mit Reactive Programming https://www.oreilly.com/radar/reactive-programming-vs-reactive-systems/
 //TODO Grafik wie modern java in action figure 17.1
+\subsection{Nicht-blockierende }
+\subsection{Reactor Pattern}
+\label{section:reactor_pattern}
+//blocking io
+//nonblocking I/O was ist as - auf betriebssystem ebene
+// wird von java.nio nutzbar gemacht, implementiert event demultiplexing
 
+netty -> implementiert dieses Reactor Pattern
+\url{https://programmerwiki.com/article/1332457226/}
+\parencite[Kapitel 9]{NodeJSDesignPatterns}
+\parencite{SchmidtReactorPattern}
+\parencite[Kapitel 1]{NettyInAction}
 \subsection{Event Loop}
 \label{section:event_loop}
-
+//TODO IN Reactor Pattern umbenenen un derklären wie asynchrone nonblocking I/O in Single-Threaded Environments ausgeführt wird
+//Bogen schlagen auf Thread per Request in Java (was ja nicht single threaded ist) und auf Vert.x (welches pro Logischem CPU Kern einen
+//IO-Thread bzw. Event Loop Thread spawned) und daher das single -threaded environment durch event-loop thread pool erweitert)
+//hinweis das die events die event-handler nichts anderes als die Subscriber aus dem Reactive Streams-Pattern sind (heißen in javascript nur Event-Handler)
+//und legen damit die basis für das Reactor Pattern
 Ein beliebtes Modell für die Verarbeitung von asynchronen Events ist die \textit{Event Loop}.
 Sobald ein Event entsteht wird es einer Warteschlange (Queue) in der Event Loop hinzugefügt.
-Solange der ausführende Thread aktiv ist und die Queue noch Events enthält, wird in einer Schleife das nächste Event
-abgerufen und an den, für diesen Eventtyp, registrierten Event-Handler weitergeleitet.
+Solange der ausführende Thread aktiv ist und die Queue Events enthält, wird in einer Schleife das nächste Event
+abgerufen und vollständig verarbeitet bevor die nächste Iteration beginnt.
+an den, für diesen Eventtyp, registrierten Event-Handler weitergeleitet.
+Die Verarbeitung erfolgt konkret indem der, für dieses spezifische Event, registrierte Event-Handler bzw. Subscriber aus einer implementierungsabhängigen
+Datenstruktur abgerufen wird und das Event an ihn weitergeleitet wird.
 \begin{figure}[h!]
 	\centering
 	\includegraphics[width=1.0\textwidth]{EventLoop}
 	\caption{Exemplarische Abbildung einer Event Loop. \parencite[Kapitel 1.7]{Ponge2020}}
 \end{figure}
 
+Dieses Modell wurde zuerst vorrangig in den JavaScript-Engines von Webbrowsern als Nebenläufigskeitsmodell genutzt, da JavaScript kein Multithreading
+unterstützt,\parencite{MozillaEventLoop} und später auch von der Node.js-Laufzeitumgebung,
+um jegliche I/O-Operationen auf nicht-blockierende Art auszuführen.\parencite{NodeJSEventLoop}
+
+
+//TODO: Event Loop dabei nur Teil des Reactor pattern mit event demultiplexer etc. , io operationen auf multithreaded betriebssystem dispatched und
+//wird über kPoll solange abgefragt bis fertig -> event zu event loop
 Threading Dabei wird, im Gegensatz zum Thread per Request-Modell,
 //TODO: Dieses Modell kanna uch zum Verarbeiten von Anfragen bzw. für das Threading Modell genutzt werden dabei wird statt Thread per Request (siehe Anfang)
 //in jedem IO-Thread eine Event Loop ausgeführt daher auch Event-Loop-Thread
 //TODO weiter oben erwähenn das jede Anfrage ein Event innerhalb eines Event Streams ist
+//Nicht blockieren da imperativer code
 Dies wird in Abbildung \ref{fig:blocking} dargestellt, hierbei arbeiten zwei IO-Threads mehrere \verb|Event streams| ab. Dies geschieht in der Regel in einer
 
 Dies können beispielsweise I/O-Events sein, die signalisieren das Daten bereit zur Weiterverarbeitung sind, aber auch jegliches andere Event.
@@ -460,10 +492,10 @@ Zu den populärsten gehören:
 
 \subsubsection{Eclipse Vert.x}
 \label{section:Vert.x}
+\parencite{VertxArticle}
 TODO: Genauer auf Vert.x eingehen siehe Ponge Buch
-https://vertx.io/docs/vertx-core/java/
+\parencite{Vert.xDocs}
 //dispatching erwähnen, io threads laufen immer (einer pro kernel thread, in io-thread pool size)und werden dann wahlweise auf worker thread pool dispatched
-
 \subsubsection{Quarkus}
 \label{section:Quarkus}
 

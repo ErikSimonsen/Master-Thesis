@@ -1,0 +1,90 @@
+\section{Grundlagen}
+\label{sec:grundlagen}
+
+\subsection{Threads}
+\label{subsec:threads}
+TODO: allgemein -  was sind threads - abarbeitunslau finnerhalb eines prozesses etc. leichtgewichtig
+
+\subsubsection{Kernel-Threads}
+\label{subsubsec:kernel-threads}
+Als \verb|Kernel-Threads| werden Threads bezeichnet dessen Ablaufplanung vom Betriebssystem übernommen wird.
+Konkret bedeutet das, das die Zuweisung der Rechenzeit für einen Thread, sowie die Threadwechsel (siehe \ref{subsubsec:threadwechsel})
+vom Scheduler \& Dispatcher des Kernels übernommen werden.
+
+Mindestens ein \verb|Kernel-Thread| existiert innerhalb jedes Prozesses, der \verb|Main-Thread|. Kernel-Threads innerhalb eines Prozesses
+teilen sich Speicheradressräume, Datei-Handles und Netzwerkverbindungen. Dadurch ist eine Kommunikation zwischen \verb|Kernel-Threads| deutlich
+einfacher als bei Prozessen, da Sie über gemeinsamen Speicher verfügen. Allerdings muss eine eventuelle Synchronisation der Threads erfolgen, um
+gleichzeitige Zugriffe auf diesselbe Ressource zu verhindern (Deadlock).
+Da Sie zudem nur über wenige Resourcen verfügen (Stack, Registerinhalte, Befehlszähler) ist es, im Vergleich zu Prozessen,
+verhältnismäßig günstig Sie zu erstellen oder zu zerstören. \parencite[Kapitel 2.2.5 - Implementing Threads in the Kernel]{Tanenbaum2016}\parencite{Brosenne2021}
+
+\subsubsection{User-Threads}
+\label{subsubsec:user-threads}
+Die Funktionalität von \verb|User-Threads| \footnote{Auch als \textit{Fiber} oder \verb|virtueller Thread| bezeichnet} ist, im Gegensatz zu \verb|Kernel-Threads|
+nicht im Kernel implementiert, sondern in einer Programmbibliothek im Benutzeradressraum des Betriebssystems.
+Da sich das Scheduling-System des Kernels daher nicht um die Verwaltung dieser Threads kümmern kann muss dies über einen eigenen Scheduling-Algorithmus
+der jeweiligen Anwendung erfolgen.
+Ein Vorteil dieser Vorgehensweise ist die Möglichkeit, die Schedulingstrategie individuell an die Arbeitslast des Programms anzupassen.
+
+Im Gegensatz zu \verb|Kernel-Threads| kann einem User-Thread, der einen blockierenden Systemaufruf macht, aber nicht vom Scheduler die Kontrolle über die CPU
+entzogen werden, da der gesamte Prozess vom Kernel blockiert wird. Aus der Sicht des Kernels existiert lediglich der Main-Thread des Prozesses und dieser
+führt einen blockierenden Aufruf aus. \footnote{Hier könne lediglich, abhängig von der Schedulingstrategie des Kernels, ein Prozesswechsel stattfinden}
+Daher kann während dieser Zeit kein anderer \verb|User-Thread| des Prozesses ausgeführt werden.
+
+Eine Lösung für dieses Problem ist die Nutzung einer internen, nichtblockierenden API für I/O-Operationen. Dadurch wird lediglich der
+auszuführende \verb|User-Thread| blockiert, statt des gesamten Prozesses, und ein weiterer \verb|User-Thread| kann in der Zwischenzeit ausgeführt werden.
+\parencite[Kapitel 2.2.4 Implementing Threads in User Space]{Tanenbaum2016}
+Diese Vorgehensweise ist im weiteren Rahmen dieser Arbeit von besonderem Interesse und wird in \label{subsec:nonblocking-i/o} thematisiert.
+
+\subsubsection{Threadwechsel}
+\label{subsubsec:threadwechsel}
+Sobald die Schedulingstrategie eines Schedulers erfordert, dass ein gerade rechnender Thread die Kontrolle eines logischen CPU an
+einen anderen Thread abgeben muss, wird von einem \verb|Kontextwechsel| in Form eines \verb|Threadwechsel| gesprochen.
+Ein Threadwechsel kann durch eine Reihe von Ereignissen ausgelöst werden:
+\begin{enumerate}
+    \item Terminierung eines Threads
+    \item Warten auf das Ergebnis einer synchronen I/O-Operation
+    \item Verbrauch der zugewiesenen Rechenzeit (Zeitscheibe)
+    \item Geringere Priorisierung
+    \item Freiwillige Abgabe der CPU-Kontrolle (kooperativ)
+\end{enumerate}
+
+Insbesondere das 2. Ereignis ist im Rahmen dieser Arbeit von besonderem Interesse und wird in \label{subsec:blocking-i/o} thematisiert.
+
+Während bei einem Kontextwechsel von Prozessen (Prozesswechsel) der gesamte Programmkontext (Adressräume, Inhalt der CPU-Register,
+Seitentabelle, geöffnete Dateien und Metainformationen)
+gewechselt werden muss, wird bei einem Threadwechsel lediglich der Inhalt der CPU-Register (inkl. Programmzähler und Stack-Pointer)
+ersetzt.\parencite{Mosberger2002}
+
+\noindent
+Da der Threadwechsel, im Fall von \verb|Kernel-Threads|, durch Systemaufrufe, also vom Kernel des Betriebssystems, ausgeführt werden muss, entsteht
+bei einem Threadwechsel dennoch ein messbarer Zeitverlust.
+Dies ist durch die geringe Geschwindigkeit und den Overhead des notwendigen, vom Dispatcher ausgelösten, Softwareinterrupts bedingt.
+Der Softwareinterrupt erfolgt, um die Programmausführung im Benutzer-Modus zu unterbrechen und die Ausführung der jeweiligen Interrupt Service Routine (ISR) im
+Kernel-Modus (Kontextwechsel auf privilegierten Ring 0) zu erzwingen, sowie auf dessen Beendigung zu warten.
+
+Bei \verb|User-Threads| sind Threadwechsel extrem effizient und deutlich schneller als bei \verb|Kernel-Threads|
+da sie sich komplett im Benutzeradressraum befinden und keinerlei Interaktion mit dem Kernel erfolgt.
+Der Prozess führt eine Thread-Tabelle mit, in der der gesamte Thread-Kontext gespeichert ist.
+Bei einem Threadwechsel wird der gesamte Thread-Kontext des aktiven \verb|User-Threads| in diese Tabelle gespeichert, und anschließend für den neuen Thread
+aus dieser Tabelle in die Maschinen-Register geladen.
+\parencite[Kapitel 2.2.6 Thread Scheduling]{Tanenbaum2016}
+
+\subsection{Blocking I/O}
+\label{subsec:blocking-i/o}
+Bei der herkömmlichen synchronen Ausführung von I/O-Operationen blockiert der entsprechende Funktionsaufruf die Ausführung des
+Threads bis die Operation abgeschlossen ist. Das Abschließen der Operation kann zwischen wenigen Millisekunden (Zugriff auf die Festplatte),
+einigen Minuten (Abrufen eines Service oder komplexen Queries) oder länger (bei Benutzer-Interaktion) dauern.
+Diese Art der Ausführung von I/O-Operationen wird daher als \verb|Blocking I/O| bezeichnet.
+Aus diesem Umstand wird schnell ersichtlich, dass ein auf \verb|Blocking I/O| basierender Webserver nicht in der Lage sein wird mehrere Anfragen in einem
+Thread zu bearbeiten.
+\subsubsection{Thread per Request}
+\label{subsubsec:thread per request}
+
+\subsection{Nonblocking I/O}
+\label{subsec:nonblocking-i/o}
+\subsubsection{Single threaded?}
+\subsubsection{Reactor-Pattern}
+\paragraph{Event Demultiplexing}
+\paragraph{Event Loops}
+\paragraph{Implementierungen}
