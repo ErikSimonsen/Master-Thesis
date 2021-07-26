@@ -16,7 +16,7 @@ der benötigte Arbeitsspeicher und CPU-Auslastung des Prozesses, der Durchsatz, 
 Für Container- und Cloud-Umgebungen eignen sich, primär aus Kostengründen, Anwendungen die, statt auf hohen Durchsatz und lange Laufzeiten, auf
 schnelle Startzeiten und geringen Ressourcenverbrauch setzen.
 Aus diesem Grund werden die beiden Anwendungen sowohl im \textit{JVM mode} als auch im \textit{native mode}
-(siehe \ref{section:java_tooling}) den Lasttests unterzogen. Ingesamt ergeben sich also 4 Testszenarien.
+ den Lasttests unterzogen. Ingesamt ergeben sich also 4 Testszenarien.
 
 
 \subsection{Implementierung \& Systemaufbau}
@@ -35,7 +35,7 @@ wird der abzuarbeitende Code dann auf einem blockierenden \textit{worker thread}
 Die \textit{IO threads} sind dafür zuständig alle IO-Operationen asynchron auszuführen und die jeweiligen EventListener bzw. Subscriber
 auszulösen sobald die Operationen abgeschlossen sind.
 \newpage
-\begin{figure}[h!]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=1.0\textwidth]{Quarkus_HTTP_Layer}
 	\caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
@@ -289,7 +289,7 @@ Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des
 
 Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host, welches das qDup Skript ausgeführt hat, kopiert.
 
-\begin{figure}[h!]
+\begin{figure}[ht]
 	\centering
 	\includegraphics[width=0.8\textwidth]{Testaufbau}
 	\caption{Testaufbau}

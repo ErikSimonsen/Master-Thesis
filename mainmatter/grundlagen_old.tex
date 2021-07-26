@@ -1,4 +1,55 @@
-\section{Reaktive Programmierung}
+\section{Grundlagen}
+\label{section:grundlagen}
+
+\subsection{Threads in Java}
+\label{section:threads_java}
+Java-Threads werdem vom Betriebssystem verwaltet, sog. \textit{native threads} oder auch \textit{kernel threads}.
+Hierbei wird die Steuerung der Ausführungsreihenfolge, die Zuweisung der Rechenzeit und der Prozess- \& Threadwechsel
+vom Scheduler \& Dispatcher des Betriebssystems übernommen\parencite[Kapitel 2]{Tanenbaum2016}.
+Die Threading-Abstraktion in Java bietet Entwicklern verhältnismäßig leichten Zugriff auf parallelle Programmierung und Synchronisation von Threads.
+
+Sobald im Code eine I/O-Operation, beispielsweise eine Datenbankanfrage, aufgerufen wird, wird die Abarbeitung der nachfolgenden Instruktionen
+vom Thread blockiert, bis die Operation abgeschlossen ist.
+Deshalb wird diese Art von I/O-Operationen auch als \verb|Blocking-I/O| bezeichnet.
+
+Webserver die Blocking-I/O nutzen können daher nicht mehrere Anfragen auf einem Thread bearbeiten, da jede blockierende I/O-Operation den
+Thread, und damit die weiteren Anfragen, blockieren würde.
+Aus diesem Grund binden Servlet-Container üblicherweise jede vom Webserver weitergeleitete Anfrage an einen
+Thread\footnote{Aus einem, im vornherein erzeugten, Thread-Pool} im Servlet-API, welcher die jeweilige Anfrage imperativ abarbeitet
+(daher auch als\textit{worker thread} bezeichnet). Sie nutzen das \verb|Thread per Request|-Modell.
+Der auszuführende Code ist in diesem Ansatz an den jeweiligen Thread gekoppelt.
+
+\noindent
+Um jede Anfrage, und somit jeden Thread, möglichst parallel zu bearbeiten wird vom Scheduler
+des Betriebssystems für jeden logischen CPU regelmäßig ein Kontextwechsel zwischen den zugeordneten Threads,
+ein \textit{Threadwechsel} (\textit{thread-switch}), veranlasst.
+Der Dispatcher entzieht dabei dem derzeit aktiven Thread die CPU und teilt sie anschließend dem nächsten Thread zu.
+
+Während bei einem Kontextwechsel von Prozessen (Prozesswechsel) der gesamte Programmkontext (Adressräume, Inhalt der CPU-Register,
+Seitentabelle, geöffnete Dateien und Metainformationen)
+gewechselt werden muss, wird bei einem Threadwechsel lediglich der Inhalt der CPU-Register (inkl. Programmzähler)
+ersetzt\parencite{Brosenne2021}\parencite{Mosberger2002}.
+
+\noindent
+Da der Threadwechsel, im Fall von \textit{kernel threads}, durch Systemaufrufe, also vom Kernel des Betriebssystems, ausgeführt werden muss, entsteht
+bei einem Threadwechsel dennoch ein messbarer Zeitverlust.
+Dies ist durch die geringe Geschwindigkeit und den Overhead des notwendigen Softwareinterrupts bedingt.
+Der Softwareinterrupt erfolgt, um die Programmausführung im Benutzer-Modus zu unterbrechen und die Ausführung des Interrupt-Handlers im
+Kernel-Modus (Kontextwechsel auf privilegierten Ring 0) zu erzwingen , sowie auf dessen Beendigung zu warten.
+Weitere Threadwechsel entstehen, wenn ein Thread die zugewiesene Rechenzeit nicht nutzen kann, da er noch durch eine I/O-Operation
+blockiert, und diese vom Scheduler einem anderen Thread zugeteilt werden muss.
+
+\noindent
+Bei Client-Server Kommunikation kann das Blockieren einer I/O-Operation zwei Gründe haben:
+\begin{enumerate}
+	\item Eine Lese-Operation wartet auf Daten, die über das Netzwerk transportiert werden
+	\item Eine Schreib-Operation muss warten bis die Puffer des Ziels (wieder) aufnahmebereit sind
+\end{enumerate}
+\noindent
+
+
+
+\subsection{Reaktive Programmierung}
 \label{section:reaktive_programmierung}
 Reaktive Programmierung ist ein Programmierparadigma, bei dem der Programmablauf als Sequenz von asynchronen Ereignissen (Events), und
 Daten als, von außen unveränderliche (immutable), Datenströme (Streams) dargestellt werden.
@@ -50,7 +101,7 @@ source <-- source ist der Beginn des streams, also die Quelle
 	.subscribe(consumer) <-- consumer ist das Ende des Streams, also die Senke
 \end{lstlisting}
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.8\textwidth]{EventFlow}
 	\caption{Exemplarische Abbildung eines Event Flow in der Reactive Programming-Bibliothek Mutiny \parencite{MutinyEventFlow}}
@@ -72,9 +123,8 @@ Programms auszuführen, die nicht von dem Ergebnis der I/O Operation abhängen.
 In \ref{lst:NIO_Pseudocode} kann durchaus zuerst \verb|hello world| ausgegeben werden, da die gestarteten Datenbank-Anfragen die
 restliche Programmausführung nicht blockieren. Wenn statt \verb|hello world| versucht würde, die Ergebnisse einer der Datenbank-Abfragen
 darzustellen wäre das Ergebnis in der Regel eine Exception oder \verb|null|, da die Anfragen zur Zeit der Ausführung von Zeile 5 noch nicht notwendigerweise
-abgeschlossen sind. Das ist ein sehr weit verbreiter Fehler beim Arbeiten mit asynchronen, nicht-blockierenden Funktionen.
+abgeschlossen sind. Das ist ein sehr weit verbreiter Fehler beim Arbeiten mit asynchronen, nicht-blockierenden I/O-Operationen.
 
-//TODO: wird eigentlich schon in grundlagen erklärt oder in Nonblocking I/O
 Methoden die normalerweise \verb|Blocking-I/O| ausführen, wie Datenbankzugriffe oder Anfragen von externen Services,
 geben beim Aufruf unverzüglich einen Publisher zurück, auf dem sich der Aufrufer als \verb|Subscriber| registriert.
 Dadurch wird der bearbeitende Thread nicht blockiert, und kann die nächste Anfrage bearbeiten.
@@ -83,8 +133,8 @@ vom Aufrufer bzw. Subscriber weiter bearbeitet werden.
 Da durch dieses Modell der auszuführende Code nicht mehr an den jeweils ausführenden Thread gebunden wird, erlaubt es die Nutzung eines einzigen
 Threads (\textit{sog. IO Thread}) statt eines \textit{Threadpools} für die Verarbeitung von vielen Anfragen.
 
-\subsection{Vorteile und Nachteile}
-\label{subsec:vorteile_nachteile}
+\subsubsection{Vorteile und Nachteile}
+\label{section:vorteile_nachteile}
 
 Die Vorteile der Nutzung von einigen wenigen \verb|kernel threads| als \verb|IO Threads| gegenüber eines ganzen Threadpools
 an \verb|kernel threads| liegen insbesondere in den Antwortszeiten bei hoher Last und dem Ressourcenverbrauch.
@@ -109,7 +159,7 @@ Reaktive Programmierung ist zudem mit einer steilen Lernkurve verbunden. Dies li
 Anwendungen und der damit oftmals einhergehenden falschen Verwendung von Begriffen und der Überladung des Begriffs \verb|Reactive Programming|.
 Außerdem gibt es, Stand dieser Arbeit, kaum allgemeine, Hersteller
 -unabhängige Fachliteratur zum Programmierparadigma, wodurch sich viele verschiedenen Nomenklaturen und Vorgehensweisen der verschiedenen Anbieter von
-Reaktive-Programming-Bibliotheken (siehe \ref{subsec:java_ökosystem}), die sich größtenteils vor dem \verb|Reactive Streams|-Standard entwickelt haben,
+Reaktive-Programming-Bibliotheken (siehe \ref{section:java_tooling}), die sich größtenteils vor dem \verb|Reactive Streams|-Standard entwickelt haben,
 nicht klar voneinander abgrenzen.
 
 Ein weiteres Problem besteht bei der Integration in bestehende Enterprise Anwendungen. Bibliotheken und Konzepte die Themen wie
@@ -131,8 +181,8 @@ Die wesentlichen Vor-und Nachteile lassen sich wie folgt zusammenfassen:
 	\item Blockierende I/O-Operationen führen zur Blockierung des IO-Threads und damit zur Blockierung der gesamten Anwendung
 \end{enumerate}
 
-\subsection{Alternativen}
-\label{subsec:alternativen}
+\subsubsection{Alternativen}
+\label{section:alternativen}
 In Java 1.1 wurden Threads als sog. \textit{Green Threads} implementiert. Dabei wurde die Möglichkeit Threads vom Betriebssystem, also \verb|Kernel threads|,
 verwalten zu lassen gar nicht genutzt.
 \textit{Green threads} waren als \textit{user threads} implementiert \footnote{Auch als \textit{Fiber} oder \textit{virtual thread} bezeichnet},
@@ -273,7 +323,7 @@ ist eine gegebene Anzahl an Events zu verarbeiten (backpressure). Mit der \verb|
 somit mitteilen das er nicht länger Events erhalten will.
 \parencite{JavaSEFlow}
 
-\begin{figure}[ht]
+\begin{figure}[h!]
 	\centering
 	\includegraphics[width=0.8\textwidth]{flow-api_manning.PNG}
 	\caption{Lebenszyklus einer reaktiven Anwendung mit der Flow-API \parencite[Kapitel 17,  Figure 17.3]{JavaInAction}}
@@ -343,11 +393,68 @@ Der Ansatz jegliche Kommunikation der Komponenten durch das Übermitteln von Nac
 indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch das Überwachen der Nachrichtenwarteschlangen
 (\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.\parencite{ReactiveSystems}
 //TODO: Unterschied Nachricht/Message vs Event-Driven -> Nachricht hat klares Ziel, Event nicht nur für andere zum beobachten
-//WIe steht das im Zusammenhang mit Reactive Programming https://www.oreilly.com/radar/reactive-programming-vs-reactive-systems/
-//Grafik wie modern java in action figure 17.1
-//reactive programming nur ein teil eines reaktiven systems 
+//TODO: WIe steht das im Zusammenhang mit Reactive Programming https://www.oreilly.com/radar/reactive-programming-vs-reactive-systems/
+//TODO Grafik wie modern java in action figure 17.1
+\subsection{Nicht-blockierende }
+\subsection{Reactor Pattern}
+\label{section:reactor_pattern}
+//blocking io
+//nonblocking I/O was ist as - auf betriebssystem ebene
+// wird von java.nio nutzbar gemacht, implementiert event demultiplexing
+
+netty -> implementiert dieses Reactor Pattern
+\url{https://programmerwiki.com/article/1332457226/}
+\parencite[Kapitel 9]{NodeJSDesignPatterns}
+\parencite{SchmidtReactorPattern}
+\parencite[Kapitel 1]{NettyInAction}
+\subsection{Event Loop}
+\label{section:event_loop}
+//TODO IN Reactor Pattern umbenenen un derklären wie asynchrone nonblocking I/O in Single-Threaded Environments ausgeführt wird
+//Bogen schlagen auf Thread per Request in Java (was ja nicht single threaded ist) und auf Vert.x (welches pro Logischem CPU Kern einen
+//IO-Thread bzw. Event Loop Thread spawned) und daher das single -threaded environment durch event-loop thread pool erweitert)
+//hinweis das die events die event-handler nichts anderes als die Subscriber aus dem Reactive Streams-Pattern sind (heißen in javascript nur Event-Handler)
+//und legen damit die basis für das Reactor Pattern
+Ein beliebtes Modell für die Verarbeitung von asynchronen Events ist die \textit{Event Loop}.
+Sobald ein Event entsteht wird es einer Warteschlange (Queue) in der Event Loop hinzugefügt.
+Solange der ausführende Thread aktiv ist und die Queue Events enthält, wird in einer Schleife das nächste Event
+abgerufen und vollständig verarbeitet bevor die nächste Iteration beginnt.
+an den, für diesen Eventtyp, registrierten Event-Handler weitergeleitet.
+Die Verarbeitung erfolgt konkret indem der, für dieses spezifische Event, registrierte Event-Handler bzw. Subscriber aus einer implementierungsabhängigen
+Datenstruktur abgerufen wird und das Event an ihn weitergeleitet wird.
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=1.0\textwidth]{EventLoop}
+	\caption{Exemplarische Abbildung einer Event Loop. \parencite[Kapitel 1.7]{Ponge2020}}
+\end{figure}
+
+Dieses Modell wurde zuerst vorrangig in den JavaScript-Engines von Webbrowsern als Nebenläufigskeitsmodell genutzt, da JavaScript kein Multithreading
+unterstützt,\parencite{MozillaEventLoop} und später auch von der Node.js-Laufzeitumgebung,
+um jegliche I/O-Operationen auf nicht-blockierende Art auszuführen.\parencite{NodeJSEventLoop}
+
+
+//TODO: Event Loop dabei nur Teil des Reactor pattern mit event demultiplexer etc. , io operationen auf multithreaded betriebssystem dispatched und
+//wird über kPoll solange abgefragt bis fertig -> event zu event loop
+Threading Dabei wird, im Gegensatz zum Thread per Request-Modell,
+//TODO: Dieses Modell kanna uch zum Verarbeiten von Anfragen bzw. für das Threading Modell genutzt werden dabei wird statt Thread per Request (siehe Anfang)
+//in jedem IO-Thread eine Event Loop ausgeführt daher auch Event-Loop-Thread
+//TODO weiter oben erwähenn das jede Anfrage ein Event innerhalb eines Event Streams ist
+//Nicht blockieren da imperativer code
+Dies wird in Abbildung \ref{fig:blocking} dargestellt, hierbei arbeiten zwei IO-Threads mehrere \verb|Event streams| ab. Dies geschieht in der Regel in einer
+
+Dies können beispielsweise I/O-Events sein, die signalisieren das Daten bereit zur Weiterverarbeitung sind, aber auch jegliches andere Event.
+Eine Event Loop wird in der Regel auf einem IO-Thread ausgeführt, daher darf das Verarbeiten von Events
+keine blockierenden, oder zeitintensiven Operationen beinhalten\parencite{Ponge2020}.
+//TODO : Event-Loop Threads
+\begin{figure}[h!]
+	\centering
+	\includegraphics[width=0.8\textwidth]{blocking io.PNG}
+	\caption{Veranschaulichung eines Events durch das blockierender Code innerhalb eines IO-Threads ausgeführt wird
+		\parencite[Kapitel 17,  Figure 17.2]{JavaInAction}}
+	\label{fig:blocking}
+\end{figure}
+
 \subsection{Java Ökosystem}
-\label{subsec:java_ökosystem}
+\label{section:java_tooling}
 Im Java Ökosystem gibt es eine Vielzahl an Frameworks, Libaries und APIs mit denen Reaktive Programmierung und reaktive Systeme umgesetzt
 werden können.
 Um in Java einzelne, asynchrone Prozesse zu implementieren, wird vom JDK die Future-API zur Verfügung gestellt.\parencite{OracleFuture}
@@ -376,16 +483,13 @@ Zu den populärsten gehören:
 \end{enumerate}\parencite{Vert.x, Akka, ProjectReactor}
 
 \subsubsection{Eclipse Vert.x}
-\label{subsubsec:vert.x}
-
-\subsubsection{Reaktives Programmieren}
-\label{subsubsec:reaktives_programmieren}
-\paragraph{Mutiny}
-\paragraph{RxJava}
-\paragraph{Project Reactor}
-
+\label{section:Vert.x}
+\parencite{VertxArticle}
+TODO: Genauer auf Vert.x eingehen siehe Ponge Buch
+\parencite{Vert.xDocs}
+//dispatching erwähnen, io threads laufen immer (einer pro kernel thread, in io-thread pool size)und werden dann wahlweise auf worker thread pool dispatched
 \subsubsection{Quarkus}
-\label{subsubsec:quarkus}
+\label{section:Quarkus}
 
 Bei dem, in dieser Arbeit verwendeten, Framework Quarkus handelt es sich laut Hersteller Red Hat, um ein
 benutzerfreundliches, auf Entwickler abgestimmtes Java Framework, welches für Container-, Cloud- und Serverless-Umgebungen optimiert ist und nur wenig
@@ -411,3 +515,5 @@ alle Netzwerk I/O-Operationen verarbeitet. \parencite{QuarkusReactiveGettingStar
 
 TODO: Noch genauer auf Quarkus eingehen? Erwähnen dass alle Bibliotheken speziell für Quarkus angepasst werden müssen, damit
 die native Kompilierung auch funktioniert
+
+TODO: Generell, Entscheidungen mehr begründen (bspw. warum Uber-Jar)

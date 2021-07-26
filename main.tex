@@ -63,7 +63,6 @@
 \input{pdf}
 \input{todo-definition}
 \begin{document}
-
 \input{frontmatter/titlepage}
 \input{frontmatter/abstract}
 \input{frontmatter/ehrenwort}
@@ -81,13 +80,14 @@
 
 \input{mainmatter/einleitung}
 \newpage
-\input{mainmatter/grundlagen}
 % Definiere Style für Text Listings.
 \lstdefinestyle{text}{
     basicstyle=\ttfamily\footnotesize
 }
 % Verwende Style 
 \lstset{style=text}
+\input{mainmatter/grundlagen}
+\input{mainmatter/reaktive_systeme}
 \input{mainmatter/vergleich_programmierparadigmen}
 \input{mainmatter/fazit}
 
