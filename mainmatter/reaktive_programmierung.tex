@@ -1,7 +1,7 @@
 \section{Reaktive Programmierung}
 \label{section:reaktive_programmierung}
-Reaktive Programmierung ist ein Programmierparadigma, bei dem der Programmablauf als Sequenz von asynchronen Ereignissen (Events), und
-Daten als, von außen unveränderliche (immutable), Datenströme (Streams) dargestellt werden.
+Reaktive Programmierung ist ein ereignisgesteuertes (event-driven) Programmierparadigma, bei dem der Programmablauf
+ als Sequenz von asynchronen Ereignissen (Events), und Daten als, von außen unveränderliche (immutable), Datenströme (Streams) dargestellt werden.
 Sobald es innerhalb des Datenstroms zu Änderungen kommt werden diese als Events durch einen Publisher veröffentlicht.
 Diese Events werden dann von einem oder mehreren \verb|Subscribern| konsumiert. Diese können wiederrum weitere Events durch einen Publisher veröffentlichen.
 
@@ -74,15 +74,6 @@ restliche Programmausführung nicht blockieren. Wenn statt \verb|hello world| ve
 darzustellen wäre das Ergebnis in der Regel eine Exception oder \verb|null|, da die Anfragen zur Zeit der Ausführung von Zeile 5 noch nicht notwendigerweise
 abgeschlossen sind. Das ist ein sehr weit verbreiter Fehler beim Arbeiten mit asynchronen, nicht-blockierenden Funktionen.
 
-//TODO: wird eigentlich schon in grundlagen erklärt oder in Nonblocking I/O
-Methoden die normalerweise \verb|Blocking-I/O| ausführen, wie Datenbankzugriffe oder Anfragen von externen Services,
-geben beim Aufruf unverzüglich einen Publisher zurück, auf dem sich der Aufrufer als \verb|Subscriber| registriert.
-Dadurch wird der bearbeitende Thread nicht blockiert, und kann die nächste Anfrage bearbeiten.
-Sobald das Ergebnis der I/O Operation bereit ist, wird es dem Publisher in Form eines Events mitgeteilt, von diesem veröffentlicht und die Anfrage kann
-vom Aufrufer bzw. Subscriber weiter bearbeitet werden.
-Da durch dieses Modell der auszuführende Code nicht mehr an den jeweils ausführenden Thread gebunden wird, erlaubt es die Nutzung eines einzigen
-Threads (\textit{sog. IO Thread}) statt eines \textit{Threadpools} für die Verarbeitung von vielen Anfragen.
-
 \subsection{Vorteile und Nachteile}
 \label{subsec:vorteile_nachteile}
 
@@ -130,53 +121,6 @@ Die wesentlichen Vor-und Nachteile lassen sich wie folgt zusammenfassen:
 	\item Reaktive Anwendungen müssen in jeder Schicht reaktiv sein (Transaktionen, Security, Datenbanktreiber)
 	\item Blockierende I/O-Operationen führen zur Blockierung des IO-Threads und damit zur Blockierung der gesamten Anwendung
 \end{enumerate}
-
-\subsection{Alternativen}
-\label{subsec:alternativen}
-In Java 1.1 wurden Threads als sog. \textit{Green Threads} implementiert. Dabei wurde die Möglichkeit Threads vom Betriebssystem, also \verb|Kernel threads|,
-verwalten zu lassen gar nicht genutzt.
-\textit{Green threads} waren als \textit{user threads} implementiert \footnote{Auch als \textit{Fiber} oder \textit{virtual thread} bezeichnet},
-dabei ist die Funktionalität
-nicht im Kernel implementiert, sondern in einer Programmbibliothek im \textit{Userspace}.
-Da sich das Betriebssystem nicht um das Scheduling von \textit{user threads} kümmert
-\footnote{Da es diese garnicht kennt, da Sie keine kernel threads}, wurde dies über einen eigenen Scheduling-Algorithmus der JVM
-geregelt.\parencite{Oracle2010}
-Ein \textit{green thread} existiert lediglich als Objekt innerhalb der JVM, und durch die virtuelle Speicherverwaltung entfallen somit
-die aufwändigen Betriebssystemaufrufe beim
-Erstellen eines Threads, sowie bei Thread- bzw. Kontextwechseln, denn der ausführende Main-Thread bleibt gleich.
-
-Die Threadwechsel der \textit{user-threads} erfolgten ausschließlich innerhalb des Main-Threads, weswegen keine echte Parallelität realisiert werden konnte,
-da immer nur ein Prozessorkern genutzt wurde.
-Während der Vorteil dieses Modells darin lag, dass es keine 'echten' parallelen Zugriffe auf eine Resource innerhalb des JVM-Prozesses geben konnte
-und die Synchronisation von Datenzugriffen daher leicht war, überwog schließlich der Umstand, dass keine Nutzung von mehreren Prozessorkernen
-durch Multithreading möglich war, weswegen \textit{Green Threads} ab Java 1.3 zugunsten von \textit{native threads} entfernt wurden.
-
-Mit dem OpenJDK Projekt \textit{Project Loom} ist die Idee von \textit{Green threads}
-wieder aufgegriffen worden, allerdings nun als Ergänzung (statt Alternative) zu \textit{native threads}.
-Statt alle virtuellen Threads auf dem nativen Main-Thread auszuführen, werden diese von einer geringen Anzahl an nativen \textit{worker threads},
-die als Carrier eingesetzt werden, ausgeführt.
-Deren Anzahl ist so gewählt, dass alle CPU Kerne durch Multithreading dauerhaft benutzt werden können
-\footnote{In der Praxis laufen natürlich noch andere Prozesse auf dem Server, deren Threads auch ausgeführt werden müssen.}
-, aber so wenig Kontextwechsel wie möglich ausgeführt werden müssen.
-\parencite{Oracle2021} \footnote{Im Idealfall würde auf jedem CPU Kern ein \textit{worker thread} laufen,
-	ohne jemals einen Thread- bzw. Kontextwechsel zu machen.}
-Während ein nativer Thread in einer 64 Bit JVM auf Linux-Systemen standardmäßig 1 MB für den Threadstack reserviert
-und zusätzlich noch Metadaten abspeichert, ist ein virtueller Thread
-lediglich ein Objekt im virtuellen Speicher der JVM und benötigt sehr wenig Resourcen (da er ja im Hintergrund von einem
-nativen Thread abgearbeitet wird).
-Aus diesem Grund können durchaus mehrere Millionen virtueller Threads erzeugt werden (bei entsprechend allokierten Heap-Speicher der JVM), wohingegen
-die Erstellung von 10.000 nativen Threads entweder den allokierten Speicher weit überschreitet (wodurch der JVM-Prozess abstürzt) oder die Threadgrenze
-des Betriebssystems überschreitet.
-
-Sobald ein virtueller Thread nun eine blockierende I/O Operation ausführt signalisiert er dem darunterliegenden nativen Thread, dass er momentan nichts machen
-kann außer Warten, und erlaubt dem nativen Thread zu einem anderen virtuellen Thread zu wechseln.
-
-Das große Versprechen des Projektes ist außerdem, das Entwickler keine asynchronen Programmierparadigmen (wie u.A. \textit{Reactive Programming})
-nutzen müssen um die beschriebenen virtuellen Threads (und die damit einhergehenden wesentlichen Performanceverbesserungen) nutzen zu können.
-Um dieses Versprechen zu halten werden virtuelle Threads, statt als Bibliothek eines Drittanbieters, in Form einer eigenen JDK Version bereitgestellt.
-In dieser Version wurden viele Teile der Standardbibliothek die mit I/O-Operationen arbeiten so angepasst, dass virtuelle Threads statt native Threads
-genutzt werden. Auf diese Weise können I/O-Operationen, wie beispielsweise der Aufruf einer Netzwerkfunktionalität, ohne Änderungen am Programm,
-die virtuellen Threads nutzen und blockieren den darunterliegenden nativen Thread nicht mehr.
 
 \subsection{Reaktive Datenströme}
 \label{section:reaktive_datenströme}
@@ -288,7 +232,7 @@ Sobald ein \verb|Processor| ein Fehler erhält kann er sich entweder davon erhol
 Downstream-Subscriber propagieren.
 
 \subsection{Reaktive Systeme}
-\label{section:reaktive_systeme}
+\label{subsection:reaktive_systeme}
 Anforderungen an große Softwaresysteme haben sich in den letzten Jahren stark verändert:
 \begin{enumerate}
 	\item Antwortzeiten in Millisekunden statt im Sekundenbereich
@@ -301,9 +245,12 @@ Unternehmen aus verschiedenen Bereichen haben sich voneinander unabhängig an di
 erarbeitet, mit denen robuste, belastbare und flexible Softwaresysteme entwickelt werden können, die die modernen Anforderungen
 erfüllen.
 
-2014 wurde mit dem \textit{Reactive Manifesto} versucht diese Ansätze des Systemdesigns in Form eines Manifests zusammenzuführen
+2014 wurde mit dem \verb|Reactive Manifesto| versucht diese Ansätze der Systemarchitektur in Form eines Manifests zusammenzuführen
 und daraus allgemeingültige Systemattribute abzuleiten.
-Laut dieses Manifests sind Systeme reaktiv wenn sie:
+
+\subsubsection{Eigenschaften}
+\label{subsubsec:reaktive_systeme_eigenschaften}
+Laut des \verb|Reactive Manifesto| sind Systeme reaktiv wenn sie:
 \begin{enumerate}
 	\item Reaktionsschnell
 	\item Widerstandsfähig (gegen Fehler)
@@ -313,6 +260,13 @@ Laut dieses Manifests sind Systeme reaktiv wenn sie:
 sind.
 Solche Systeme sind, laut den Autoren, flexibler, stärker entkoppelt und würden besser skalieren als herkömmliche, nicht-reaktive Systeme.
 Dies mache sie leichter zu entwickeln, zugänglicher für Veränderungen und deutlich fehlertoleranter.
+
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{reactive-traits}
+	\caption{Zusammenspiel der Eigenschaften eines reaktiven Systems \parencite{ReactiveSystems}}
+	\label{fig:reactive-traits}
+\end{figure}
 
 Die Autoren definieren die genannten Systemeigenschaften wie folgt:
 
@@ -327,7 +281,7 @@ jedes System das nicht Fehlertolerant ist, wird nach Fehlern nicht mehr reaktion
 Widerstandsfähigkeit wird durch Redundanz, Eingrenzung, Isolation und Delegation erreicht.
 Fehler werden innerhalb einer Komponente eingegrenzt und die Komponenten sind voneinander isoliert. Dadurch bleibt das Gesamtsystem stabil, selbst
 wenn eine einzelne Komponente versagt.
-Die Wiederherstellung jeder Komponente wird an eine andere (möglicherweise externe) Komponente deligiert, und
+Die Wiederherstellung jeder Komponente (self-healing) wird an eine andere (möglicherweise externe) Komponente deligiert, und
 Hochverfügbarkeit der Komponenten wird, wo notwendig, durch Redundanz gewährleistet.
 
 \textbf{Elastisch}: Das System bleibt reaktionsschnell unter variierenden Arbeitslasten. Auf Änderungen der Arbeitslast wird durch das Anpassen der
@@ -336,54 +290,104 @@ Komponenten problemlos repliziert und die Last darauf verteilt werden kann.
 Reaktive Systeme unterstützen prädiktive, skalierende Algorithmen zur Ressourcenberechnung,
 indem Sie die Live-Messungen von Performance relevanten Systemmetriken als Eingabe nutzen.
 
-\textbf{Nachrichtengesteuert}: Reaktive Systeme basieren auf dem asynchronen Austausch von Nachrichten, um die Komponenten voneinander abzugrenzen und dadurch
+\textbf{Nachrichtengesteuert}: Reaktive Systeme basieren auf dem asynchronen, nichtblockierendem Austausch von Nachrichten, um die Komponenten voneinander abzugrenzen und dadurch
 eine loose Kopplung, Isolation und eine transparente Lokalisierung der Komponenten zu ermöglichen.
 Aufgrund dieser Abgrenzung werden Fehler als Nachrichten an andere Komponenten delegiert.
 Der Ansatz jegliche Kommunikation der Komponenten durch das Übermitteln von Nachrichten zu implementieren erlaubt Elastizität,
 indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch das Überwachen der Nachrichtenwarteschlangen
 (\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.\parencite{ReactiveSystems}
-//TODO: Unterschied Nachricht/Message vs Event-Driven -> Nachricht hat klares Ziel, Event nicht nur für andere zum beobachten
-//WIe steht das im Zusammenhang mit Reactive Programming https://www.oreilly.com/radar/reactive-programming-vs-reactive-systems/
-//Grafik wie modern java in action figure 17.1
-//reactive programming nur ein teil eines reaktiven systems 
+
+Im Gegensatz zu Events haben Nachrichten immer ein klar definiertes Ziel.
+Das bedeutet, dass sich ein ereignisgesteuertes System- oder Systemkomponente auf adressierbare Event-Quellen konzentriert,
+während ein nachrichtengesteuertes System auf adressierbaren Empfängern basiert.
+
+\subsubsection{Abgrenzung zu reaktiver Programmierung}
+\label{subsubsection:abgrenzung_reaktive_programmierung}
+Aufgrund der steigenden Popularität von reaktiven Anwendungen ist der Begriff \verb|reaktiv| im Kontext der Softwareentwicklung
+überladen und unterscheidet nicht zwischen \verb|Reaktiver Programmierung| und \verb|Reaktiven Systemen|.
+
+\verb|Reaktive Programmierung| ist eine ideale Technik zur Abbildung der internen Logik innerhalb einer Komponente, in Form von Transformationen 
+auf Datenströmen, um sowohl Performance, Ressourceneffizienz und Code-Verständlichkeit zu optimieren.
+
+\verb|Reaktive Systeme| sind hingegen eine Menge von architektonischen Prinzipien, die die verteilte Kommunikation hervorheben und 
+Ansätze zur Realisierung von Fehlertoleranz und Elastizität liefern.
+
+Ein gängiges Problem bei ausschließlicher Nutzung von \verb|Reaktiver Programmierung| besteht darin, dass die enge Kopplung
+zwischen Verarbeitungsschritten (Transformationen) in einem eventgesteuerten Programm die geforderte Fehlertoleranz eines reaktiven Systems
+schwer zu erreichen macht.
+Die Transformationsketten bzw. \verb|Pipelines| sind kurzlebig und die Operatoren und Callback-Methoden innerhalb der \verb|Pipes|
+sind anonym, also nicht adressierbar.
+
+Das bedeutet, dass sowohl Erfolg, als auch Misserfolg bzw. Fehler direkt behandelt werden, ohne andere Komponenten darüber zu informieren.
+Dieser Mangel an Adressierbarkeit erschwert die Wiederherstellung einzelner Phasen, da unklar ist, wo beziehungsweise ob Ausnahmen
+propagiert werden sollten. Infolgedessen sind Fehler an kurzlebige Client-Anfragen und nicht an den
+Gesamtzustand der Komponente gebunden – wenn eine der Phasen in der \verb|Pipeline| fehlschlägt, muss die gesamte \verb|Pipeline| neu 
+ gestartet und der Client benachrichtigt werden. Dies steht im Gegensatz zu einem nachrichtengesteuerten reaktiven System, das 
+die Fähigkeit zur Wiederherstellung von Komponenten besitzt, ohne dass der Client benachrichtigt werden muss.
+
+Ein weiterer Kontrast zum Ansatz eines reaktiven Systems ist, dass rein reaktive Programmierung zwar eine zeitliche Entkopplung,
+aber keine räumliche Entkopplung ermöglicht. Zeitliche Entkopplung erlaubt gleichzeitige Verarbeitung, während räumliche Entkopplung
+die Verteilung auf mehrere Systemkomponenten erlaubt. Dadurch können nicht nur statische, sondern auch dynamische Topologien
+realisiert werden, was für die Elastizität eines reaktiven Systems essentiell ist.
+
+Insgesamt ist \verb|reaktives Programmieren| eine sehr nützliche Technik, die in einer reaktiven Architektur genutzt werden kann.
+Das Implementieren von Datenflüssen durch asynchrone und nichtblockierende Ausführung innerhalb eines Services bildet 
+die Basis eines reaktiven Systems, mehrere reaktive Services bilden aber noch kein reaktives System.
+
+Sobald mehrere Services in einem reaktiven System miteinander arbeiten sollen, müssen unter Anderem Funktionalitäten wie 
+Datenkonsistenz, Serviceübergreifende Kommunikation, Versionierung, Orchestrierung, Fehlermanagement und Trennung von Verantwortlichkeiten
+berücksichtigt werden.
+
 \subsection{Java Ökosystem}
 \label{subsec:java_ökosystem}
-Im Java Ökosystem gibt es eine Vielzahl an Frameworks, Libaries und APIs mit denen Reaktive Programmierung und reaktive Systeme umgesetzt
-werden können.
+Im Java Ökosystem gibt es eine Vielzahl an Libraries und Frameworks mit denen 
+\verb|Reaktive Programmierung| und \verb|Reaktive Systeme| umgesetzt werden können.
 Um in Java einzelne, asynchrone Prozesse zu implementieren, wird vom JDK die Future-API zur Verfügung gestellt.\parencite{OracleFuture}
-Für die Verarbeitung von asynchronen (unbegrenzten) Datenströmen gibt es die Flow-API.\parencite{OracleFlow}
-Da die Flow-API lediglich Interfaces bereitstellt, gibt es mehrere Implementierungen von \textit{reactive streams}.
-
-Um reaktive Programmierung zu erleichtern, gibt es unter Anderem die folgenden Projekte:
+Für die Verarbeitung von asynchronen (unbegrenzten) Datenströmen gibt es die Interfaces der Flow-API (siehe \ref{section:java_flow_api}).
+\parencite{OracleFlow}
+//TODO: erwähenn dass versucht wird einen überblick zu schaffen, da viele projekte wieder auf anderen basieren und die verwendeten
+//terminiologien verschwimmen, ansonsten sehr schwer überblick zu behalten was genau wer macht
+\subsubsection{Reaktive Datenströme}
+\label{subsubsec:reactive_streams}
+Da die Flow-API lediglich Interfaces bereitstellt, gibt es mehrere Implementierungen von \verb|Reaktiven Datenströmen|.
+Zu den populärsten Bibliotheken zählen:
 \begin{enumerate}
-	\item RxJava (//TODO: Functional Reactive Programming)
+	\item RxJava
 	\item Spring Webflux
 	\item Mutiny
 \end{enumerate}
-TODO: Erwähen das unterschiedlihe Operatoren und KLassennamen die die Flow-APi implementieren
-Jedes Projekt unterscheidet sich dabei in den verwendeten Klassennamen \footnote{RxJava - Observable; Mutiny - Uni, Multi; Spring Webflux - Mono, Flux},
-Operatoren und dem Grad der funktionalen Programmierung.\parencite{ReactiveX, Mutiny}
-Allerdings sind die meisten Frameworks und Bibliotheken interoperabel, da sie die \textit{reactive streams} Spezifikation implementieren (und damit
-\textit{back pressure}) und Converter-Klassen anbieten.
+Jedes Projekt unterscheidet sich dabei in den verwendeten Klassen - und Operatoren um die \verb|reactive streams|-Spezifikation 
+beziehungsweise die \verb|Flow-API| des JDK zu implementieren:
+\begin{itemize}
+	\item RxJava\footnote{Implementiert die Flow-API erst seit Version 2} - Flowable, Observable \parencite{RxJava}
+	\item Project Reactor - Flux, Mono \parencite{ProjectReactor}
+	\item Mutiny - Multi, Uni \parencite{Mutiny}  
+\end{itemize}
 
-Für die Entwicklung von reaktiven Systemen bieten sich mehrere Toolkits und Frameworks an.
-Sie implementieren bereits Komponenten und Mechanismen wie Messaging, Event Loops, Dateizugriffe, nichtblockierende Netzwerkanwendungen, Web APIs und mehr.
+Die Bibliotheken sind zudem interoperabel, da sie die \verb|reactive streams} Spezifikation mithilfe der \verb|Flow-API|
+ implementieren (und damit \verb|back pressure|) und Converter-Klassen anbieten.
+
+\subsubsection{Reaktive Systeme}
+\label{subsubsec:reaktive_systeme}
+Für die Entwicklung von reaktiven Systemen bieten sich mehrere Toolkits(keine Frameworks!!!) an.
+Sie implementieren bereits Komponenten und Mechanismen wie Messaging, Event Loops, Dateizugriffe,
+ nichtblockierende Netzwerkanwendungen, Web APIs und mehr.
+//TODO: Nutzen alle Netty um nonblocking I/o zu implementieren
 Zu den populärsten gehören:
 \begin{enumerate}
-	\item Eclipse Vert.x
+	\item Eclipse Vert.x	
 	\item Akka
-	\item Project Reactor
+	\item Reactor-Netty
 \end{enumerate}\parencite{Vert.x, Akka, ProjectReactor}
 
-\subsubsection{Eclipse Vert.x}
-\label{subsubsec:vert.x}
+\paragraph{Eclise Vert.x}
 
-\subsubsection{Reaktives Programmieren}
-\label{subsubsec:reaktives_programmieren}
-\paragraph{Mutiny}
-\paragraph{RxJava}
-\paragraph{Project Reactor}
-
+//erwähnen das vert.x die Komponenten und Lösungen für die Realisierung von eaktiven
+ Systemen (siehe \ref{subsubsection:abgrenzung_reaktive_programmierung}) bereitstellt bspw. Event Bus für räumliche Entkopplung
+ 
+\subsubsection{Frameworks}
+Spring WebFlux
+Quarkus
 \subsubsection{Quarkus}
 \label{subsubsec:quarkus}
 
@@ -411,3 +415,50 @@ alle Netzwerk I/O-Operationen verarbeitet. \parencite{QuarkusReactiveGettingStar
 
 TODO: Noch genauer auf Quarkus eingehen? Erwähnen dass alle Bibliotheken speziell für Quarkus angepasst werden müssen, damit
 die native Kompilierung auch funktioniert
+
+\subsection{Alternativen}
+\label{subsec:alternativen}
+In Java 1.1 wurden Threads als sog. \textit{Green Threads} implementiert. Dabei wurde die Möglichkeit Threads vom Betriebssystem, also \verb|Kernel threads|,
+verwalten zu lassen gar nicht genutzt.
+\textit{Green threads} waren als \textit{user threads} implementiert \footnote{Auch als \textit{Fiber} oder \textit{virtual thread} bezeichnet},
+dabei ist die Funktionalität
+nicht im Kernel implementiert, sondern in einer Programmbibliothek im \textit{Userspace}.
+Da sich das Betriebssystem nicht um das Scheduling von \textit{user threads} kümmert
+\footnote{Da es diese garnicht kennt, da Sie keine kernel threads}, wurde dies über einen eigenen Scheduling-Algorithmus der JVM
+geregelt.\parencite{Oracle2010}
+Ein \textit{green thread} existiert lediglich als Objekt innerhalb der JVM, und durch die virtuelle Speicherverwaltung entfallen somit
+die aufwändigen Betriebssystemaufrufe beim
+Erstellen eines Threads, sowie bei Thread- bzw. Kontextwechseln, denn der ausführende Main-Thread bleibt gleich.
+
+Die Threadwechsel der \textit{user-threads} erfolgten ausschließlich innerhalb des Main-Threads, weswegen keine echte Parallelität realisiert werden konnte,
+da immer nur ein Prozessorkern genutzt wurde.
+Während der Vorteil dieses Modells darin lag, dass es keine 'echten' parallelen Zugriffe auf eine Resource innerhalb des JVM-Prozesses geben konnte
+und die Synchronisation von Datenzugriffen daher leicht war, überwog schließlich der Umstand, dass keine Nutzung von mehreren Prozessorkernen
+durch Multithreading möglich war, weswegen \textit{Green Threads} ab Java 1.3 zugunsten von \textit{native threads} entfernt wurden.
+
+Mit dem OpenJDK Projekt \textit{Project Loom} ist die Idee von \textit{Green threads}
+wieder aufgegriffen worden, allerdings nun als Ergänzung (statt Alternative) zu \textit{native threads}.
+Statt alle virtuellen Threads auf dem nativen Main-Thread auszuführen, werden diese von einer geringen Anzahl an nativen \textit{worker threads},
+die als Carrier eingesetzt werden, ausgeführt.
+Deren Anzahl ist so gewählt, dass alle CPU Kerne durch Multithreading dauerhaft benutzt werden können
+\footnote{In der Praxis laufen natürlich noch andere Prozesse auf dem Server, deren Threads auch ausgeführt werden müssen.}
+, aber so wenig Kontextwechsel wie möglich ausgeführt werden müssen.
+\parencite{Oracle2021} \footnote{Im Idealfall würde auf jedem CPU Kern ein \textit{worker thread} laufen,
+	ohne jemals einen Thread- bzw. Kontextwechsel zu machen.}
+Während ein nativer Thread in einer 64 Bit JVM auf Linux-Systemen standardmäßig 1 MB für den Threadstack reserviert
+und zusätzlich noch Metadaten abspeichert, ist ein virtueller Thread
+lediglich ein Objekt im virtuellen Speicher der JVM und benötigt sehr wenig Resourcen (da er ja im Hintergrund von einem
+nativen Thread abgearbeitet wird).
+Aus diesem Grund können durchaus mehrere Millionen virtueller Threads erzeugt werden (bei entsprechend allokierten Heap-Speicher der JVM), wohingegen
+die Erstellung von 10.000 nativen Threads entweder den allokierten Speicher weit überschreitet (wodurch der JVM-Prozess abstürzt) oder die Threadgrenze
+des Betriebssystems überschreitet.
+
+Sobald ein virtueller Thread nun eine blockierende I/O Operation ausführt signalisiert er dem darunterliegenden nativen Thread, dass er momentan nichts machen
+kann außer Warten, und erlaubt dem nativen Thread zu einem anderen virtuellen Thread zu wechseln.
+
+Das große Versprechen des Projektes ist außerdem, das Entwickler keine asynchronen Programmierparadigmen (wie u.A. \textit{Reactive Programming})
+nutzen müssen um die beschriebenen virtuellen Threads (und die damit einhergehenden wesentlichen Performanceverbesserungen) nutzen zu können.
+Um dieses Versprechen zu halten werden virtuelle Threads, statt als Bibliothek eines Drittanbieters, in Form einer eigenen JDK Version bereitgestellt.
+In dieser Version wurden viele Teile der Standardbibliothek die mit I/O-Operationen arbeiten so angepasst, dass virtuelle Threads statt native Threads
+genutzt werden. Auf diese Weise können I/O-Operationen, wie beispielsweise der Aufruf einer Netzwerkfunktionalität, ohne Änderungen am Programm,
+die virtuellen Threads nutzen und blockieren den darunterliegenden nativen Thread nicht mehr.
