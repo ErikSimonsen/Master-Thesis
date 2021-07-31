@@ -1,7 +1,7 @@
 \section{Reaktive Programmierung}
 \label{section:reaktive_programmierung}
 Reaktive Programmierung ist ein ereignisgesteuertes (event-driven) Programmierparadigma, bei dem der Programmablauf
- als Sequenz von asynchronen Ereignissen (Events), und Daten als, von außen unveränderliche (immutable), Datenströme (Streams) dargestellt werden.
+als Sequenz von asynchronen Ereignissen (Events), und Daten als, von außen unveränderliche (immutable), Datenströme (Streams) dargestellt werden.
 Sobald es innerhalb des Datenstroms zu Änderungen kommt werden diese als Events durch einen Publisher veröffentlicht.
 Diese Events werden dann von einem oder mehreren \verb|Subscribern| konsumiert. Diese können wiederrum weitere Events durch einen Publisher veröffentlichen.
 
@@ -306,10 +306,10 @@ während ein nachrichtengesteuertes System auf adressierbaren Empfängern basier
 Aufgrund der steigenden Popularität von reaktiven Anwendungen ist der Begriff \verb|reaktiv| im Kontext der Softwareentwicklung
 überladen und unterscheidet nicht zwischen \verb|Reaktiver Programmierung| und \verb|Reaktiven Systemen|.
 
-\verb|Reaktive Programmierung| ist eine ideale Technik zur Abbildung der internen Logik innerhalb einer Komponente, in Form von Transformationen 
+\verb|Reaktive Programmierung| ist eine ideale Technik zur Abbildung der internen Logik innerhalb einer Komponente, in Form von Transformationen
 auf Datenströmen, um sowohl Performance, Ressourceneffizienz und Code-Verständlichkeit zu optimieren.
 
-\verb|Reaktive Systeme| sind hingegen eine Menge von architektonischen Prinzipien, die die verteilte Kommunikation hervorheben und 
+\verb|Reaktive Systeme| sind hingegen eine Menge von architektonischen Prinzipien, die die verteilte Kommunikation hervorheben und
 Ansätze zur Realisierung von Fehlertoleranz und Elastizität liefern.
 
 Ein gängiges Problem bei ausschließlicher Nutzung von \verb|Reaktiver Programmierung| besteht darin, dass die enge Kopplung
@@ -321,8 +321,8 @@ sind anonym, also nicht adressierbar.
 Das bedeutet, dass sowohl Erfolg, als auch Misserfolg bzw. Fehler direkt behandelt werden, ohne andere Komponenten darüber zu informieren.
 Dieser Mangel an Adressierbarkeit erschwert die Wiederherstellung einzelner Phasen, da unklar ist, wo beziehungsweise ob Ausnahmen
 propagiert werden sollten. Infolgedessen sind Fehler an kurzlebige Client-Anfragen und nicht an den
-Gesamtzustand der Komponente gebunden – wenn eine der Phasen in der \verb|Pipeline| fehlschlägt, muss die gesamte \verb|Pipeline| neu 
- gestartet und der Client benachrichtigt werden. Dies steht im Gegensatz zu einem nachrichtengesteuerten reaktiven System, das 
+Gesamtzustand der Komponente gebunden – wenn eine der Phasen in der \verb|Pipeline| fehlschlägt, muss die gesamte \verb|Pipeline| neu
+gestartet und der Client benachrichtigt werden. Dies steht im Gegensatz zu einem nachrichtengesteuerten reaktiven System, das
 die Fähigkeit zur Wiederherstellung von Komponenten besitzt, ohne dass der Client benachrichtigt werden muss.
 
 Ein weiterer Kontrast zum Ansatz eines reaktiven Systems ist, dass rein reaktive Programmierung zwar eine zeitliche Entkopplung,
@@ -331,23 +331,24 @@ die Verteilung auf mehrere Systemkomponenten erlaubt. Dadurch können nicht nur 
 realisiert werden, was für die Elastizität eines reaktiven Systems essentiell ist.
 
 Insgesamt ist \verb|reaktives Programmieren| eine sehr nützliche Technik, die in einer reaktiven Architektur genutzt werden kann.
-Das Implementieren von Datenflüssen durch asynchrone und nichtblockierende Ausführung innerhalb eines Services bildet 
+Das Implementieren von Datenflüssen durch asynchrone und nichtblockierende Ausführung innerhalb eines Services bildet
 die Basis eines reaktiven Systems, mehrere reaktive Services bilden aber noch kein reaktives System.
 
-Sobald mehrere Services in einem reaktiven System miteinander arbeiten sollen, müssen unter Anderem Funktionalitäten wie 
+Sobald mehrere Services in einem reaktiven System miteinander arbeiten sollen, müssen unter Anderem Funktionalitäten wie
 Datenkonsistenz, Serviceübergreifende Kommunikation, Versionierung, Orchestrierung, Fehlermanagement und Trennung von Verantwortlichkeiten
 berücksichtigt werden.
 
 \subsection{Java Ökosystem}
 \label{subsec:java_ökosystem}
-Im Java Ökosystem gibt es eine Vielzahl an Libraries und Frameworks mit denen 
+Im Java Ökosystem gibt es eine Vielzahl an Libraries und Frameworks mit denen
 \verb|Reaktive Programmierung| und \verb|Reaktive Systeme| umgesetzt werden können.
 Um in Java einzelne, asynchrone Prozesse zu implementieren, wird vom JDK die Future-API zur Verfügung gestellt.\parencite{OracleFuture}
 Für die Verarbeitung von asynchronen (unbegrenzten) Datenströmen gibt es die Interfaces der Flow-API (siehe \ref{section:java_flow_api}).
 \parencite{OracleFlow}
-//TODO: erwähenn dass versucht wird einen überblick zu schaffen, da viele projekte wieder auf anderen basieren und die verwendeten
-//terminiologien verschwimmen, ansonsten sehr schwer überblick zu behalten was genau wer macht
-\subsubsection{Reaktive Datenströme}
+
+Im Folgenden wird ein Überblick über die Vielzahl an Bibliotheken und Frameworks gegeben.
+
+\subsubsection{Reaktive Datenströme - Bibliotheken}
 \label{subsubsec:reactive_streams}
 Da die Flow-API lediglich Interfaces bereitstellt, gibt es mehrere Implementierungen von \verb|Reaktiven Datenströmen|.
 Zu den populärsten Bibliotheken zählen:
@@ -356,40 +357,80 @@ Zu den populärsten Bibliotheken zählen:
 	\item Spring Webflux
 	\item Mutiny
 \end{enumerate}
-Jedes Projekt unterscheidet sich dabei in den verwendeten Klassen - und Operatoren um die \verb|reactive streams|-Spezifikation 
-beziehungsweise die \verb|Flow-API| des JDK zu implementieren:
+Jedes Projekt unterscheidet sich dabei in den verwendeten Klassen - und Operatoren um die \verb|reactive streams|-Spezifikation
+beziehungsweise die \verb|Flow-API| des JDK zu implementieren.
 \begin{itemize}
 	\item RxJava\footnote{Implementiert die Flow-API erst seit Version 2} - Flowable, Observable \parencite{RxJava}
 	\item Project Reactor - Flux, Mono \parencite{ProjectReactor}
-	\item Mutiny - Multi, Uni \parencite{Mutiny}  
+	\item Mutiny - Multi, Uni \parencite{Mutiny}
 \end{itemize}
 
-Die Bibliotheken sind zudem interoperabel, da sie die \verb|reactive streams} Spezifikation mithilfe der \verb|Flow-API|
- implementieren (und damit \verb|back pressure|) und Converter-Klassen anbieten.
+Die Bibliotheken sind zudem interoperabel, da sie die \verb|reactive streams| Spezifikation mithilfe der \verb|Flow-API|
+implementieren \footnote{Und damit auch \textit{back pressure}} und Converter-Klassen anbieten.
 
-\subsubsection{Reaktive Systeme}
+\subsubsection{Reaktive Systeme - Toolkits}
 \label{subsubsec:reaktive_systeme}
-Für die Entwicklung von reaktiven Systemen bieten sich mehrere Toolkits(keine Frameworks!!!) an.
-Sie implementieren bereits Komponenten und Mechanismen wie Messaging, Event Loops, Dateizugriffe,
- nichtblockierende Netzwerkanwendungen, Web APIs und mehr.
-//TODO: Nutzen alle Netty um nonblocking I/o zu implementieren
+Für die Entwicklung von reaktiven Systemen bieten sich mehrere Toolkits an.
+Sie implementieren bereits Mechanismen wie Messaging, Event Loops,
+nichtblockierende Netzwerkanwendungen und Dateizugriffe, sowie umfangreiche Funktionen für Webanwendungen.
 Zu den populärsten gehören:
 \begin{enumerate}
-	\item Eclipse Vert.x	
+	\item Eclipse Vert.x
 	\item Akka
 	\item Reactor-Netty
 \end{enumerate}\parencite{Vert.x, Akka, ProjectReactor}
+Sowohl \verb|Eclipse Vert.x| als auch Reactor-Netty nutzen dabei \verb|Netty|
+(siehe \ref{subsubsec:reactor_pattern}) als Low-Level Framework für \verb|Nonblocking I/O|
+Da das in dieser Arbeit verwendete Anwendungsframework \verb|Quarkus| auf \verb|Eclipse Vert.x| basiert, wird Vert.x im Folgenden genauer beschrieben:
 
 \paragraph{Eclise Vert.x}
+Vert.x ist ein Toolkit für das Entwickeln von reaktiven Anwendungen auf der JVM und wird unter dem Dach der herstellerneutralen Eclipse Foundation entwickelt.
+Da es sich nicht um ein Framework handelt, gibt es keine vordefinierte Grundlage für Anwendungen und kann dadurch auch in bestehende Projekte
+integriert werden.
+Der Kern des Toolkits \verb|vertx-core| stellt APIs für asynchrones Programmieren, \verb|Nonblocking I/O|, Streaming und Zugriff zu
+Netzwerkprokollen wie TCP, UDP, DNS HTTP oder WebSockets.
+\begin{figure}[ht]
+	\centering
+	\includegraphics[width=0.8\textwidth]{vertx}
+	\caption{Vert.x Struktur \parencite{Ponge2020}}
+	\label{fig:vertx}
+\end{figure}
 
-//erwähnen das vert.x die Komponenten und Lösungen für die Realisierung von eaktiven
- Systemen (siehe \ref{subsubsection:abgrenzung_reaktive_programmierung}) bereitstellt bspw. Event Bus für räumliche Entkopplung
- 
+Für die räumliche Entkopplung eines reaktiven Systems bietet Vert.x einen \verb|Event Bus|.
+Der \verb|Event Bus| stellt ein verteiltes Peer-To-Peer Nachrichten System dar, welches sich über mehrere Serverknoten ersteckt.
+Damit können verschiedene Komponenten eines Systems, unabhängig von der genutzten Programmiersprache, durch eindeutige Addressierung miteinander kommunizieren.
+Auf jede Adresse können sich, ganz nach dem \verb|Publish-Subscribe|-Modell, mehrere Subscriber registrieren. Sobald Nachrichten an eine
+Adresse veröffentlicht (published) werden, werden diese an jeden \verb|Subscriber| weitergeleitet.
+
+Für die Resilienz eines reaktiven Systems verfügt Vert.x über einen Hochverfügbarkeits-Modus (high availablity, HA).
+Dabei wird im Falle des Versagens einer Vert.x-Instanz die Anwendung auf eine andere Instanz aus einem Cluster redeployed.
+Darüber hinaus wird im Falle des Ausfalls einer Komponente durch einen Circuit Breaker vermieden, dass weitere Anfragen an diese
+Komponente getätigt werden.
+
+Eine Implementierung des Reactor-pattern nutzt standardmäßig einen einzigen \verb|Event loop|-Thread, der in einer Schleife alle
+Events an die jeweils registrierten Event-Handler liefert.
+Da durch einen einzigen \verb|Event loop|-Thread allerdings zu jeder Zeit auch nur ein CPU-Kern genutzt wird, kann
+eine solche Implementierung Mehrkern-CPUs nur nutzen, indem mehrere Prozesse gestartet und verwaltet werden.
+Statt einer einzigen Event Loop hält jede Vertx-Instanz mehrere, abhängig von der Anzahl der verfügbaren CPU-Kerne|, \verb|Event loop|-Threads.
+Diese Threads werden aus einem im vornherein erzeugten \verb|Event loop thread pool| entnommen.
+\footnote{Die Größe des \textit{event loop thread pools} kann auch manuell überschrieben werden}
+//TODO: vergleich zu worker thread pools aus thread per request ansatz ? -> konzept ähnlcih aber um ein vielfaches kleiner -> und nur ein thread pro kern keine threadwechsel
+
+Um dieses Pattern vom Single Threaded Reactor-Pattern zu unterscheiden, wird es in der Vert.x-Dokumentation als \verb|Multi-Reactor Pattern| bezeichnet.
+
+//TODO: Falls blockierender Code (normal in bestehnden Systsemen und Ökosystemen) wird deer Anwendungscode, ansttatt die Event Loop zu blockieren
+// auf einen Worker-Thread (aus einem vornhereein erzeugen Worker Thred pool) dispatched
 \subsubsection{Frameworks}
-Spring WebFlux
-Quarkus
-\subsubsection{Quarkus}
-\label{subsubsec:quarkus}
+\label{subsubsec:frameworks}
+//TODO: Komplette Anwendungsframeworks welche Gebrauch von den oben genannten Frameworks machen, aber auch noch viel mehr anbieten und viel Konfiguration
+// wegabstrahieren, bspw.
+\begin{itemize}
+	\item Spring WebFlux
+	\item Quarkus
+\end{itemize}
+
+Fullstack Frameworks SpringWebFlux nutzt Project Reactor under the Hood, Quarkus nutzt Vert.x under the hood
+\paragraph{Quarkus}
 
 Bei dem, in dieser Arbeit verwendeten, Framework Quarkus handelt es sich laut Hersteller Red Hat, um ein
 benutzerfreundliches, auf Entwickler abgestimmtes Java Framework, welches für Container-, Cloud- und Serverless-Umgebungen optimiert ist und nur wenig
