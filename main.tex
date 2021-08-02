@@ -47,6 +47,7 @@
 % Figure a b
 \usepackage{subcaption}
 
+\usepackage{float}
 % Code Highlighting
 \usepackage{listings}
 
@@ -77,17 +78,19 @@
 \setcounter{page}{1}
 \pagenumbering{arabic}
 \pagestyle{headings}
-
+\newpage
 \input{mainmatter/einleitung}
 \newpage
 % Definiere Style für Text Listings.
-\lstdefinestyle{text}{
-    basicstyle=\ttfamily\footnotesize
+\lstdefinestyle{code}{
+    basicstyle=\ttfamily\footnotesize,
+    tabsize=2
 }
 % Verwende Style 
-\lstset{style=text}
+\lstset{style=code}
 \input{mainmatter/grundlagen}
 \input{mainmatter/reaktive_programmierung}
+\newpage
 \input{mainmatter/vergleich_programmierparadigmen}
 \input{mainmatter/fazit}
 
