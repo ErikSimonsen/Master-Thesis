@@ -2,11 +2,11 @@
 \label{section:vergleich_reaktiv_imperativ}
 Um zu prüfen, ob Leistungsfähigkeit und Skalierbarkeit einer reaktiven Anwendung tatsächlich die einer traditionellen, imperativen Anwendung
 übertrifft, werden in diesem Kapitel beide Ansätze hinsichtlich verschiedener Metriken in einem festen Zeitintervall miteinander verglichen.
-//TODO auslagern in kapitel testmethodik und kapitel ergebnisse?
-Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung zwei Lasttests unterzogen: //TODO: Testreihen?
+
+Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung, in mehreren Testreihen, zwei Lasttests unterzogen:
 \begin{enumerate}
-	\item Abfrage von Statische Daten
-	\item Abfrage von dynamischen Daten mit Datenbankanbindung
+	\item Abfrage von statischen Daten
+	\item Abfrage von dynamischen Daten (mit Datenbankanbindung)
 \end{enumerate}
 Dabei wird eine Reihe an Lasten bzw. \textit{workloads} von einem Client-Host generiert und über eine feste Dauer in kleinen Zeitinvervallen
 an einen ausgewählten HTTP-Endpunkt der Anwendung gesendet.
@@ -16,25 +16,21 @@ der benötigte Arbeitsspeicher und CPU-Auslastung des Prozesses, der Durchsatz, 
 Für Container- und Cloud-Umgebungen eignen sich, primär aus Kostengründen, Anwendungen die, statt auf hohen Durchsatz und lange Laufzeiten, auf
 schnelle Startzeiten und geringen Ressourcenverbrauch setzen.
 Aus diesem Grund werden die beiden Anwendungen sowohl im \textit{JVM mode} als auch im \textit{native mode}
-(siehe Paragraph \verb|Quarkus| in Kapitel \ref{subsubsec:frameworks})
+(siehe Paragraph \verb|Quarkus und native image| in Kapitel \ref{subsubsec:frameworks})
 den Lasttests unterzogen. Ingesamt ergeben sich also 4 Testszenarien.
-
 
 \subsection{Implementierung \& Systemaufbau}
 \label{section:implementierung}
 Die beiden Anwendungen implementieren mit dem Quarkus-Framework jeweils eine simple REST-Schnittstelle mit HTTP-CRUD Methoden
 und einer angebundenen PostgreSQL-Datenbank.
 Dabei ist vorallem die HTTP-Schicht von Interesse. Die HTTP-Unterstützung von Quarkus basiert auf einem reaktiven, nicht-blockierenden
-Unterbau: der Vert.x Engine.
+Unterbau: der Vert.x Engine (siehe Kapitel \ref{subsubsec:reaktive_systeme}).
 Jede HTTP-Anfrage wird auf einem der \textit{event-loop threads} bzw. \textit{IO threads}
-\footnote{Deren Anzahl hängt von der Anzahl der CPU-Kerne ab}
 verarbeitet und durch eine Routing-Schicht an den Anwendungscode weitergeleitet.
 Je nachdem welcher Ansatz zur Implementierung des jeweiligen HTTP-Endpunktes gewählt wurde,
 wird der abzuarbeitende Code dann auf einem blockierenden \textit{worker thread} aus dem \textit{worker thread pool}
-\footnote{Auch als \textit{Dispatch} bezeichnet} (Servlet, JAX-RS) oder einem der
-\textit{IO threads} (Reactive Routes, Reactive Resteasy) ausgeführt.
-Die \textit{IO threads} sind dafür zuständig alle IO-Operationen asynchron auszuführen und die jeweiligen EventListener bzw. Subscriber
-auszulösen sobald die Operationen abgeschlossen sind.
+(Servlet, JAX-RS) oder weiter auf einem der \textit{IO threads} (Reactive Routes, Reactive Resteasy) ausgeführt.
+
 \newpage
 \begin{figure}[h]
 	\centering
@@ -42,17 +38,19 @@ auszulösen sobald die Operationen abgeschlossen sind.
 	\caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
 \end{figure}
 
-Damit sich beide Anwendungen nahe an einer realen Java-EE REST-API orientieren, haben
+Die \textit{IO threads} sind dafür zuständig alle IO-Operationen asynchron auszuführen und die jeweiligen EventListener bzw. Subscriber
+auszulösen sobald die Operationen abgeschlossen sind.
+Damit sich beide Anwendungen nahe an einer realen Java-EE CRUD REST-API orientieren, haben
 sie (zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks) folgende Projekt-Abhängigkeiten:
-\begin{enumerate}
+\begin{itemize}
 	\item JAX-RS Implementierung
 	\item JSON Unterstützung
-	\item Datenbanktreiber
+	\item PostgreSQL - Datenbanktreiber
 	\item JPA Implementierung
-\end{enumerate}
+\end{itemize}
 
 Diese Abhängigkeiten wurden vom Quarkus Maven-Repository sowohl in blockierender,
-als auch in nicht-blockierender, reaktiver Form bereitgestellt: \parencite{MavenQuarkusIO}
+als auch in nicht-blockierender, reaktiver und in \verb|native image|-kompatibler Form bereitgestellt: \parencite{MavenQuarkusIO}
 % space between the text and the left/right border of its containing cell is set to 18 pt
 \setlength{\tabcolsep}{18pt}
 % the height of each row is set to 1.5 relative to its default height
@@ -75,54 +73,69 @@ als auch in nicht-blockierender, reaktiver Form bereitgestellt: \parencite{Maven
 	\caption{Tabelle mit den Abhängigkeiten beider Applikationen}
 	\label{table:dependencies}
 \end{table}
-TODO add some text to listings
-\begin{lstlisting}[caption=Update Methode der reaktiven Anwendung, language=Java, captionpos=b, label=lst:update_reactive]
-    @PUT
-    @Path("{id}")
-    public Uni<Response> update(Long id, Fruit fruit) {
-        if (fruit == null || fruit.getName() == null) {
-            return Uni.createFrom().item(Response.status(422).build());
-        }
-        return fruitRepository.findById(id).onItem()
-        .ifNotNull().invoke(storedFruit -> storedFruit.setName(fruit.getName())
-        ).call(storedFruit -> fruitRepository.update(storedFruit))
-                .onItem().ifNotNull().transform(storedFruit ->
-                 Response.ok(storedFruit).build())
-                .onItem().ifNull().continueWith(Response.status(Status.NOT_FOUND).build());
-    }
-   \end{lstlisting}
-\begin{lstlisting}[caption=Update Methode der nicht-reaktiven Anwendung, language=Java, captionpos=b, label=lst:update_blocking]
-    @PUT
-    @Path("/{id}")
-    public Response update(Fruit fruit, @PathParam("id") Long id) {
-        if (fruit == null || fruit.getName() == null) {
-            return Response.status(422).build();
-        }
-        Fruit storedFruit = fruitRepository.findById(id);
-        if (storedFruit == null) {
-            return Response.status(Response.Status.NOT_FOUND).build();
-        }
-        storedFruit.setName(fruit.getName());
-        fruitRepository.update(storedFruit);
-        return Response.status(Response.Status.OK).build();
-    }
-   \end{lstlisting}
 
-Der Projekt-Code dieser Arbeit kann vom Gitlab-Server der Ostfalia unter
-\url{//TODO Ostfalia Gitlab link?} eingesehen und abgerufen werden.
+In Listing \ref{lst:update_reactive} und \ref{lst:update_blocking} ist jeweils die Update Methode der REST-APIs abgebildet, um den
+Unterschied der beiden Paradigmen auf Code-Ebene darzustellen.
+
+Dabei wird versucht eine Entity mit der übergebenen \verb|id| des API-Endpunktes
+aus der Datenbank abzurufen und, falls eine Entity mit der \verb|id| gefunden werden konnte, dessen Name mit dem Wert
+aus dem Request-Body der Anfrage zu überschreiben. Anschließend wird die Entity mit dem neuen Namen wieder in die Datenbank zurückgeschrieben
+und HTTP-Statuscode 422 an den Client zurückgegeben. Falls keine Entity gefunden werden konnte, wird stattdessen
+HTTP-Statuscode 404 zurückgegeben.
+
+In der reaktiven Anwendung ist die gesamte Logik, sowie Fehler- und Nullprüfung in einer einzigen Pipeline abgebildet.
+Da in diesem Beispiel Mutiny genutzt wird, wird der Rückgabetyp immer als \verb|Uni| oder \verb|Multi|-Objekt eines spezifischen Typs
+angegeben. \verb|Uni| repräsentiert dabei einen Datenstrom der entweder ein Element oder ein Fehler-Event emittiert.
+\verb|Multi| repräsentiert einen Datenstrom der entweder 0, 1, \verb|n| oder unendlich viele Elemente emittieren kann.
+Der \verb|Subscriber| ist in diesem Fall der Aufrufer der \verb|update|-Methode und sorgt dafür, dass die Pipeline überhaupt ausgeführt wird.
+
+Jede \verb|Pipe| bzw. \verb|Processor| der Pipeline der \verb|update|-Methode gibt ein \verb|Uni|, dieses kann entweder
+vom Typ \verb|Void| (für null-Werte) oder von der jeweiligen Entität sein, an den Downstream weiter
+\footnote{invoke() und call() sind Abkürzungen, um die Lesbarkeit zu verbessern\parencite{MutinyShortcuts}}.
+
+\begin{lstlisting}[caption=Update Methode der reaktiven Anwendung, language=Java, captionpos=b, label=lst:update_reactive]
+@PUT
+@Path("{id}")
+public Uni<Response> update(Long id, Fruit fruit) {
+	if (fruit == null || fruit.getName() == null) {
+		return Uni.createFrom().item(Response.status(422).build());
+	}
+	return fruitRepository.findById(id).onItem()
+	.ifNotNull().invoke(storedFruit -> storedFruit.setName(fruit.getName())
+	).call(storedFruit -> fruitRepository.update(storedFruit))
+			.onItem().ifNotNull().transform(storedFruit ->
+			Response.ok(storedFruit).build())
+			.onItem().ifNull().continueWith(Response.status(Status.NOT_FOUND).build());
+}
+\end{lstlisting}
+\begin{lstlisting}[caption=Update Methode der nicht-reaktiven Anwendung, language=Java, captionpos=b, label=lst:update_blocking]
+@PUT
+@Path("/{id}")
+public Response update(Fruit fruit, @PathParam("id") Long id) {
+	if (fruit == null || fruit.getName() == null) {
+		return Response.status(422).build();
+	}
+	Fruit storedFruit = fruitRepository.findById(id);
+	if (storedFruit == null) {
+		return Response.status(Response.Status.NOT_FOUND).build();
+	}
+	storedFruit.setName(fruit.getName());
+	fruitRepository.update(storedFruit);
+	return Response.status(Response.Status.OK).build();
+}
+\end{lstlisting}
+
+Der Projekt-Code dieser Arbeit kann von GitHub unter \url{https://github.com/ErikSimonsen/quarkus-iothread-workerpool} eingesehen und abgerufen werden.
 
 \subsection{Testumgebung}
 \label{section:testumgebung}
 Für die Testumgebung werden zwei Systeme benötigt: der Client-Host und der Server-Host.
-Dabei muss es sich um UNIX-Systeme handeln, da eine einige der verwendeten Werkzeuge nur
-auf diesen Systemen verfügbar sind.
+Dabei muss es sich um UNIX-Systeme handeln, da eine einige der verwendeten Werkzeuge nur auf diesen Systemen verfügbar sind.
 Zudem müssen beide Systeme per SSH von einem (idealerweise vorhandenem) dritten System, dem User-Host
 \footnote{Dies kann allerdings auch der Client-Host selber sein}
 erreichbar sein, damit dieses den Testablauf in der korrekten Abfolge ausführen kann.
 Der Einfachheit halber empfiehlt es sich, dass sich alle Geräte im gleichen Netzwerk befinden.
-//TODO warum -> aufwendige netzwerkkommunikation ?
-Beiden Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks.
-//TODO Graal VM Version 20.1
+Beiden Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks, welches wiederrum 20.1 der GraalVM nutzt.
 Um eine reproduzierbare Anwendungsumgebung und Ressourcenallokation zu ermöglichen, laufen beide Anwendungen auf dem Server-Host in
 jeweils einem Docker-Container mit fest definierten Ressourcen:
 \begin{itemize}
@@ -138,9 +151,7 @@ Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
 \end{itemize}
 //TODO: Größe von Event-Loop Thread Pool (4/8) und Worker Thread Pool(20) in Vert.x nennen und begründen warum Event-Loop Thread Pool Size explizit
 gesetzt werden muss (Vert.x Version )
-//TODO: Readme in Java-Projekt anpassen und Hinzufügen das Event-Loop Thread Pool Size explizit gesetzt werden muss da Vert.x die Limitierungen d
-//TODO: Komplett neue Tests (diesmal als Testreihe) durchführen durch Korrektur der Event-Loop Thread Pool Size
-des Containers nicht berücksichtigt
+
 Die Anwendung, die auf dem Client-Host die \textit{work load} für die beiden zu testenden Anwendungen generiert,
 nutzt in dieser Testumgebung 4 Threads.
 Welche Laufzeitumgebungen und Tools für die Tests auf den jeweiligen Hosts vorhanden sein müssen,
@@ -161,7 +172,7 @@ die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
 		\hline
 		Betriebssystem & Fedora 34 (Workstation Edition)             \\
 		\hline
-		Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64|    \\
+		Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64|   \\
 		\hline
 	\end{tabular}
 	\caption{Systemspezifikationen der verwendeten Server-Maschine}
@@ -172,16 +183,16 @@ die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
 	\centering
 	\begin{tabular}{| c | c |}
 		\hline
-		Client-Host                                               \\
-		Hardware       & Acer Aspire VN7-591G                     \\
+		Client-Host                                                \\
+		Hardware       & Acer Aspire VN7-591G                      \\
 		\hline
-		CPU            & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4  \\
+		CPU            & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4   \\
 		\hline
-		RAM            & 8GB                                      \\
+		RAM            & 8GB                                       \\
 		\hline
-		Speicher       & 500 GB                                   \\
+		Speicher       & 500 GB                                    \\
 		\hline
-		Betriebssystem & Fedora 34 (Workstation Edition)          \\
+		Betriebssystem & Fedora 34 (Workstation Edition)           \\
 		\hline
 		Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64| \\
 		\hline
@@ -239,13 +250,13 @@ Listing \ref*{lst:generateLoad} zeigt den Aufruf von \textit{wrk2} mit den besch
 \verb|${RUN_RATE}| enthält die \textit{workload}
 
 \begin{lstlisting}[caption=Auszug des qDup Skripts generate load, captionpos=b, label=lst:generateLoad]
-    - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-START
-    - sh: wrk -t 4 -c 100 -d 60s -R ${{RUN_RATE}} ${{TEST_DYNAMIC_ENDPOINT}} > ${{CLIENT_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP.wrk2.out
-    - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-END
-    - sh: sleep 5s
-    - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-START
-    - sh: wrk -t 4 -c 100 -d 60s -R ${{RUN_RATE}} --latency ${{TEST_DYNAMIC_ENDPOINT}} > ${{CLIENT_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE.wrk2.out
-    - signal: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-END
+- signal: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-START
+- sh: wrk -t 4 -c 100 -d 60s -R ${{RUN_RATE}} ${{TEST_DYNAMIC_ENDPOINT}} > ${{CLIENT_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP.wrk2.out
+- signal: ${{RUNTIME.name}}-${{RUN_RATE}}-WARM-UP-END
+- sh: sleep 5s
+- signal: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-START
+- sh: wrk -t 4 -c 100 -d 60s -R ${{RUN_RATE}} --latency ${{TEST_DYNAMIC_ENDPOINT}} > ${{CLIENT_FILE_PATH}}/output/${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE.wrk2.out
+- signal: ${{RUNTIME.name}}-${{RUN_RATE}}-MEASURE-END
    \end{lstlisting}
 
 Die Ausgabe von wrk enthält Informationen zur \Gls{latenz}\footnote{Pro verwendetem Thread und Gesamt},
@@ -253,19 +264,19 @@ zum \Gls{durchsatz} und der \Gls{perzentile} der \Gls{latenz} (durch ein \Gls{hd
 Listing \ref*{lst:wrk-listing} zeigt die umgeleitete Ausgabe von \textit{wrk} ohne die genaue Darstellung der Perzentile.
 
 \begin{lstlisting}[caption=Beispiel für Ausgabe von wrk,captionpos=b, label=lst:wrk-listing]
-    Running 1m test @ http://erik-pc.local:8080/greeting/Bob
-    4 threads and 100 connections
-    Thread calibration: mean lat.: 310.434ms, rate sampling interval: 1047ms
-    Thread calibration: mean lat.: 330.365ms, rate sampling interval: 1127ms
-    Thread calibration: mean lat.: 298.671ms, rate sampling interval: 994ms
-    Thread calibration: mean lat.: 333.465ms, rate sampling interval: 1123ms
-    Thread Stats   Avg      Stdev     Max   +/- Stdev
-      Latency     1.76s   738.93ms   4.12s    62.98%
-      Req/Sec    28.58k   633.82    30.09k    66.49%
-    6839722 requests in 1.00m, 476.17MB read
-   Requests/sec: 113929.77
-   Transfer/sec:      7.93MB
-   \end{lstlisting}\footnote{Die Resultate der Tests sind auch im Quellcodeverzeichnis unter \textit{\/results} zu finden}
+Running 1m test @ http://erik-pc.local:8080/greeting/Bob
+4 threads and 100 connections
+Thread calibration: mean lat.: 310.434ms, rate sampling interval: 1047ms
+Thread calibration: mean lat.: 330.365ms, rate sampling interval: 1127ms
+Thread calibration: mean lat.: 298.671ms, rate sampling interval: 994ms
+Thread calibration: mean lat.: 333.465ms, rate sampling interval: 1123ms
+Thread Stats   Avg      Stdev     Max   +/- Stdev
+	Latency     1.76s   738.93ms   4.12s    62.98%
+	Req/Sec    28.58k   633.82    30.09k    66.49%
+6839722 requests in 1.00m, 476.17MB read
+Requests/sec: 113929.77
+Transfer/sec:      7.93MB
+\end{lstlisting}\footnote{Die Resultate der Testreihen sind auch im Quellcodeverzeichnis unter \textit{\/results} zu finden}
 
 Bevor die Warmup-Phase und die Belastungs-Phase mit \textit{wrk} vom Client-Host ausgeführt werden, wird dem Server-Host signalisiert, dass
 er das Skript \textit{capture platform stats} ausführen soll.
@@ -306,10 +317,13 @@ Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \text
 \subsection{Test: Statische Daten}
 \label{section:statische_daten}
 TODO: Arbeit formattieren und vorherige TODOs abarbeiten bevor anfangen
+TODO: erklären welche Testreihe genutzt wird
 \subsubsection{Systemablauf}
 //TODO: Grafik ähnlich zu Grafik in Implementierung aber mit Threadwechseln und exemplarisch mhrere Threads zeigen
 (auch angeben wie Ergebnisse mit komplizierteren Queries aussehen könnten)
 \subsubsection{Resultate}
+\paragraph{JVM mode}
+\paragraph{native mode}
 
 \subsection{Test: Datenbankzugriffe}
 \label{section:datenbankzugriffe}
@@ -319,6 +333,8 @@ TODO: Arbeit formattieren und vorherige TODOs abarbeiten bevor anfangen
 das Nicht BLockieren bzw. Asynchronität verdeutlichen
 
 \subsubsection{Resultate}
+\paragraph{JVM mode}
+\paragraph{native mode}
 
 //auch erwähnen dss beide paradigmen gemischt werden können, und vert.x dann entweder die anfrage an den worker thread pool dispatched
 // (auch mit kosten verbunden)

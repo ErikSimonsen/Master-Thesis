@@ -80,7 +80,7 @@ In Listing \ref{lst:NIO_Pseudocode} kann durchaus zuerst \verb|hello world| ausg
 restliche Programmausführung nicht blockieren. Wenn statt \verb|hello world| versucht würde, die Ergebnisse einer der Datenbank-Abfragen
 darzustellen wäre das Ergebnis in der Regel eine Exception oder \verb|null|, da die Anfragen zur Zeit der Ausführung von Zeile 3 noch nicht notwendigerweise
 abgeschlossen sind. Das ist ein sehr weit verbreiter Fehler beim Arbeiten mit asynchronen, nicht-blockierenden Funktionen.
-\newpage
+
 \subsection{Vorteile und Nachteile}
 \label{subsec:vorteile_nachteile}
 
@@ -165,7 +165,7 @@ asynchrone, nicht blockierende Verarbeitung von (unbegrenzten) Datenströmen mit
 	nach der Abarbeitung liegt statt eines Streams eine Collection vor}
 
 \subsubsection{Java Flow-API}
-\label{section:java_flow_api}
+\label{subsection:java_flow_api}
 Die Flow-API fügt die, nicht instanziierbare, Klasse \verb|java.util.concurrent.Flow| hinzu. Sie enthält 4 Interfaces um das,
 vom \textit{Reactive Streams}-Projekt standardisierte, beschriebene Publisher-Subscriber Model des Daten- bzw. Eventflusses
 (siehe \ref{lst:eventflow_pseudocode} und \ref{fig:eventflow_mutiny}) mit \verb|backpressure|
@@ -240,7 +240,7 @@ reaktiven Datenstrom verarbeitet werden (siehe Listing \ref{lst:eventflow_pseudo
 Klassen die dieses Interface implementieren repräsentieren in der Regel die Operatoren einer Reactive Programming-Bibliothek.
 Sobald ein \verb|Processor| ein Fehler erhält kann er sich entweder davon erholen oder direkt das onError-Signal an seinen
 Downstream-Subscriber propagieren.
-
+\newpage
 \subsection{Reaktive Systeme}
 \label{subsection:reaktive_systeme}
 Anforderungen an große Softwaresysteme haben sich in den letzten Jahren stark verändert:
@@ -315,7 +315,7 @@ In Abbildung \ref{fig:reactive-traits} wird das Zusammenspiel der Eigenschaften 
 \subsubsection{Abgrenzung zu reaktiver Programmierung}
 \label{subsubsection:abgrenzung_reaktive_programmierung}
 Aufgrund der steigenden Popularität von reaktiven Anwendungen ist der Begriff \verb|reaktiv| im Kontext der Softwareentwicklung
-überladen und unterscheidet nicht zwischen \verb|Reaktiver Programmierung| und \verb|Reaktiven Systemen|.
+überladen und unterscheidet nicht zwischen \linebreak\verb|Reaktiver Programmierung| und \verb|Reaktiven Systemen|.
 
 \verb|Reaktive Programmierung| ist eine ideale Technik zur Abbildung der internen Logik innerhalb einer Komponente, in Form von Transformationen
 auf Datenströmen, um sowohl Performance, Ressourceneffizienz und Code-Verständlichkeit zu optimieren.

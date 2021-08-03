@@ -57,6 +57,14 @@
 % Literaturverzeichniss
 \usepackage[backend=bibtex,style=authoryear]{biblatex}
 
+% Definiere Style für Text Listings.
+\lstdefinestyle{code}{
+    basicstyle=\ttfamily\footnotesize,
+    tabsize=2
+}
+% Verwende Style 
+\lstset{style=code}
+
 \addbibresource{main.bib}
 \makeglossaries
 \input{glossary}
@@ -64,9 +72,11 @@
 \input{pdf}
 \input{todo-definition}
 \begin{document}
+\pagestyle{empty}
 \input{frontmatter/titlepage}
 \input{frontmatter/abstract}
 \input{frontmatter/ehrenwort}
+\newpage
 \tableofcontents
 % Verzeichnis von Abbildungen
 \listoffigures
@@ -75,20 +85,14 @@
 % Verzeichnis von Tabellen
 \listoftables
 
-\setcounter{page}{1}
+\newpage
 \pagenumbering{arabic}
 \pagestyle{headings}
-\newpage
+\setcounter{page}{1}
 \input{mainmatter/einleitung}
 \newpage
-% Definiere Style für Text Listings.
-\lstdefinestyle{code}{
-    basicstyle=\ttfamily\footnotesize,
-    tabsize=2
-}
-% Verwende Style 
-\lstset{style=code}
 \input{mainmatter/grundlagen}
+\newpage
 \input{mainmatter/reaktive_programmierung}
 \newpage
 \input{mainmatter/vergleich_programmierparadigmen}
