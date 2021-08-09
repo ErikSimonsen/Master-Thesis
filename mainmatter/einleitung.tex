@@ -4,16 +4,18 @@
 \subsection{Motivation}
 \label{subsec:motivation}
 //Problemstellung zeigen, bisheriger Ansatz durch thread switching nur begrenzt skalierbar
-//      Während die Kosten von Threadwechseln für, nach früheren Standards, hoch frequentierte Anwendungen lange Zeit kein Problem darstellte,
-    	sind die Anforderungen an Webanwendungen in den letzten Jahren durch steigende Nutzerzahlen und Architekturen,
-        die stark auf Client-Server-Kommunikation basieren, wie Microservices und SPAs, erheblich gestiegen.
-        \noindent
-        Sobald die Last eine realistische, kritische Grenze erreicht, erfolgen die Threadwechsel zwischen \textit{kernel threads} vom Betriebssystem
-        nicht mehr schnell genug, um jede Anfrage innerhalb einer akzeptablen Zeit zu bearbeiten bzw. jedem Thread ausreichend Rechenzeit zuzuweisen.
-        Die Kosten der Threadwechsel von \textit{kernel threads} können also zu einem Performance Problem führen, welches sich in nicht
-        ausreichend skalierendem Durchsatz äußert.
+//Während die Kosten von Threadwechseln für, nach früheren Standards, hoch frequentierte Anwendungen lange Zeit kein Problem darstellte,
+sind die Anforderungen an Webanwendungen in den letzten Jahren durch steigende Nutzerzahlen und Architekturen,
+die stark auf Client-Server-Kommunikation basieren, wie Microservices und \Glspl{spag}, erheblich gestiegen.
+\noindent
+Sobald die Last eine realistische, kritische Grenze erreicht, erfolgen die Threadwechsel zwischen \textit{kernel threads} vom Betriebssystem
+nicht mehr schnell genug, um jede Anfrage innerhalb einer akzeptablen Zeit zu bearbeiten bzw. jedem Thread ausreichend Rechenzeit zuzuweisen.
+Die Kosten der Threadwechsel von \textit{kernel threads} können also zu einem Performance Problem führen, welches sich in nicht
+ausreichend skalierendem \Gls{durchsatz}(*) äußert.
 //Forschungsfrage: Kann Reactive Programming das Problem von modernen Workloads lösen ?
 //Verwandte Arbeiten?
-//Wird anhand  von Benchmarks durch Lasttests für eine 'triviale' Anwendung geprüft
+//Wird anhand  von \Glspl{benchmark}(*) durch Lasttests für eine 'triviale' Anwendung geprüft
+//Erwähnen das alle Begriffe mit einem (*), im Glossar und im Acronym verzeichnis kurz erklärt werden, da sie möglicherweise nicht geläufig sind aber
+nicht im Fließtext erläutert werden
 \subsection{Aufbau}
 \label{subsec:aufbau}

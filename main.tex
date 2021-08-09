@@ -57,14 +57,6 @@
 % Literaturverzeichniss
 \usepackage[backend=bibtex,style=authoryear]{biblatex}
 
-% Definiere Style für Text Listings.
-\lstdefinestyle{code}{
-    basicstyle=\ttfamily\footnotesize,
-    tabsize=2
-}
-% Verwende Style 
-\lstset{style=code}
-
 \addbibresource{main.bib}
 \makeglossaries
 \input{glossary}
@@ -89,6 +81,13 @@
 \pagenumbering{arabic}
 \pagestyle{headings}
 \setcounter{page}{1}
+% Definiere Style für Text Listings.
+\lstdefinestyle{code}{
+    basicstyle=\ttfamily\footnotesize,
+    tabsize=2
+}
+% Verwende Style 
+\lstset{style=code}
 \input{mainmatter/einleitung}
 \newpage
 \input{mainmatter/grundlagen}
@@ -96,12 +95,13 @@
 \input{mainmatter/reaktive_programmierung}
 \newpage
 \input{mainmatter/vergleich_programmierparadigmen}
+\newpage
 \input{mainmatter/fazit}
-
+\newpage
 %Glossar und Acronyme ohne Seitenzahl anzeigen, auf denen die Begriffe auftauchen
 \printglossary[nonumberlist]
 \printglossary[type=\acronymtype, nonumberlist]
-
+\newpage
 %Literaturverzeichnis in Inhaltsverzeichnis zeigen
 \addcontentsline{toc}{section}{Literaturverzeichnis}
 \printbibliography

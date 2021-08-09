@@ -1,52 +1,145 @@
 \newglossaryentry{benchmark}
 {
-	name=benchmark,
-	description={Ein Benchmark im Software Performance Testing ist
-			eine Metrik oder ein Bezugspunkt, mit dem Softwareprodukte oder -dienstleistungen verglichen werden können, um deren Qualität zu bewerten.
-			Beliebte Benchmarks sind beispielsweise CPU-Auslastung, Speicherverbrauch, Durchsatz, Startzeiten aber auch Fehlerrate und Fehlertoleranz.
-		}
+  name=Benchmark,
+  description={Ein Benchmark im Software Performance Testing ist
+      eine Metrik oder ein Bezugspunkt, mit dem Softwareprodukte oder -dienstleistungen verglichen werden können, um deren Qualität zu bewerten.
+      Beliebte Benchmarks sind beispielsweise CPU-Auslastung, Speicherverbrauch, Durchsatz, Startzeiten, Ausführungszeiten,
+      aber auch Fehlerraten und Fehlertoleranz.
+    }
 }
 \newglossaryentry{latenz}
 {
-	name=latenz,
-	description={
-			Die Latenz ist ein Maß dafür, wie schnell ein Server auf Anfragen des Clients reagiert.
-			Die Latenz wird normalerweise in Millisekunden (ms) gemessen und wird oft als Antwortzeit bezeichnet.
-			Niedrigere Zahlen bedeuten schnellere Antworten. Die Latenz wird clientseitig gemessen, von der
-			Zeit, zu der die Anfrage gesendet wird, bis die Antwort eingeht. Netzwerk-Overhead ist in dieser Zahl enthalten.}
+  name=Latenz,
+  description={
+      Die Latenz ist ein Maß dafür, wie schnell ein Server auf Anfragen des Clients reagiert.
+      Die Latenz wird normalerweise in Millisekunden (ms) gemessen und wird oft als Antwortzeit bezeichnet.
+      Niedrigere Zahlen bedeuten schnellere Antworten. Die Latenz wird clientseitig gemessen, von der
+      Zeit, zu der die Anfrage gesendet wird, bis die Antwort eingeht. Netzwerk-Overhead ist in dieser Zahl enthalten.}
 }
 \newglossaryentry{durchsatz}
 {
-	name=durchsatz,
-	description={Der Durchsatz gibt an wieviele Anfragen während eines spezifischen Zeit Intervalls von einem Server verarbeitet werden konnen.
-			Der Durchsatz wird normalerweise in Anfragen pro Sekunde (requests/sec) angegeben.}
+  name=Durchsatz,
+  description={Der Durchsatz gibt an wieviele Anfragen während eines spezifischen Zeit Intervalls von einem Server verarbeitet werden konnen.
+      Der Durchsatz wird normalerweise in Anfragen pro Sekunde (requests/sec) angegeben.}
 }
-
 \newglossaryentry{perzentile}
 {
-	name=perzentile,
-	description=
-		{In der Statistik ist ein Perzentil (oder ein Zentil) ein Wert, unter den ein bestimmter Prozentsatz von Werten in seiner Häufigkeitsverteilung fällt.
-			Wenn die Antwortzeit im 50. Perzentil 100ms beträgt, bedeutet dies, dass 50\% der Anfragen in 100ms oder weniger zurückgegeben wurden.
-		}
+  name=Perzentile,
+  description=
+    {In der Statistik ist ein Perzentil (oder ein Zentil) ein Wert, unter den ein bestimmter Prozentsatz von Werten in seiner Häufigkeitsverteilung fällt.
+      Wenn die Antwortzeit im 50. Perzentil 100ms beträgt, bedeutet dies, dass 50\% der Anfragen in 100ms oder weniger zurückgegeben wurden.
+    }
+}
+\newglossaryentry{hdrHistogramm}{
+  name=HdrHistogramm,
+  description={Histogramme die das Aufnehmen und Analysieren von
+      ausgewählten Daten über eine konfigurierbare, ganzzahlige Reichweite und eine konfigurierbare
+      Genauigkeit innerhalb dieser Reichweite ermöglichen.
+    },
+  user1={hdrHistogramme}
+}
+\newglossaryentry{jaxrsg}{
+  name=JAX-RS,
+  description={
+      Die Jakarta RESTful Web Services (JAX-RS) Spezifikation definiert eine Menge an Java APIs, die die Entwicklung von Web-Services gemäß
+      dem Representational State Transfer (REST) Architekturstil ermöglichen. \parencite{JakartaEERest}
+    }
+}
+\newglossaryentry{jpag}{
+  name=JPA,
+  description={
+      Die Jakarta Persistence API Spezifikation definiert eine API, die das Zuordnen und Übertragen von Java-Objekten in eine
+      relationale Datenbank erleichtern, um sie dort zu persistieren.
+      Die dabei verwendete Technik wird als objektrelationale Abbildung bezeichnet. \parencite{MuellerJPA}
+    }
+}
+\newglossaryentry{ormg}{
+  name=ORM,
+  description={
+      Objektrelationale Abbildung in der Informatik ist eine Programmiertechnik zum Konvertieren von Daten zwischen inkompatiblen Typsystemen unter Verwendung objektorientierter
+      Programmiersprachen. Dies erzeugt in der Tat eine "virtuelle Objektdatenbank", die innerhalb der Programmiersprache verwendet werden kann.
+      Damit ist es möglich Objekte einer objektorientierten Programmiersprache in einer relationalen, nicht objektorientierten Datenbank abzulegen.
+    }
 }
 
-\newglossaryentry{hdrHistogramm}{
-	name=hdrHistogramm,
-	description={Histogramme die das Aufnehmen und Analysieren von
-			ausgewählten Daten über eine konfigurierbare, ganzzahlige Reichweite und eine konfigurierbare
-			Genauigkeit innerhalb dieser Reichweite ermöglichen
-			TODO: Add JavaEE APIS jax rs, orm, json, publisher, subscriber, IO Operationen, SPA, Servlet-Container, logische cpus
-			callback (The answer is that you instead pass a callback[7]
-			(a lambda) to f as an additional argument, and the body of f spawns a task that calls this lambda with the result when it’s ready)
-		},
-	user1={hdrHistogramme}
+\newglossaryentry{io}
+{
+  name=I/O,
+  description={
+      In der Informatik bezeichnet input/output(I/O) die Kommunikation eines Informationssystems, wie ein Computer, mit der Außenwelt, möglicherweise
+      einem Menschen oder einem anderen Informationssystem. Eingaben sind dabei die Signale und Daten, die das System empfängt und
+      Ausgaben sind die vom System gesendeten Signale und Daten. Für einen Computer sind auch die auf ihm laufenden Programme Eingaben.
+      Der Begriff kann auch als Teil einer Aktion genutzt werden; "I/O auszuführen" bedeutet, eine Eingabe-oder Ausgabeoperation (I/O-Operation) auszuführen.
+      Auf Ebene der Computerarchitektur wird allgmein jegliche Übertragung von Informationen (unabhängig von der Richtung) von einer CPU ausgeführt, indem
+      Bereiche des Hauptspeichers über individuelle Befehle beschrieben (Schreiboperation) oder gelesen (Leseoperation) werden.
+      Daher wird generell jeglicher Transport von Informationen, beispielsweise das Lesen von Daten einer Festplatte, als I/O bezeichnet.
+    }
 }
+
+\newglossaryentry{servlet-container}{
+  name=Servlet-Container,
+  description={
+      Ein Servlet ist eine Webkomponente, die von einem Container verwaltet wird und dynamische Inhalte generiert.
+      Die Servlet-Spezifikation ist Teil der Jakarta-EE-Technologie und Servlet-Container sind damit fester Bestandteil aller Jakarta-EE-Anwendungsserver.
+      Servlets sind Java-Klassen, deren kompilierter Bytecode, dynamisch vom Anwendungsserver geladen und ausgeführt wird und somit Anfragen von
+      Clients entgegennehmen und beantworten können. \parencite{JakartaServlet}
+    }
+}
+\newglossaryentry{logische CPU}{
+  name=Logische CPU,
+  description={
+      Die Anzahl der logischen Prozessoren beschreibt die Anzahl der verfügbaren Prozessoren, wenn die physischen CPU-Kerne Hyperthreading unterstützen.
+      Durch Hyperthreading ist es möglich mehrere Threads (in der Regel auf 2 limitiert) pro CPU-Kern echt parallel auszuführen.
+      Dabei beläuft sich die Zahl der logischen Prozessoren in der Regel auf das doppelte der vorhandenen physischen CPU-Kerne.
+    },
+  user1={logischen CPU}
+}
+\newglossaryentry{uber-jar}{
+  name=Uber-jar,
+  description={
+      Ein uber-JAR, auch als \textit{fat JAR} bezeichnet, ist eine Java-Archiv das sowohl alle Klassen des Java-Projektes, als auch alle Klassen der
+      Abhängigkeiten enthält. Dadurch kann das Programm als einzige .jar-Datei deployed und in einer Java-Laufzeitumgebung ausgeführt werden.
+    }
+}
+\newglossaryentry{callback}{
+  name=Callback,
+  description={
+      Eine Callback-Funktion, auch als Rückruffunktion bezeichnet, ist eine Funktion, die einer anderen Funktion als Parameter übergeben wird und von dieser
+      unter gewissen Bedingungen aufgerufen wird.
+    }
+}
+\newglossaryentry{spag}{
+  name=SPA,
+  description={
+      Eine Single-Page-Application (SPA) ist eine Webanwendung, die mit dem Benutzer interagiert, indem sie den aktuellen Inhalt der Seite mit neuen
+      Daten ersetzt, anstatt standardmäßig neue Seiten durch den Browser zu laden.
+      Das Ziel besteht dabei in schnelleren Übergangen, wodurch das Gefühlt vermittelt wird bei der Website handele es sich um eine native Anwendung.
+      In einer SPA findet nie eine Seitenaktualisierung statt, stattdessen wird gesamte erforderliche HTML-, JavaScript- und CSS-Code entweder vom Browser
+      mit einem einzigen Seitenladevorgang abgerufen, oder die entsprechenden Ressourcen werden dynamisch geladen und nach Bedarf zur Seite hinzugefügt,
+      normalerweise als Reaktion auf Benutzeraktionen.
+    }
+}
+\newglossaryentry{jsong}{
+  name=JSON,
+  description={
+      Bei JavaScript Object Notation (JSON) handelt es sich um ein einfaches, schlankes Datenaustauschformat.
+      Es wurde mit der Absicht entwickelt für Menschen einfach zu lesen, und für Maschinen einfach zu parsen und zu generieren zu sein.
+      Es basiert dabei auf einer Untermenge der JavaScript Programmiersprache, ist aber als Textformat komplett unabhängig von Programmiersprachen.
+      \parencite{JSON}
+    }
+}
+\newacronym{spa}{SPA}{Single Page Application}
 \newacronym{http}{HTTP}{Hypertext Transfer Protocol}
 \newacronym{hdrhistogram}{HdrHistogramm}{High dynamic range histogram}
-\newacronym{cpu}{CPU}{Central processing unit}
-\newacronym{ram}{RAM}{Random-access memory}
-\newacronym{spa}{SPA}{Single page application}
-%jvm 
-%aot
-%jit
+\newacronym{cpu}{CPU}{Central Processing Unit}
+\newacronym{ram}{RAM}{Random-Access Memory}
+\newacronym{jvm}{JVM}{Java Virtual Machine}
+\newacronym{aot}{AOT compilation}{Ahead-Of-Time compilation}
+\newacronym{jit}{JIT compilation}{Just-In-Time compilation}
+\newacronym{json}{JSON}{JavaScript Object Notation}
+\newacronym{orm}{ORM}{Object Relational Mapping}
+\newacronym{rest}{REST}{Representational State Transfer}
+\newacronym{crud}{CRUD}{Create Read Update Delete}
+\newacronym{jax-rs}{JAX-RS}{Jakarta RESTful Web Services (früher: Java API for RESTful Web Services)}
+\newacronym{jpa}{JPA}{Jakarta Persistence API (früher Java Persistence API)}
+\newacronym{api}{API}{Application Programming Interface}
