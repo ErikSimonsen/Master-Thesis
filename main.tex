@@ -57,18 +57,31 @@
 % Literaturverzeichniss
 \usepackage[backend=bibtex,style=authoryear]{biblatex}
 
-\addbibresource{main.bib}
-\makeglossaries
-\input{glossary}
+% PDF-Metainformationen
+\hypersetup{
+	pdftitle={Master-Arbeit},
+	pdfsubject={Reactive Programming mit Quarkus},
+	pdfauthor={Erik Simonsen},
+	pdfkeywords={Reactive, Reactive Programming, Quarkus, Java},
+	pdfstartpage={1},
+	plainpages=false,
+	hypertexnames=false
+}
 
-\input{pdf}
-\input{todo-definition}
+% Literaturverzeichnis Quelle angeben
+\addbibresource{backmatter/main.bib}
+% Glossar und Akronyme
+\makeglossaries
+\input{backmatter/glossary}
+
 \begin{document}
 \pagestyle{empty}
+% Titelseite, Abstract und Ehrenwort
 \input{frontmatter/titlepage}
 \input{frontmatter/abstract}
 \input{frontmatter/ehrenwort}
 \newpage
+% Inhaltsverzeichnis
 \tableofcontents
 % Verzeichnis von Abbildungen
 \listoffigures
@@ -78,6 +91,7 @@
 \listoftables
 
 \newpage
+% Seitennummerierung zurücksetzen
 \pagenumbering{arabic}
 \pagestyle{headings}
 \setcounter{page}{1}
@@ -88,6 +102,7 @@
 }
 % Verwende Style 
 \lstset{style=code}
+% Inhalt
 \input{mainmatter/einleitung}
 \newpage
 \input{mainmatter/grundlagen}
@@ -98,11 +113,14 @@
 \newpage
 \input{mainmatter/fazit}
 \newpage
-%Glossar und Acronyme ohne Seitenzahl anzeigen, auf denen die Begriffe auftauchen
+% Glossar und Acronyme anzeigen ohne Seitenzahl auf denen die Begriffe auftauchen
 \printglossary[nonumberlist]
 \printglossary[type=\acronymtype, nonumberlist]
 \newpage
-%Literaturverzeichnis in Inhaltsverzeichnis zeigen
+% Literaturverzeichnis in Inhaltsverzeichnis zeigen und Literaturverzeichnis anzeigen
 \addcontentsline{toc}{section}{Literaturverzeichnis}
 \printbibliography
+% Anhang
+\appendix
+\input{backmatter/appendix}
 \end{document}

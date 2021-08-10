@@ -5,8 +5,8 @@ Um zu prüfen, ob Leistungsfähigkeit und Skalierbarkeit einer reaktiven Anwendu
 
 Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung, in mehreren Testreihen, zwei Lasttests unterzogen:
 \begin{enumerate}
-  \item Abfrage von statischen Daten
-  \item Abfrage von dynamischen Daten (mit Datenbankanbindung)
+    \item Abfrage von statischen Daten
+    \item Abfrage von dynamischen Daten (mit Datenbankanbindung)
 \end{enumerate}
 Dabei wird eine Reihe an Lasten bzw. \textit{workloads} von einem Client-Host generiert und über eine feste Dauer in kleinen Zeitinvervallen
 an einen ausgewählten HTTP-Endpunkt der Anwendung gesendet.
@@ -16,7 +16,7 @@ der benötigte Arbeitsspeicher und CPU-Auslastung des Prozesses, der Durchsatz, 
 Für Container- und Cloud-Umgebungen eignen sich, primär aus Kostengründen, Anwendungen die, statt auf hohen Durchsatz und lange Laufzeiten, auf
 schnelle Startzeiten und geringen Ressourcenverbrauch setzen.
 Aus diesem Grund werden die beiden Anwendungen sowohl im \textit{JVM mode} als auch im \textit{native mode}
-(siehe Paragraph \verb|Quarkus und native image| in Kapitel \ref{subsubsec:frameworks})
+(siehe Absatz \verb|Quarkus und native image| in Kapitel \ref{subsubsec:frameworks})
 den Lasttests unterzogen. Ingesamt ergeben sich also 4 Testszenarien.
 
 \subsection{Implementierung \& Systemaufbau}
@@ -33,10 +33,10 @@ wird der abzuarbeitende Code dann auf einem blockierenden \textit{worker thread}
 
 \newpage
 \begin{figure}[h]
-  \centering
-  \includegraphics[width=0.9\textwidth]{Quarkus_HTTP_Layer}
-  \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
-  \label{fig:quarkus_http_schicht}
+    \centering
+    \includegraphics[width=0.9\textwidth]{Quarkus_HTTP_Layer}
+    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
+    \label{fig:quarkus_http_schicht}
 \end{figure}
 
 Die \textit{IO threads} sind dafür zuständig alle IO-Operationen asynchron auszuführen und die jeweiligen EventListener bzw. Subscriber
@@ -44,10 +44,10 @@ auszulösen sobald die Operationen abgeschlossen sind.
 Damit sich beide Anwendungen nahe an einer realen Java-EE CRUD REST-API orientieren, haben
 sie (zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks) folgende Projekt-Abhängigkeiten:
 \begin{itemize}
-  \item JAX-RS Implementierung
-  \item \Gls{jsong}(*) Unterstützung
-  \item PostgreSQL - Datenbanktreiber
-  \item \Gls{jpag}(*) Implementierung
+    \item JAX-RS Implementierung
+    \item \Gls{jsong}(*) Unterstützung
+    \item PostgreSQL - Datenbanktreiber
+    \item \Gls{jpag}(*) Implementierung
 \end{itemize}
 
 Diese Abhängigkeiten wurden vom Quarkus Maven-Repository sowohl in blockierender,
@@ -57,22 +57,22 @@ als auch in nicht-blockierender, reaktiver und in \verb|native image|-kompatible
 % the height of each row is set to 1.5 relative to its default height
 \renewcommand{\arraystretch}{1.5}
 \begin{table}[ht!]
-  \centering
-  \begin{tabular}{| c | c | c |}
-    \hline
-                     & Blockierend      & Nicht-blockierend (reaktiv) \\
-    \hline
-    JAX-RS           & Resteasy         & Resteasy Reactive           \\
-    \hline
-    JSON             & Resteasy-Jackson & Resteasy-Reactive-Jackson   \\
-    \hline
-    Datenbanktreiber & JDBC-Postgresql  & Reactive-Pg-Client          \\
-    \hline
-    JPA-/ORM         & Hibernate-ORM    & Hibernate-Reactive          \\
-    \hline
-  \end{tabular}
-  \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
-  \label{table:dependencies}
+    \centering
+    \begin{tabular}{| c | c | c |}
+        \hline
+                         & Blockierend      & Nicht-blockierend (reaktiv) \\
+        \hline
+        JAX-RS           & Resteasy         & Resteasy Reactive           \\
+        \hline
+        JSON             & Resteasy-Jackson & Resteasy-Reactive-Jackson   \\
+        \hline
+        Datenbanktreiber & JDBC-Postgresql  & Reactive-Pg-Client          \\
+        \hline
+        JPA-/ORM         & Hibernate-ORM    & Hibernate-Reactive          \\
+        \hline
+    \end{tabular}
+    \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
+    \label{table:dependencies}
 \end{table}
 
 In Listing \ref{lst:update_reactive} und \ref{lst:update_blocking} ist jeweils die Update Methode der REST-APIs abgebildet, um den
@@ -140,72 +140,72 @@ Beiden Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks, welches wied
 Um eine reproduzierbare Anwendungsumgebung und Ressourcenallokation zu ermöglichen, laufen beide Anwendungen auf dem Server-Host in
 jeweils einem Docker-Container mit fest definierten Ressourcen:
 \begin{itemize}
-  \item Nutzung von 4 CPU-Kernen
-  \item 1024 MB RAM
-  \item 256 MB Heap Größe für den Java-Prozess
-        \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \parencite{Java10ReleaseNotes}}
+    \item Nutzung von 4 CPU-Kernen
+    \item 1024 MB RAM
+    \item 256 MB Heap Größe für den Java-Prozess
+          \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \parencite{Java10ReleaseNotes}}
 \end{itemize}
 Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
 \begin{itemize}
-  \item 4 CPU-Kerne
-  \item 2048 MB RAM
+    \item 4 CPU-Kerne
+    \item 2048 MB RAM
 \end{itemize}
 
 Die Größe des von Vert.x verwendeten \verb|Worker Thread Pools| (siehe Abbildung \ref{fig:quarkus_http_schicht}) beträgt standardmäßig 20 und bleibt
 unverändert, die Größe des \verb|Event-Loop Thread Pools| hingegen wird für die Tests manuell auf 8 gesetzt, da die Anwendung durch die Ressourcenallokation
 des Docker-Containers nur 4 CPU-Kerne nutzen darf und jeder dieser CPU-Kerne Hyperthreading unterstützt. \footnote{Wodurch jeder physische CPU-Kern über
-  zwei logische CPUs verfügt}
+    zwei logische CPUs verfügt}
 Standardmäßig wird die Ressourcenbegrenzung durch Container von Vert.x nicht beachtet und die Anzahl der \verb|Event loop|-Threads auf die doppelte
 Anzahl der verfügbaren CPU-Kerne des Container-Hosts gesetzt.
 
 Die Anwendung, die auf dem Client-Host die \textit{work load} für die beiden zu testenden Anwendungen generiert,
 nutzt in dieser Testumgebung 4 Threads.
 \footnote{Welche Laufzeitumgebungen und Tools für die Tests auf den jeweiligen Hosts vorhanden sein müssen, und wie diese installiert werden
-  wird in der README.md-Datei des Projektverzeichnisses beschrieben.}
+    wird in der README.md-Datei des Projektverzeichnisses beschrieben.}
 
 Da die Messergebnisse je nach verwendeter Hardware der Client- und Server-Hosts durchaus variieren können werden im Folgenden
 die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
 \begin{table}[ht!]
-  \centering
-  \begin{tabular}{| c | c |}
-    \hline
-    Server-Host                                                  \\
-    \hline
-    CPU's          & AMD Ryzen 7 2700x eight-core processor x 16 \\
-    \hline
-    RAM            & 16GB                                        \\
-    \hline
-    Speicher       & 1,5 TB                                      \\
-    \hline
-    Betriebssystem & Fedora 34 (Workstation Edition)             \\
-    \hline
-    Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64|   \\
-    \hline
-  \end{tabular}
-  \caption{Systemspezifikationen der verwendeten Server-Maschine}
-  \label{table:system_host}
+    \centering
+    \begin{tabular}{| c | c |}
+        \hline
+        Server-Host                                                  \\
+        \hline
+        CPU's          & AMD Ryzen 7 2700x eight-core processor x 16 \\
+        \hline
+        RAM            & 16GB                                        \\
+        \hline
+        Speicher       & 1,5 TB                                      \\
+        \hline
+        Betriebssystem & Fedora 34 (Workstation Edition)             \\
+        \hline
+        Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64|   \\
+        \hline
+    \end{tabular}
+    \caption{Systemspezifikationen der verwendeten Server-Maschine}
+    \label{table:system_host}
 \end{table}
 
 \begin{table}[ht!]
-  \centering
-  \begin{tabular}{| c | c |}
-    \hline
-    Client-Host                                                \\
-    Hardware       & Acer Aspire VN7-591G                      \\
-    \hline
-    CPU            & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4   \\
-    \hline
-    RAM            & 8GB                                       \\
-    \hline
-    Speicher       & 500 GB                                    \\
-    \hline
-    Betriebssystem & Fedora 34 (Workstation Edition)           \\
-    \hline
-    Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64| \\
-    \hline
-  \end{tabular}
-  \caption{Systemspezifikationen der verwendeten Client-Maschine}
-  \label{table:system_client}
+    \centering
+    \begin{tabular}{| c | c |}
+        \hline
+        Client-Host                                                \\
+        Hardware       & Acer Aspire VN7-591G                      \\
+        \hline
+        CPU            & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4   \\
+        \hline
+        RAM            & 8GB                                       \\
+        \hline
+        Speicher       & 500 GB                                    \\
+        \hline
+        Betriebssystem & Fedora 34 (Workstation Edition)           \\
+        \hline
+        Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64| \\
+        \hline
+    \end{tabular}
+    \caption{Systemspezifikationen der verwendeten Client-Maschine}
+    \label{table:system_client}
 \end{table}
 
 \subsection{Testvorgehen / Testaufbau}
@@ -217,11 +217,11 @@ zur Erstellung von verschiedenen Benchmarks für den Quarkus Technologie-Stack g
 Um den gesamten Versuchsablauf zu automatisieren und über mehrere Server zu steuern wird ein Tool namens qDup eingesetzt.
 Damit können Shell-Kommandos als Skripte gruppiert, und verschiedenen Hosts je nach Rolle zugewiesen werden.
 \footnote{Die qDup Skripte mit dem gesamten Testablauf können im Verzeichnis \textit{/scripts/qDup} des Quellcodeverzeichnisses eingesehen und
-  angepasst werden.}
+    angepasst werden.}
 Um dem Ablauf korrekt zu steuern werden Signale definiert die ein Host sendet, und auf die die anderen Hosts warten um ihrerseits
 weitere Skripte auszuführen.
 \footnote{Beispielsweise sollte der Server-Host erst anfangen den Java-Prozess zu überwachen, sobald der Client-Host die \textit{workload}
-  generiert und nicht bereits davor}
+    generiert und nicht bereits davor}
 
 
 Wie bereits in \ref{section:testumgebung} erwähnt, nutzt qDup SSH um auf die jeweilige Hosts zuzugreifen.
@@ -241,9 +241,9 @@ Die \textit{workload} ist hier definiert als die Anzahl der, an den Server-Host,
 Für das Generieren und Übermitteln der \textit{workload} wird das Werkzeug \textit{wrk2} genutzt, welches das
 bewährte HTTP-Benchmarking Tool \textit{wrk} um folgende Funktionen erweitert:
 \begin{enumerate}
-  \item Konstanter \textit{workload} Durchsatz
-  \item Korrekteres Messverfahren der Antwort-Latenz durch Vermeidung von \verb|Coordinated Omission|
-  \item Hochexaktes Messen durch \Glsuseri{hdrHistogramm}(*)
+    \item Konstanter \textit{workload} Durchsatz
+    \item Korrekteres Messverfahren der Antwort-Latenz durch Vermeidung von \verb|Coordinated Omission|
+    \item Hochexaktes Messen durch \Glsuseri{hdrHistogramm}(*)
 \end{enumerate}\parencite{Wrk2, Wrk}
 
 \paragraph{Coordinated Omission Problem}
@@ -273,8 +273,8 @@ Jede \textit{workload} wird über einen Zeitraum von 60 Sekunden über 100 offen
 In den Tests nutzt \verb|wrk2| für das Generieren und Übermitteln der \textit{workload}, sowie das Messen der Antwortszeit
 4 Threads.
 
-Damit der Anwendungscode des angesteuerten HTTP-Endpunkts durch den JIT-Compiler der JVM (siehe Absatz \textbf{Quarkus und native image} in Kapitel
-\ref{subsubsec:frameworks}) optimiert wird, findet pro \textit{workload} vor der eigentlichen Mess-Phase eine identische Warmup-Phase statt.
+Damit der Anwendungscode des angesteuerten HTTP-Endpunkts durch den JIT-Compiler der JVM ((siehe Absatz \verb|Quarkus und native image| in Kapitel
+\ref{subsubsec:frameworks})) optimiert wird, findet pro \textit{workload} vor der eigentlichen Mess-Phase eine identische Warmup-Phase statt.
 
 Listing \ref*{lst:generateLoad} zeigt den Aufruf von \verb|{wrk2| mit den beschriebenen Parametern in der Warmup- und Mess-Phase,
 \verb|${RUN_RATE}| enthält dabei die \textit{workload}.
@@ -333,9 +333,9 @@ Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des
 Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host, welches das qDup Skript ausgeführt hat, kopiert.
 
 \begin{figure}[ht]
-  \centering
-  \includegraphics[width=0.8\textwidth]{Testaufbau}
-  \caption{Testaufbau}
+    \centering
+    \includegraphics[width=0.8\textwidth]{Testaufbau}
+    \caption{Testaufbau}
 \end{figure}
 
 In einem Bash-Skript werden anschließend die Ausgaben von \verb|top| und \verb|wrk| für jede einzelne \verb|workload| eines Tests
@@ -346,14 +346,13 @@ Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \text
 
 \subsection{Test: Statische Daten}
 \label{section:statische_daten}
-TODO: Arbeit formattieren, vorherige TODOs und Glossar abarbeiten bevor anfangen
 TODO: erklären welche Testreihe genutzt wird
+TODO: andere Testreihen in Anhang
 \subsubsection{Systemablauf}
 //TODO: Grafik ähnlich zu Grafik in Implementierung aber mit Threadwechseln und exemplarisch mhrere Threads zeigen
 (auch angeben wie Ergebnisse mit komplizierteren Queries aussehen könnten)
-\subsubsection{Resultate}
-\paragraph{JVM mode}
-\paragraph{native mode}
+\subsubsection{JVM mode}
+\subsubsection{native mode}
 
 \subsection{Test: Datenbankzugriffe}
 \label{section:datenbankzugriffe}
@@ -362,9 +361,8 @@ TODO: erklären welche Testreihe genutzt wird
 //TODO: Grafik ähnlich zu Grafik in Implementierung aber ohne Threadwechsel dafür Main-Thread mit dahinterliegender Datenbank,
 das Nicht BLockieren bzw. Asynchronität verdeutlichen
 
-\subsubsection{Resultate}
-\paragraph{JVM mode}
-\paragraph{native mode}
+\subsubsection{JVM mode}
+\subsubsection{native mode}
 
 //auch erwähnen dss beide paradigmen gemischt werden können, und vert.x dann entweder die anfrage an den worker thread pool dispatched
 // (auch mit kosten verbunden)
