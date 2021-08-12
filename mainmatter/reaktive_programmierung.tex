@@ -11,8 +11,8 @@ Hinzufügen eines Elements, welche anschließend den weiteren Programmablauf dur
 Die Grundidee orientiert sich am Observer-Pattern und dessen Ausprägung dem Publish-Subscribe Pattern, erweitert diese aber
 noch um die Benachrichtigungen des Subscribers:
 \begin{enumerate}
-  \item Sobald keine Events mehr kommen
-  \item Wenn ein Fehler aufgetreten ist
+	\item Sobald keine Events mehr kommen
+	\item Wenn ein Fehler aufgetreten ist
 \end{enumerate}
 Indem Änderungen eines Datenstroms direkt propagiert werden und der Subscriber diesen nicht modifizieren kann, sondern lediglich über Änderungen informiert wird,
 können Programme ohne jeglichen Zustand realisiert werden\parencite{Escoffier2017}.
@@ -41,7 +41,7 @@ Jeder Operator muss dabei wiederrum einen Publisher zur Verfügung stellen, auf 
 um die transformierten Elementen zu erhalten.
 
 \footnote{Obwohl die Implementierungsdetails und die verwendete Terminologie unterschiedlich sind, abhängig von der verwendeten Reactive Programming-Bibliothek
-  und der Programmiersprache, ist der Arbeitsablauf immer ähnlich}
+	und der Programmiersprache, ist der Arbeitsablauf immer ähnlich}
 In Listing \ref{lst:eventflow_pseudocode} wird der Event-/Datenfluss anhand von Pseudocode dargestellt.
 \begin{lstlisting}[caption=Pseudocode Event-/Datenfluss, captionpos=b, label=lst:eventflow_pseudocode]
 source <-- source ist der Beginn des streams, also die Quelle
@@ -60,10 +60,10 @@ mit der Reactive Programming-Bibliothek \verb|Mutiny| aussehen würde.
 Die Quelle ist dabei der \verb|Publisher|, die Operatoren die \verb|Processors| und die Senke ist der \verb|Subscriber|.
 
 \begin{figure}[h]
-  \centering
-  \includegraphics[width=0.8\textwidth]{EventFlow}
-  \caption{Exemplarische Abbildung eines Event Flow in der Reactive Programming-Bibliothek Mutiny \parencite{MutinyEventFlow}}
-  \label{fig:eventflow_mutiny}
+	\centering
+	\includegraphics[width=0.9\textwidth]{EventFlow}
+	\caption{Exemplarische Abbildung eines Event Flow in der Reactive Programming-Bibliothek Mutiny \parencite{MutinyEventFlow}}
+	\label{fig:eventflow_mutiny}
 \end{figure}
 
 Reaktive Programmierung verinnerlicht das Konzept von nicht-blockierender bzw. asynchroner Ein- und Ausgabe (I/O).
@@ -120,17 +120,17 @@ Die wesentlichen Vor-und Nachteile lassen sich wie folgt zusammenfassen:
 
 Vorteile
 \begin{itemize}
-  \item Die Antwortenzeiten sind für eine hohe Last geringer, da deutlich weniger Threadwechsel gemacht werden müssen und jeder Thread
-        mehr Rechenzeit bekommt
-  \item Der Speicherverbrauch ist geringer, da weniger Threads genutzt werden
-  \item Der Grad der Parallellität ist nicht von der Anzahl der Threads begrenzt
+	\item Die Antwortenzeiten sind für eine hohe Last geringer, da deutlich weniger Threadwechsel gemacht werden müssen und jeder Thread
+	      mehr Rechenzeit bekommt
+	\item Der Speicherverbrauch ist geringer, da weniger Threads genutzt werden
+	\item Der Grad der Parallellität ist nicht von der Anzahl der Threads begrenzt
 \end{itemize}
 Nachteile
 \begin{itemize}
-  \item Asynchroner Code ist schwieriger zu schreiben, lesen, testen und zu debuggen als imperativer Code
-  \item Sehr aufwendig in bestehende klassische Enterprise-Anwendungen zu integrieren
-  \item Reaktive Anwendungen müssen in jeder Schicht reaktiv sein (Transaktionen, Security, Datenbanktreiber)
-  \item Blockierende I/O-Operationen führen zur Blockierung des IO-Threads und damit zur Blockierung der gesamten Anwendung
+	\item Asynchroner Code ist schwieriger zu schreiben, lesen, testen und zu debuggen als imperativer Code
+	\item Sehr aufwendig in bestehende klassische Enterprise-Anwendungen zu integrieren
+	\item Reaktive Anwendungen müssen in jeder Schicht reaktiv sein (Transaktionen, Security, Datenbanktreiber)
+	\item Blockierende I/O-Operationen führen zur Blockierung des IO-Threads und damit zur Blockierung der gesamten Anwendung
 \end{itemize}
 
 \subsection{Reaktive Datenströme}
@@ -140,10 +140,10 @@ bestehend aus einem Sender und Empfänger bzw. Publisher und Subscriber kann es 
 dass der Sender Daten schneller an den Empfänger verschickt, als dieser sie verarbeiten kann.
 Zwei naive Ansätze mit einer Überlastung des Empfängers umzugehen wären:
 \begin{enumerate}
-  \item Nur der Empfänger reagiert auf eine Überlast. Diese kann sich in einem Speicherüberlauf äußern oder, falls der Puffer des Empfängers eine Größenbeschränkung
-        hat, im Verlust der empfangenen Daten
-  \item Der Sender begrenzt im vornherein die Datenmenge, die er an den Empfänger schickt. Da der Sender allerdings in der Regel nicht weiß wieviel der Empfänger
-        verarbeiten kann, sendet er entweder zuviel (es entsteht eine Überlast), oder er sendet zuwenig wodurch der Durchsatz geringer ist als nötig
+	\item Nur der Empfänger reagiert auf eine Überlast. Diese kann sich in einem Speicherüberlauf äußern oder, falls der Puffer des Empfängers eine Größenbeschränkung
+	      hat, im Verlust der empfangenen Daten
+	\item Der Sender begrenzt im vornherein die Datenmenge, die er an den Empfänger schickt. Da der Sender allerdings in der Regel nicht weiß wieviel der Empfänger
+	      verarbeiten kann, sendet er entweder zuviel (es entsteht eine Überlast), oder er sendet zuwenig wodurch der Durchsatz geringer ist als nötig
 \end{enumerate}\parencite{JavaSpektrum2015}
 Die Lösung für dieses Problem wird \textit{Backpressure} genannt.
 Dabei fordert der Empfänger die Daten entsprechend seiner Kapazitäten an, wodurch der Sender weiß wieviele Daten er maximal versenden darf.
@@ -162,7 +162,7 @@ Die \textit{Flow-API} des JDK entspricht der \textit{Reactive Streams} Spezifika
 asynchrone, nicht blockierende Verarbeitung von (unbegrenzten) Datenströmen mit \textit{back pressure} auf der JVM implementiert werden kann.
 \parencite{OracleFlow}.
 \footnote{Nicht zu Verwechseln mit den Java-Streams durch die Collection-API ab Java 8. Diese sind zur Auswertungszeit in ihrer Größe begrenzt und
-  nach der Abarbeitung liegt statt eines Streams eine Collection vor}
+	nach der Abarbeitung liegt statt eines Streams eine Collection vor}
 
 \subsubsection{Java Flow-API}
 \label{subsection:java_flow_api}
@@ -171,10 +171,10 @@ vom \textit{Reactive Streams}-Projekt standardisierte, beschriebene Publisher-Su
 (siehe \ref{lst:eventflow_pseudocode} und \ref{fig:eventflow_mutiny}) mit \verb|backpressure|
 von reaktiven Anwendungen auszudrücken:
 \begin{enumerate}
-  \item Publisher
-  \item Subscriber
-  \item Subscription
-  \item Processor
+	\item Publisher
+	\item Subscriber
+	\item Subscription
+	\item Processor
 \end{enumerate}
 
 Die \verb|Flow|-Klasse erlaubt es Komponenten zu implementieren die Teil von reaktiven Pipelines sein können, in denen
@@ -209,9 +209,9 @@ extends Flow.Subscriber<T>, Flow.Publisher<R> {
 Die vier \verb|Callback|-Methoden des \verb|Subscriber|-Interface werden vom \verb|Publisher| aufgerufen sobald eines der jeweiligen Events ausgelöst wird.
 Die Events müssen dabei immer in der gleichen Reihenfolge veröffentlicht (und die jeweiligen Callback-Methoden ausgeführt) werden:
 \begin{enumerate}
-  \item onSubscribe
-  \item onNext*
-  \item (onError | onComplete)?
+	\item onSubscribe
+	\item onNext*
+	\item (onError | onComplete)?
 \end{enumerate}
 Die Notation bedeutet, dass \verb|onSubscribe| immer als erstes aufgerufen werden muss, gefolgt von einer beliebigen Anzahl an
 \verb|onNext|-Aufrufen. Dieser Eventstrom kann theoretisch ewig weitergehen, oder durch ein \verb|onComplete|-Aufruf beendet werden, welches
@@ -227,28 +227,29 @@ ist eine gegebene Anzahl an Events zu verarbeiten (backpressure). Mit der \verb|
 somit mitteilen das er nicht länger Events erhalten will.
 \parencite{JavaSEFlow}
 
-\begin{figure}[h!]
-  \centering
-  \includegraphics[width=0.9\textwidth]{flow-api_manning.PNG}
-  \caption{Lebenszyklus einer reaktiven Anwendung mit der Flow-API \parencite[Kapitel 17,  Figure 17.3]{JavaInAction}}
-  \label{fig:flow-api}
-\end{figure}
-
 Das \verb|Processor|-Interface erweitert \verb|Publisher| und \verb|Subscriber| ohne das weitere Methoden implementiert werden müssen.
 Dieses Interface repräsentiert eine Transformation der Events, die durch den
 reaktiven Datenstrom verarbeitet werden (siehe Listing \ref{lst:eventflow_pseudocode}).
 Klassen die dieses Interface implementieren repräsentieren in der Regel die Operatoren einer Reactive Programming-Bibliothek.
 Sobald ein \verb|Processor| ein Fehler erhält kann er sich entweder davon erholen oder direkt das onError-Signal an seinen
-Downstream-Subscriber propagieren.
+Downstream-Subscriber propagieren. Ein typischer Lebenszyklus eines reaktiven Datenstroms mit der Flow-API wird in
+Abbildung \ref{fig:flow-api} gezeigt.
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{flow-api_manning.PNG}
+	\caption{Lebenszyklus eines reactive streams mit der Flow-API \parencite[Kapitel 17,  Figure 17.3]{JavaInAction}}
+	\label{fig:flow-api}
+\end{figure}
 \newpage
+
 \subsection{Reaktive Systeme}
 \label{subsection:reaktive_systeme}
 Anforderungen an große Softwaresysteme haben sich in den letzten Jahren stark verändert:
 \begin{itemize}
-  \item Antwortzeiten in Millisekunden statt im Sekundenbereich
-  \item Datengrößen in Petabytes statt Gigabytes
-  \item 100\% Verfügbarkeit statt stundenlange Wartungsarbeiten
-  \item Deployment auf einer Vielzahl von Plattformen und cloud-basierten Clustern mit tausenden Multikernprozessoren
+	\item Antwortzeiten in Millisekunden statt im Sekundenbereich
+	\item Datengrößen in Petabytes statt Gigabytes
+	\item 100\% Verfügbarkeit statt stundenlange Wartungsarbeiten
+	\item Deployment auf einer Vielzahl von Plattformen und cloud-basierten Clustern mit tausenden Multikernprozessoren
 \end{itemize}
 
 Unternehmen aus verschiedenen Bereichen haben sich voneinander unabhängig an diese Kriterien angepasst und Architekturmuster
@@ -262,10 +263,10 @@ und daraus allgemeingültige Systemattribute abzuleiten.
 \label{subsubsec:reaktive_systeme_eigenschaften}
 Laut des \verb|Reactive Manifesto| sind Systeme reaktiv wenn sie:
 \begin{itemize}
-  \item Reaktionsschnell
-  \item Widerstandsfähig (gegen Fehler)
-  \item Elastisch
-  \item Nachrichtengesteuert
+	\item Reaktionsschnell
+	\item Widerstandsfähig (gegen Fehler)
+	\item Elastisch
+	\item Nachrichtengesteuert
 \end{itemize}
 sind.
 Solche Systeme sind, laut den Autoren, flexibler, stärker entkoppelt und würden besser skalieren als herkömmliche, nicht-reaktive Systeme.
@@ -273,43 +274,52 @@ Dies mache sie leichter zu entwickeln, zugänglicher für Veränderungen und deu
 
 Die Autoren definieren die genannten Systemeigenschaften wie folgt:
 
-\paragraph{Reaktionsschnelligkeit}: Das System reagiert, falls überhaupt möglich, rechtzeitig. Reaktionsgeschwindigkeit ist dabei die Grundlage von Nutzen und
-Benutzbarkeit und ermöglicht das schnelle Erkennen und Behandeln von Fehlern.
+\paragraph{Reaktionsschnelligkeit}: Das System reagiert, falls überhaupt möglich, zeitgerecht. Reaktionsschnelligkeit ist dabei die Grundlage für Funktion und
+Benutzbarkeit. Es ermöglicht das schnelle Erkennen und Behandeln von Fehlern, indem verlässliche, zeitliche Obergrenzen für die Antworten von
+Komponenten innerhalb des Systems geschaffen werden. Sobald eine Komponente nicht innerhalb des Zeitfensters antwortet, wird dies als Fehler gewertet und kann
+entsprechend behandelt werden.
 Der Fokus von reaktionsschnellen Systemen liegt auf konsistenten und schnellen Antwortszeiten. Darüber hinaus schaffen sie
 verlässliche Obergrenzen um eine konsistente Qualität zu erreichen.
-Dieses konsistente und verlässliche Verhalten simplifiziert Fehlerbehandlung, und erhöht das Vertrauen der Benutzer.
+Dieses Verhalten simplifiziert Fehlerbehandlung, und erhöht das Vertrauen der Benutzer bezüglich Interaktionen.
 
 \paragraph{Widerstandsfähig/Fehlertolerant}: Das System bleibt auch bei Fehlern reaktionsschnell. Das gilt nicht nur geschäftskritische, hochverfügbare Systeme -
 jedes System das nicht Fehlertolerant ist, wird nach Fehlern nicht mehr reaktionsfähig sein.
-Widerstandsfähigkeit wird durch Redundanz, Eingrenzung, Isolation und Delegation erreicht.
+Widerstandsfähigkeit wird durch Replikation von Funktionalität bzw. Redundanz, Eingrenzung von Fehlern, Isolation von Komponenten und
+Delegatieren von Verantwortung realisierbar.
 Fehler werden innerhalb einer Komponente eingegrenzt und die Komponenten sind voneinander isoliert. Dadurch bleibt das Gesamtsystem stabil, selbst
 wenn eine einzelne Komponente versagt.
 Die Wiederherstellung jeder Komponente (self-healing) wird an eine andere (möglicherweise externe) Komponente deligiert, und
 Hochverfügbarkeit der Komponenten wird, wo notwendig, durch Redundanz gewährleistet.
 
-\paragraph{Elastisch}: Das System bleibt reaktionsschnell unter variierenden Arbeitslasten. Auf Änderungen der Arbeitslast wird durch das Anpassen der
-allokierten Ressourcen reagiert. Das impliziert ein Systemdesign das keine zentralen Performance-Bottlenecks oder Reibunspunkte hat, damit
-Komponenten problemlos repliziert und die Last darauf verteilt werden kann.
+\paragraph{Elastisch}: Das System bleibt reaktionsschnell unter variierenden Arbeitslasten. Auf Änderungen der Arbeitslast wird durch das Replikation
+das Anpassen der, durch Replikation, allokierten Ressourcen reagiert. Das impliziert ein Systemdesign das keine zentralen Performance-Bottlenecks oder
+Reibunspunkte hat, damit Komponenten problemlos repliziert und die Last darauf verteilt werden kann.
+
 Reaktive Systeme unterstützen prädiktive, skalierende Algorithmen zur Ressourcenberechnung,
 indem Sie die Live-Messungen von Performance relevanten Systemmetriken als Eingabe nutzen.
 
-\paragraph{Nachrichtengesteuert}: Reaktive Systeme basieren auf dem asynchronen, nichtblockierendem Austausch von Nachrichten, um die Komponenten voneinander abzugrenzen und dadurch
-eine loose Kopplung, Isolation und eine transparente Lokalisierung der Komponenten zu ermöglichen.
+\paragraph{Nachrichtengesteuert}: Reaktive Systeme basieren auf dem asynchronen, nichtblockierendem Austausch von Nachrichten, um die Komponenten voneinander
+abzugrenzen und dadurch eine loose Kopplung, Isolation und eine transparente Lokalisierung der Komponenten zu ermöglichen.
 Aufgrund dieser Abgrenzung werden Fehler als Nachrichten an andere Komponenten delegiert.
 Der Ansatz jegliche Kommunikation der Komponenten durch das Übermitteln von Nachrichten zu implementieren erlaubt Elastizität,
-indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch das Überwachen der Nachrichtenwarteschlangen
-(\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.\parencite{ReactiveSystems}
+indem er das Verteilen der Arbeitslast, und die Kontrolle der Datenströme durch das Überwachen der Nachrichtenwarteschlangen zur Laufzeit
+(\textit{message queues}) und, falls nötig, Anwenden von \textit{back pressure}, erlaubt.
+Ortsunabhängigkeit bedeutet, dass Code und Semantik des Programms nicht davon abhängen, ob dessen Teile auf demselben Computer
+oder verteilt über ein Netzwerk ausgeführt werden.
+Nicht-blockierende nachrichtenorientierte Systeme erlauben eine effiziente Verwendung von Ressourcen, da Komponenten beim Ausbleiben von
+Nachrichten vollständig inaktiv bleiben können, und sich nicht regelmäßig über neue Nachrichten informieren müssen.\parencite{ReactiveSystems}
+
 Im Gegensatz zu Events haben Nachrichten immer ein klar definiertes Ziel.
-Das bedeutet, dass sich ein ereignisgesteuertes System- oder Systemkomponente auf adressierbare Event-Quellen konzentriert,
+Das bedeutet, dass sich ein ereignisgesteuertes System- oder eine Systemkomponente auf adressierbare Event-Quellen konzentriert,
 während ein nachrichtengesteuertes System auf adressierbaren Empfängern basiert.
 
 In Abbildung \ref{fig:reactive-traits} wird das Zusammenspiel der Eigenschaften eines reaktiven Systems dargestellt.
 
-\begin{figure}[H]
-  \centering
-  \includegraphics[width=0.9\textwidth]{reactive-traits}
-  \caption{Zusammenspiel der Eigenschaften eines reaktiven Systems \parencite{ReactiveSystems}}
-  \label{fig:reactive-traits}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=0.9\textwidth]{reactive-traits}
+	\caption{Zusammenspiel der Eigenschaften eines reaktiven Systems \parencite{ReactiveSystems}}
+	\label{fig:reactive-traits}
 \end{figure}
 
 \subsubsection{Abgrenzung zu reaktiver Programmierung}
@@ -364,16 +374,16 @@ Im Folgenden wird ein Überblick über die Vielzahl an Bibliotheken und Framewor
 Da die Flow-API lediglich Interfaces bereitstellt, gibt es mehrere Implementierungen von \verb|Reaktiven Datenströmen|.
 Zu den populärsten Bibliotheken zählen:
 \begin{itemize}
-  \item RxJava
-  \item Spring Webflux
-  \item Mutiny
+	\item RxJava
+	\item Spring Webflux
+	\item Mutiny
 \end{itemize}
 Jedes Projekt unterscheidet sich dabei in den verwendeten Klassen - und Operatoren um die \verb|reactive streams|-Spezifikation
 beziehungsweise die \verb|Flow-API| des JDK zu implementieren.
 \begin{itemize}
-  \item RxJava\footnote{Implementiert die Flow-API erst seit Version 2} - Flowable, Observable \parencite{RxJava}
-  \item Project Reactor - Flux, Mono \parencite{ProjectReactor}
-  \item Mutiny - Multi, Uni \parencite{Mutiny}
+	\item RxJava\footnote{Implementiert die Flow-API erst seit Version 2} - Flowable, Observable \parencite{RxJava}
+	\item Project Reactor - Flux, Mono \parencite{ProjectReactor}
+	\item Mutiny - Multi, Uni \parencite{Mutiny}
 \end{itemize}
 
 Die Bibliotheken sind interoperabel, da sie die \verb|reactive streams|-Spezifikation in Java mithilfe der \verb|Flow-API|
@@ -386,9 +396,9 @@ Sie implementieren bereits Mechanismen wie Messaging, Event Loops,
 nichtblockierende Netzwerkanwendungen und Dateizugriffe, sowie umfangreiche Funktionen für Webanwendungen.
 Zu den populärsten gehören:
 \begin{itemize}
-  \item Eclipse Vert.x
-  \item Akka
-  \item Reactor-Netty
+	\item Eclipse Vert.x
+	\item Akka
+	\item Reactor-Netty
 \end{itemize}\parencite{Vert.x, Akka, ProjectReactor}
 Sowohl \verb|Eclipse Vert.x| als auch Reactor-Netty nutzen dabei \verb|Netty|
 (siehe \ref{subsubsec:reactor_pattern}) als Low-Level Framework für \verb|Nonblocking I/O|.
@@ -400,11 +410,11 @@ Da es sich nicht um ein Framework handelt, gibt es keine vordefinierte Grundlage
 integriert werden.
 Der Kern des Toolkits \verb|vertx-core| stellt APIs für asynchrones Programmieren, \verb|Nonblocking I/O|, Streaming und Zugriff zu
 Netzwerkprokollen wie TCP, UDP, DNS HTTP oder WebSockets.
-\begin{figure}[ht!]
-  \centering
-  \includegraphics[width=0.8\textwidth]{vertx}
-  \caption{Vert.x Struktur \parencite{Ponge2020}}
-  \label{fig:vertx}
+\begin{figure}[h]
+	\centering
+	\includegraphics[width=1.0\textwidth]{vertx}
+	\caption{Vert.x Struktur \parencite{Ponge2020}}
+	\label{fig:vertx}
 \end{figure}
 
 Für die räumliche Entkopplung eines reaktiven Systems bietet Vert.x einen \verb|Event Bus|.
@@ -433,7 +443,7 @@ Um dieses Pattern vom Single Threaded Reactor-Pattern zu unterscheiden, wird es 
 Im Falle dass eine Event Loop durch \verb|Blocking I/O| blockiert würde, wird die Operation stattdessen auf einen
 Worker Thread, aus einen im vornherein erzeugten \verb|Worker thread pool|, abgewickelt. Dieser Prozess bezeichnet \verb|Vert.x| als \verb|Dispatching|.
 Dadurch entstehen natürlich wieder Threadwechsel, ermöglichen aber die Nutzung von Vert.x in bestehenden Projekten, die nicht komplett
-auf \verb|Nonblocking I/O| basieren.\parencite[Seite 2]{VertxArticle}
+auf \verb|Nonblocking I/O| basieren\parencite[Seite 2]{VertxArticle}.
 Vert.x führt also zwei Thread Pools mit \verb|Kernel-Threads|, einen für \verb|Event loop threads|, dessen Größe der Anzahl der logischen CPUs entspricht,
 und einen für \verb|Worker threads|, auf dem die Operationen abgearbeitet werden die die \verb|Event loop threads| blockieren würden.
 \parencite{Vert.xOptions}
@@ -450,8 +460,8 @@ sich Event-Handler bzw. Subscriber registrieren können.
 Die populärsten Frameworks mit einem komplett reaktiven Stack sind dabei:
 
 \begin{itemize}
-  \item Spring WebFlux
-  \item Quarkus
+	\item Spring WebFlux
+	\item Quarkus
 \end{itemize}
 
 Spring WebFlux nutzt dabei \verb|Project Reactor| und Quarkus \verb|Vert.x| als reaktive Engine. \parencite{QuarkusReactiveGettingStarted}

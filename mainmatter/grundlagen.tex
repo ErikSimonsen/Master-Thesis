@@ -105,13 +105,12 @@ die anderen Threads bzw. die zu bearbeitenden Anfragen davon nicht direkt beeinf
 
 Um zu verhindern das für jede Anfrage ein neuer Thread erstellt wird, da dies besonders bei vielen kurzlebigen
 Anfragen einen hohen Overhead erzeugt, und bei einer potentiell hohen Last
-unvorhergesehen viele Ressourcen des Betriebssystems verwendet werden, wird das \verb|Thread per Request|-Modell
-in der Regel um einen \verb|Threadpool| erweitert.
+unvorhergesehen viele Ressourcen des Betriebssystems verwendet werden, wird das \verb|Thread per Request|-Modell in der Regel um einen \verb|Threadpool| erweitert.
 Dabei wird eine begrenzte Anzahl an Threads bereits im vornherein erstellt und wiederverwendet, wodurch sich die Kosten der Threaderstellung
 zur Laufzeit amortisieren und die benötigten Ressourcen begrenzt werden.
 Anfragen können solange parallel ausgeführt werden bis die Anzahl der gleichzeitigen Anfragen die
 Anzahl der Threads im \verb|Threadpool| übersteigt.
-Bei diesem Punkt, müssen eingehende Anfragen solange warten, bis ein Thread wieder verfügbar ist.
+Ab diesem Punkt, müssen eingehende Anfragen solange warten, bis ein Thread wieder verfügbar ist.
 Der Grad der Parallelität ist bei diesem Ansatz durch die Größe des Threadpools begrenzt.
 \newpage
 \subsection{Nonblocking I/O}
@@ -227,7 +226,7 @@ Dieser wird aufgerufen sobald das Event entsteht und von der \verb|Event Loop| a
 
 \begin{figure}[H]
   \centering
-  \includegraphics[width=0.8\textwidth]{reactor_pattern}
+  \includegraphics[width=1.0\textwidth]{reactor_pattern}
   \caption{Reactor Pattern \parencite[Abbildung 1.3]{NodeJSDesignPatterns}}
   \label{fig:reactor_pattern}
 \end{figure}
@@ -262,7 +261,7 @@ Dabei handelt es sich um ein asynchrones, eventgesteuertes Framework welches
 die Programmierung von hochperformanten Low-Level Netzwerk-Anwendungen, wie TCP- oder UDP-Socket Server simplifiziert. \parencite{NettyUserAction}
 
 Das Projekt verspricht dabei, gegenüber ähnlichen Frameworks, eine komfortable User Experience durch eine einheitliche API für
-blockierende, und nicht-blockierende I/O-Sockets. Durch das flexible und erweiterbare Event-Modell erlaubt zudem eine saubere Trennung der Zuständigkeiten.
+blockierende, und nicht-blockierende I/O-Sockets. Das flexible und erweiterbare Event-Modell erlaubt zudem eine saubere Trennung der Zuständigkeiten.
 Darüber hinaus beschränkt sich Netty nicht auf ein \verb|Single-Thread|-Modell, sondern kann auch einen oder mehrere \verb|Thread-Pools| nutzen.
 
 Gegenüber Frameworks die ähnliche Funktionalität bieten, allerdings auf \verb|Blocking I/O| basieren, resultiere die Nutzung von Netty
@@ -270,7 +269,7 @@ in besserem Durchsatz, geringerer \Gls{latenz}(*) und weniger Ressourcenverbrauc
 
 \begin{figure}[h!]
   \centering
-  \includegraphics[width=0.8\textwidth]{netty}
+  \includegraphics[width=1.0\textwidth]{netty}
   \caption{Netty Komponenten \parencite{Netty}}
   \label{fig:netty}
 \end{figure}

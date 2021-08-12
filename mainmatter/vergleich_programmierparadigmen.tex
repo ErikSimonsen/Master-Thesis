@@ -1,14 +1,16 @@
 \section {Vergleich reaktive \& imperative Anwendung}
 \label{section:vergleich_reaktiv_imperativ}
-Um zu prüfen, ob Leistungsfähigkeit und Skalierbarkeit einer reaktiven Anwendung tatsächlich die einer traditionellen, imperativen Anwendung
-übertrifft, werden in diesem Kapitel beide Ansätze hinsichtlich verschiedener Metriken in einem festen Zeitintervall miteinander verglichen.
+Um zu prüfen, ob Leistungsfähigkeit und Skalierbarkeit einer reaktiven, auf dem \newline
+\verb|Multi-Reactor-Modell| und \verb|Nonblocking I/O| basierenden,
+Anwendung tatsächlich die einer traditionellen, auf dem \verb|Thread-per-Request Modell| und \verb|Blocking I/O| basierenden, Anwendung übertrifft, werden in
+diesem Kapitel beide Ansätze hinsichtlich verschiedener Metriken in einem festen Zeitintervall miteinander verglichen.
 
-Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung, in mehreren Testreihen, zwei Lasttests unterzogen:
+Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung, in 5 Testreihen, jeweils zwei Lasttests unterzogen:
 \begin{enumerate}
     \item Abfrage von statischen Daten
     \item Abfrage von dynamischen Daten (mit Datenbankanbindung)
 \end{enumerate}
-Dabei wird eine Reihe an Lasten bzw. \textit{workloads} von einem Client-Host generiert und über eine feste Dauer in kleinen Zeitinvervallen
+Dabei wird pro Lasttest eine Reihe an Lasten bzw. \textit{workloads} von einem Client-Host generiert und über eine feste Dauer in kleinen Zeitinvervallen
 an einen ausgewählten HTTP-Endpunkt der Anwendung gesendet.
 In dieser Zeit wird das Zeitinvervall vom Starten der Anwendung bis zur Beantwortung der ersten Anfrage,
 der benötigte Arbeitsspeicher und CPU-Auslastung des Prozesses, der Durchsatz, sowie die Latenz gemessen.
@@ -17,7 +19,7 @@ Für Container- und Cloud-Umgebungen eignen sich, primär aus Kostengründen, An
 schnelle Startzeiten und geringen Ressourcenverbrauch setzen.
 Aus diesem Grund werden die beiden Anwendungen sowohl im \textit{JVM mode} als auch im \textit{native mode}
 (siehe Absatz \verb|Quarkus und native image| in Kapitel \ref{subsubsec:frameworks})
-den Lasttests unterzogen. Ingesamt ergeben sich also 4 Testszenarien.
+den beiden Lasttests unterzogen. Ingesamt ergeben sich also 4 Testszenarien pro Anwendung.
 
 \subsection{Implementierung \& Systemaufbau}
 \label{section:implementierung}
@@ -28,8 +30,9 @@ Unterbau: der Vert.x Engine (siehe Kapitel \ref{subsubsec:reaktive_systeme}).
 Jede HTTP-Anfrage wird auf einem der \textit{event-loop threads} bzw. \textit{IO threads}
 verarbeitet und durch eine Routing-Schicht an den Anwendungscode weitergeleitet.
 Je nachdem welcher Ansatz zur Implementierung des jeweiligen HTTP-Endpunktes gewählt wurde,
-wird der abzuarbeitende Code dann auf einem blockierenden \textit{worker thread} aus dem \textit{worker thread pool}
-(Servlet, \Gls{jaxrsg}(*)) oder weiter auf einem der \textit{IO threads} (Reactive Routes, Reactive Resteasy) ausgeführt.
+wird der abzuarbeitende Code dann auf einem blockierenden \textit{worker thread}, ganz nach dem \verb|Thread-Per-Request Modell|, aus dem
+\textit{worker thread pool} (Servlet, \Gls{jaxrsg}(*)) oder, nach dem \verb|Multi-Reactor-Modell|, weiter auf einem der
+\textit{IO threads} (Reactive Routes, Reactive Resteasy) ausgeführt.
 
 \newpage
 \begin{figure}[h]
@@ -131,12 +134,12 @@ Der Projekt-Code dieser Arbeit kann von GitHub unter \url{https://github.com/Eri
 \subsection{Testumgebung}
 \label{section:testumgebung}
 Für die Testumgebung werden zwei Systeme benötigt: der Client-Host und der Server-Host.
-Dabei muss es sich um UNIX-Systeme handeln, da eine einige der verwendeten Werkzeuge nur auf diesen Systemen verfügbar sind.
+Dabei muss es sich um UNIX-Systeme handeln, da einige der verwendeten Werkzeuge nur auf diesen Systemen verfügbar sind.
 Zudem müssen beide Systeme per SSH von einem (idealerweise vorhandenem) dritten System, dem User-Host
 \footnote{Dies kann allerdings auch der Client-Host selber sein}
 erreichbar sein, damit dieses den Testablauf in der korrekten Abfolge ausführen kann.
 Der Einfachheit halber empfiehlt es sich, dass sich alle Geräte im gleichen Netzwerk befinden.
-Beiden Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks, welches wiederrum 20.1 der GraalVM nutzt.
+Beide Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks, welches wiederrum Version 20.1 der GraalVM nutzt.
 Um eine reproduzierbare Anwendungsumgebung und Ressourcenallokation zu ermöglichen, laufen beide Anwendungen auf dem Server-Host in
 jeweils einem Docker-Container mit fest definierten Ressourcen:
 \begin{itemize}
@@ -154,9 +157,12 @@ Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
 Die Größe des von Vert.x verwendeten \verb|Worker Thread Pools| (siehe Abbildung \ref{fig:quarkus_http_schicht}) beträgt standardmäßig 20 und bleibt
 unverändert, die Größe des \verb|Event-Loop Thread Pools| hingegen wird für die Tests manuell auf 8 gesetzt, da die Anwendung durch die Ressourcenallokation
 des Docker-Containers nur 4 CPU-Kerne nutzen darf und jeder dieser CPU-Kerne Hyperthreading unterstützt. \footnote{Wodurch jeder physische CPU-Kern über
-    zwei logische CPUs verfügt}
+    zwei logische CPUs verfügt} Damit kann die optimale Verteilung von einem \verb|Event-Loop Thread| bzw. \verb|IO-Thread| pro
+logischer CPU erreicht werden.
 Standardmäßig wird die Ressourcenbegrenzung durch Container von Vert.x nicht beachtet und die Anzahl der \verb|Event loop|-Threads auf die doppelte
-Anzahl der verfügbaren CPU-Kerne des Container-Hosts gesetzt.
+Anzahl der verfügbaren CPU-Kerne des Container-Hosts gesetzt, weswegen es für ressourcenbegrenzte Container der beschriebenen Korrektur bedarf.
+Der \verb|Worker Thread Pool| wird vom \verb|Thread-per-Request Modell| bzw. \verb|Blocking I/O| genutzt, während der \verb|Event-Loop Thread Pool| von der
+reaktiven Anwendung bzw. \verb|Nonblocking I/O| genutzt wird.
 
 Die Anwendung, die auf dem Client-Host die \textit{work load} für die beiden zu testenden Anwendungen generiert,
 nutzt in dieser Testumgebung 4 Threads.
@@ -223,15 +229,20 @@ weitere Skripte auszuführen.
 \footnote{Beispielsweise sollte der Server-Host erst anfangen den Java-Prozess zu überwachen, sobald der Client-Host die \textit{workload}
     generiert und nicht bereits davor}
 
+Wie bereits in \ref{section:testumgebung} angedeutet, nutzt qDup SSH um auf die jeweilige Hosts zuzugreifen.
 
-Wie bereits in \ref{section:testumgebung} erwähnt, nutzt qDup SSH um auf die jeweilige Hosts zuzugreifen.
+Im ersten Schritt \textit{build applications} wird auf dem Server-Host das Quellcodeverzeichnis geklont und beide Anwendungen werden, für
+ein einfaches Deployment in den Docker-Container, jeweils als \gls{uber-jar}(*) und \verb|native image| gebaut.
 
-Im ersten Schritt \textit{build applications} wird auf dem Server-Host das Quellcodeverzeichnis geklont und beide Anwendungen werden jeweils
-als \gls{uber-jar}(*)\footnote{Für ein leichtes Deployment ähnlich dem native image} und \verb|native image| gebaut.
+Anschließend wird über ein JavaScript-Skript, welches in der Laufzeitumgebung Node.js läuft,
+die \verb|Mean Start Time to First Request|, also das durchschnittliche Zeitintervall zwischem dem Start einer Anwendung bis
+zur Verarbeitung der ersten Anfrage, mehrfach gemessen und als Textdatei gespeichert.
+Dabei wird die gebaute Anwendung, ohne Docker-Container, auf dem Server-Host gestartet und die Zeit genommen. Anschließend werden in einer Schleife
+solange Anfragen an einen Endpunkt der Anwendung gestellt bis das Ergebnis ein Statuscode 200 ist, was den Endpunkt der Messung markiert.
+Aus den gemessenen Startzeiten wird in der Auswertung der Daten anschließend der Durchschnitt gebildet, um somit die \verb|Mean Start Time to First Request|
+der Anwendung zu erhalten.
 
-Anschließend wird über ein JavaScript-Skript,
-welches in der Laufzeitumgebung Node.js läuft, das die \verb|Mean Start Time to First Request|, also das durchschnittliche Zeitintervall zwischem dem Start einer Anwendung bis
-zur Verarbeitung der ersten Anfrage, gemessen. Darüber hinaus werden die Docker-Container der Datenbank
+Darüber hinaus werden die Docker-Container der Datenbank
 \footnote{Nur beim Test mit dynamischen Daten} und der beiden REST-APIs gebaut.
 
 Beim zweiten Schritt \textit{run applications} wird der Docker-Container der jeweiligen Anwendung gestartet und anschließend signalisiert,
@@ -261,22 +272,22 @@ Phase niedriger Latenz, da die weiteren Anfragen alle verzögert werden. Ähnlic
 Anfragen mit hoher Latenz also das Absenden weiterer Anfragen.
 Dadurch koordiniert der Lastgenerator sich unbeabsichtigt mit dem Server um weitere Messungen während Phasen hoher Latenz zu vermeiden, da die Last die der Server
 in dieser Phase abzuarbeiten hat deutlich geringer ist als bei niedriger Latenz. Das Hauptproblem ist also, dass die Last die der Server empfängt
-nicht durchgehend \verb|konstant| ist, sondern von der Antwortszeit des Servers abhängt. \parencite{mci/Friedrich2017}
-
+nicht durchgehend \verb|konstant| ist, sondern von der Antwortszeit des Servers abhängt \parencite{mci/Friedrich2017}.
+\newline\newline
 \verb|Wrk2|, dessen Author auch Gil Tene ist, umgeht das \verb|Coordinated Omission Problem| in dem es eine konstante Durchsatzlast (als Befehlsargument) mit
 einer Latenzmessung, die den beabsichtigten konstanten Durchsatz berücksichtigt, kombiniert. Anstatt dabei die Antwortlatenz ab dem Zeitpunkt zu messen,
 zu dem die tatsächliche Übertragung einer Anfrage aufgetreten ist, misst wrk2 die Antwortlatenz ab dem Zeitpunkt, zu dem die Übertragung,
-gemäß dem für den Durchlauf konfigurierten konstanten Durchsatz, hätte erfolgen \textit{sollen} bis zum Erhalt der vollständigen Antwort.\parencite{Wrk2}
+gemäß dem für den Durchlauf konfigurierten konstanten Durchsatz, hätte erfolgen \textit{sollen} bis zum Erhalt der vollständigen Antwort\parencite{Wrk2}.
 
 Pro Test (siehe Anfang des Kapitels \ref{section:vergleich_reaktiv_imperativ}) werden Benchmarks für eine ganze Reihe an \textit{workloads} gemessen.
-Jede \textit{workload} wird über einen Zeitraum von 60 Sekunden über 100 offene HTTP-Verbindungen an den Server-Host übermittelt.
+Jede \textit{workload} wird sekündlich über einen Zeitraum von 60 Sekunden über 100 offene HTTP-Verbindungen an den Server-Host übermittelt.
 In den Tests nutzt \verb|wrk2| für das Generieren und Übermitteln der \textit{workload}, sowie das Messen der Antwortszeit
 4 Threads.
+\newline\newline
+Damit der Anwendungscode des angesteuerten HTTP-Endpunkts durch den JIT-Compiler der JVM (siehe Absatz \verb|Quarkus und native image| in Kapitel
+\ref{subsubsec:frameworks}) optimiert wird, findet pro \textit{workload} vor der eigentlichen Mess-Phase eine identische Warmup-Phase statt.
 
-Damit der Anwendungscode des angesteuerten HTTP-Endpunkts durch den JIT-Compiler der JVM ((siehe Absatz \verb|Quarkus und native image| in Kapitel
-\ref{subsubsec:frameworks})) optimiert wird, findet pro \textit{workload} vor der eigentlichen Mess-Phase eine identische Warmup-Phase statt.
-
-Listing \ref*{lst:generateLoad} zeigt den Aufruf von \verb|{wrk2| mit den beschriebenen Parametern in der Warmup- und Mess-Phase,
+Listing \ref*{lst:generateLoad} zeigt den Aufruf von \verb|wrk2| mit den beschriebenen Parametern in der Warmup- und Mess-Phase,
 \verb|${RUN_RATE}| enthält dabei die \textit{workload}.
 \footnote{Das manuelle Kompilieren des Quellcodes von wrk2 produziert, wie wrk auch, ein executable namens wrk}
 
@@ -330,7 +341,7 @@ Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des
 - sh: kill -9 $TOP_PID
   \end{lstlisting}
 
-Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host, welches das qDup Skript ausgeführt hat, kopiert.
+Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host der das qDup Skript ausgeführt hat kopiert.
 
 \begin{figure}[ht]
     \centering
@@ -346,27 +357,104 @@ Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \text
 
 \subsection{Test: Statische Daten}
 \label{section:statische_daten}
-TODO: erklären welche Testreihe genutzt wird
-TODO: andere Testreihen in Anhang
-\subsubsection{Systemablauf}
-//TODO: Grafik ähnlich zu Grafik in Implementierung aber mit Threadwechseln und exemplarisch mhrere Threads zeigen
-(auch angeben wie Ergebnisse mit komplizierteren Queries aussehen könnten)
-\subsubsection{JVM mode}
-\subsubsection{native mode}
+Im Folgenden werden die Testresultate der 2. Testreihe dargestellt und erläutert.
+Die Ergebnisse aller Testreihen können im Projektverzeichnis unter \verb|results/data| und \verb|results/graphs| eingesehen werden.
+Der Lasttest mit statischen Daten wird ohne Datenbankanbindung durchgeführt und der angesteuerte Endpunkt \verb|/greeting/{name}| gibt bei beiden Anwendungen
+jeweils einen statischen String zurück. Wie bereits zu Beginn des Kapitels erwähnt, wird jede Anwendung sowohl im \verb|JVM mode|, als auch im
+\verb|native mode| getestet.
+Die qDup-Skripte befinden sich im Projektverzeichnis im Verzeichnis \verb|scripts/benchmark-jvm-static.yaml| und
+\verb|scripts/benchmark-native-static.yaml|.
 
+\subsubsection{JVM mode}
+Quarkus IO-Thread 1349.ms
+Quarkus Worker-Pool 1514.6 ms
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{run2/jvm-static/mean-response-vs-throughput}
+    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
+    \label{fig:static_mean_response}
+\end{figure}
+
+TODO Welche Perzentile
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{run2/jvm-static/mean-rss-vs-throughput}
+    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
+    \label{fig:static_mean_rss}
+\end{figure}
+
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.9\textwidth]{run2/jvm-static/average-cpu-vs-throughput}
+    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
+    \label{fig:static_avg_cpu}
+\end{figure}
+
+//TODO: anmerken das werte nur bis zum umschwenkpunkt interessant sind konkret also nicht bspw. max rss (weil dieser bei 135k req/sec auch stark steigt)
+// sondern lediglich bis 135k req/seq: worker thread : max req/sec 48k, io thread max req/sec 135k
+\begin{table}[ht!]
+    \centering
+    \begin{tabular}{| c | c | c | c |}
+        \hline
+        Run 2 - JVM Static                    & Blockierend      & Reaktiv                   & Verhältnis \\
+        \hline
+        Mean Start Time to First Request (ms) & Resteasy         & Resteasy Reactive         &            \\
+        \hline
+        Max RSS (MB)                          & Resteasy-Jackson & Resteasy-Reactive-Jackson &            \\
+        \hline
+        Max Throughput (req/sec)              & JDBC-Postgresql  & Reactive-Pg-Client        &            \\
+        \hline
+        Max Req/Sec/MB                        & Hibernate-ORM    & Hibernate-Reactive        &            \\
+        \hline
+        CPU Auslastung 100\%                  & Hibernate-ORM    & Hibernate-Reactive        &            \\
+        (req/sec)
+    \end{tabular}
+    \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
+    \label{table:static_measurement_results}
+\end{table}
+
+\subsubsection{native mode}
+//startzeiten
+//Speicherverbrauches
+//cpu Auslastung
+//durchsatz
 \subsection{Test: Datenbankzugriffe}
 \label{section:datenbankzugriffe}
-
-\subsubsection{Systemablauf}
-//TODO: Grafik ähnlich zu Grafik in Implementierung aber ohne Threadwechsel dafür Main-Thread mit dahinterliegender Datenbank,
-das Nicht BLockieren bzw. Asynchronität verdeutlichen
+Im Folgenden werden die Testresultate der 2. Testreihe dargestellt und erläutert.
+Die Ergebnisse der anderen Testreihen können im Projektverzeichnis unter \verb|results/data| und \verb|results/graphs| eingesehen werden.
+Der Lasttest mit dynamischen Daten wird mit Datenbankanbindung durchgeführt und der angesteuerte Endpunkt \verb|/fruits| gibt bei beiden Anwendungen
+jeweils alle Elemente der Tabelle \textit{fruits} zurück. Wie bereits zu Beginn des Kapitels erwähnt, wird jede Anwendung sowohl im \verb|JVM mode|, als auch im
+\verb|native mode| getestet, die qDup-Skripte befinden sich im Projektverzeichnis im Verzeichnis \verb|scripts/benchmark-jvm-db.yaml| und
+\verb|scripts/benchmark-native-db.yaml|.
 
 \subsubsection{JVM mode}
+//startzeiten
+//Speicherverbrauches
+//cpu Auslastung
+//durchsatz
 \subsubsection{native mode}
+//startzeiten
+//Speicherverbrauches
+//cpu Auslastung
+//durchsatz
 
-//auch erwähnen dss beide paradigmen gemischt werden können, und vert.x dann entweder die anfrage an den worker thread pool dispatched
-// (auch mit kosten verbunden)
-// oder auf dem io thread ausführt also muss nicht komplett reaktiv oder blockierend sein x
 \subsection{Auswertung}
+//wie könnte ergebnis aussehen mit komplexeren queries
+//ressourcenbedarf von reaktiver anwendung könnte noch weiter gesenkt werden, allerdings wird der worker thread pool von vert.x aus
+kompatibilätsgründen zu blocking i/o genutzt
 
+//native anwendungen können (noch) nicht den durchsatz von jvm anwendungen erreichen (ist aber theoretisch laut entwicklern möglich), da
+viele laufzeit optimierungen wegfallen
+//in startzeiten und ressourcenverbrauch native anwendungen allerdings überlegen
+//reaktive anwendungen lohnen sich erst ab bestimmter req/sec
+//könnte verändert werden durch: bessere hardware, anpassen der worker thread pool größe und event loop thread pool größe
+//,weglassen von vert.x für den test der blockierenden anwendung da dispatching von io thread auf blocking thread auch kosten verursacht, Quarkus
+nutzut allerdings immer vert.x, verändern der gepoolten datenbank verbindungen, komplexere queries (verhältnis der größenordnungen wäre aber gleich)
+
+
+//eher fazit
+und erfordern das alle komponenten reaktiv sind (also auch alle library hesteller)
+//lösungen wie project loom deutlich komfortabler in  zukunft
 \label{section:auswertung}

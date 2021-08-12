@@ -57,6 +57,12 @@
 % Literaturverzeichniss
 \usepackage[backend=bibtex,style=authoryear]{biblatex}
 
+% Literaturverzeichnis Quelle angeben
+\addbibresource{backmatter/main.bib}
+% Glossar und Akronyme
+\makeglossaries
+\input{backmatter/glossary}
+
 % PDF-Metainformationen
 \hypersetup{
 	pdftitle={Master-Arbeit},
@@ -67,12 +73,6 @@
 	plainpages=false,
 	hypertexnames=false
 }
-
-% Literaturverzeichnis Quelle angeben
-\addbibresource{backmatter/main.bib}
-% Glossar und Akronyme
-\makeglossaries
-\input{backmatter/glossary}
 
 \begin{document}
 \pagestyle{empty}
@@ -89,18 +89,17 @@
 \lstlistoflistings
 % Verzeichnis von Tabellen
 \listoftables
-
 \newpage
 % Seitennummerierung zurücksetzen
 \pagenumbering{arabic}
 \pagestyle{headings}
 \setcounter{page}{1}
-% Definiere Style für Text Listings.
+% Definiere Style für Text Listings
 \lstdefinestyle{code}{
-    basicstyle=\ttfamily\footnotesize,
-    tabsize=2
+	basicstyle=\ttfamily\footnotesize,
+	tabsize=2
 }
-% Verwende Style 
+% Verwende Style
 \lstset{style=code}
 % Inhalt
 \input{mainmatter/einleitung}
@@ -120,7 +119,4 @@
 % Literaturverzeichnis in Inhaltsverzeichnis zeigen und Literaturverzeichnis anzeigen
 \addcontentsline{toc}{section}{Literaturverzeichnis}
 \printbibliography
-% Anhang
-\appendix
-\input{backmatter/appendix}
 \end{document}
