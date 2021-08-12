@@ -356,7 +356,7 @@ Diese werden dann für die visuelle Darstellung in eine \verb|.json|-Datei gesch
 Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \textit{d3node-linechart} als Liniendiagramme visuell dargestellt.
 
 \subsection{Test: Statische Daten}
-\label{section:statische_daten}
+\label{subsection:statische_daten}
 Im Folgenden werden die Testresultate der 2. Testreihe dargestellt und erläutert.
 Die Ergebnisse aller Testreihen können im Projektverzeichnis unter \verb|results/data| und \verb|results/graphs| eingesehen werden.
 Der Lasttest mit statischen Daten wird ohne Datenbankanbindung durchgeführt und der angesteuerte Endpunkt \verb|/greeting/{name}| gibt bei beiden Anwendungen
@@ -366,12 +366,13 @@ Die qDup-Skripte befinden sich im Projektverzeichnis im Verzeichnis \verb|script
 \verb|scripts/benchmark-native-static.yaml|.
 
 \subsubsection{JVM mode}
+\label{subsubsec:static_jvm_mode}
 Quarkus IO-Thread 1349.ms
 Quarkus Worker-Pool 1514.6 ms
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{run2/jvm-static/mean-response-vs-throughput}
+    \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-response-vs-throughput}
     \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
     \label{fig:static_mean_response}
 \end{figure}
@@ -379,7 +380,7 @@ Quarkus Worker-Pool 1514.6 ms
 TODO Welche Perzentile
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{run2/jvm-static/mean-rss-vs-throughput}
+    \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-rss-vs-throughput}
     \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
     \label{fig:static_mean_rss}
 \end{figure}
@@ -387,28 +388,28 @@ TODO Welche Perzentile
 
 \begin{figure}[h]
     \centering
-    \includegraphics[width=0.9\textwidth]{run2/jvm-static/average-cpu-vs-throughput}
+    \includegraphics[width=1.0\textwidth]{run2/jvm-static/average-cpu-vs-throughput}
     \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
     \label{fig:static_avg_cpu}
 \end{figure}
 
 //TODO: anmerken das werte nur bis zum umschwenkpunkt interessant sind konkret also nicht bspw. max rss (weil dieser bei 135k req/sec auch stark steigt)
 // sondern lediglich bis 135k req/seq: worker thread : max req/sec 48k, io thread max req/sec 135k
-\begin{table}[ht!]
+\begin{table}[h]
     \centering
     \begin{tabular}{| c | c | c | c |}
         \hline
-        Run 2 - JVM Static                    & Blockierend      & Reaktiv                   & Verhältnis \\
+        Run 2 - JVM Static                    & Blockierend & Reaktiv & Verhältnis \\
         \hline
-        Mean Start Time to First Request (ms) & Resteasy         & Resteasy Reactive         &            \\
+        Mean Start Time to First Request (ms) &             &         &            \\
         \hline
-        Max RSS (MB)                          & Resteasy-Jackson & Resteasy-Reactive-Jackson &            \\
+        Max RSS (MB)                          &             &         &            \\
         \hline
-        Max Throughput (req/sec)              & JDBC-Postgresql  & Reactive-Pg-Client        &            \\
+        Max Throughput (req/sec)              &             &         &            \\
         \hline
-        Max Req/Sec/MB                        & Hibernate-ORM    & Hibernate-Reactive        &            \\
+        Max Req/Sec/MB                        &             &         &            \\
         \hline
-        CPU Auslastung 100\%                  & Hibernate-ORM    & Hibernate-Reactive        &            \\
+        CPU Auslastung 100\%                  &             &         &            \\
         (req/sec)
     \end{tabular}
     \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
@@ -416,10 +417,14 @@ TODO Welche Perzentile
 \end{table}
 
 \subsubsection{native mode}
+\label{subsubsec:static_native_mode}
+Quarkus IO-Thread: 27.8 ms
+Quarkus Worker-Pool: 28.2 ms
 //startzeiten
 //Speicherverbrauches
 //cpu Auslastung
 //durchsatz
+//TODO
 \subsection{Test: Datenbankzugriffe}
 \label{section:datenbankzugriffe}
 Im Folgenden werden die Testresultate der 2. Testreihe dargestellt und erläutert.
@@ -430,17 +435,22 @@ jeweils alle Elemente der Tabelle \textit{fruits} zurück. Wie bereits zu Beginn
 \verb|scripts/benchmark-native-db.yaml|.
 
 \subsubsection{JVM mode}
+\label{subsubsec:dynamic_jvm_mode}
+
 //startzeiten
 //Speicherverbrauches
 //cpu Auslastung
 //durchsatz
 \subsubsection{native mode}
+\label{subsubsec:dynamic_native_mode}
+
 //startzeiten
 //Speicherverbrauches
 //cpu Auslastung
 //durchsatz
 
 \subsection{Auswertung}
+\label{subsubsec:auswertung}
 //wie könnte ergebnis aussehen mit komplexeren queries
 //ressourcenbedarf von reaktiver anwendung könnte noch weiter gesenkt werden, allerdings wird der worker thread pool von vert.x aus
 kompatibilätsgründen zu blocking i/o genutzt

@@ -17,6 +17,9 @@ main.pdf
 main-blx.bib
 *.ist
 *.out
+
+!resources/**/*.timeFirstRequest.out
+
 ## Intermediate documents:
 *.dvi
 *.xdv
