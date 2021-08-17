@@ -357,7 +357,7 @@ Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \text
 
 \subsection{Test: Statische Daten}
 \label{subsection:statische_daten}
-Im Folgenden werden die Testresultate der 2. Testreihe dargestellt und erläutert.
+Im Folgenden werden die Testresultate der 2. Testreihe dargestellt, erläutert und anschließend zusammengefasst.
 Die Ergebnisse aller Testreihen können im Projektverzeichnis unter \verb|results/data| und \verb|results/graphs| eingesehen werden.
 Der Lasttest mit statischen Daten wird ohne Datenbankanbindung durchgeführt und der angesteuerte Endpunkt \verb|/greeting/{name}| gibt bei beiden Anwendungen
 jeweils einen statischen String zurück. Wie bereits zu Beginn des Kapitels erwähnt, wird jede Anwendung sowohl im \verb|JVM mode|, als auch im
@@ -367,64 +367,156 @@ Die qDup-Skripte befinden sich im Projektverzeichnis im Verzeichnis \verb|script
 
 \subsubsection{JVM mode}
 \label{subsubsec:static_jvm_mode}
-Quarkus IO-Thread 1349.ms
-Quarkus Worker-Pool 1514.6 ms
+Wie aus Listing \ref{lst:starttimes_jvm_static} berechnet werden kann, liegt die durchschnittliche Zeit vom Start der Anwendung bis zur
+Bearbeitung der ersten Anfrage ohne Datenbankanbindung bei einer reaktiven Anwendung im \verb|JVM mode| bei 1344.8 ms und bei einer
+blockierenden Anwendung bei 1526.6 ms.
+\begin{lstlisting}[caption=5 gemessene Startzeiten bis zur Bearbeitung der ersten Anfrage: links ist die reaktive Anwendung und rechts
+    die blockierende Anwendung, captionpos=b, label=lst:starttimes_jvm_static]
+    1344 ms     1575 ms
+    1333 ms     1519 ms
+    1324 ms     1546 ms
+    1345 ms     1477 ms
+    1378 ms     1516 ms
+\end{lstlisting}
 
-\begin{figure}[h]
+In Abbildung \ref{fig:jvm_static_mean_response} wird die durchschnittlich gemessene Latenz für jede getestete \verb|workload|,
+in diesem Diagramm als Durchsatz beschrieben, dargestellt.
+Die höchste getestete \verb|workload| beträgt bei der reaktiven Anwendung \textbf{140.000} Anfragen/Sekunde und bei der
+nicht-reaktiven Anwendung \textbf{70.000} Anfragen/Sekunde.
+
+Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt ~\textbf{68.000} Anfragen/Sekunde mit einer
+Latenz von 60 ms und
+die reaktive Anwendung erreicht ~\textbf{134.000} Anfragen/Sekunde bei einer durchschnittlichen Latenz von 95ms.
+Bei höheren Lasten steigt die Latenz auf deutlich über eine Sekunde, weswegen der Durchsatz stagniert.
+
+Die reaktive Anwendung erreicht also in der vorliegenden Testumgebung für einen trivialen
+Endpunkt mit statischen Daten fast den doppelten Durchsatz.
+\newpage
+\begin{figure}[ht!]
     \centering
-    \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-response-vs-throughput}
-    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
-    \label{fig:static_mean_response}
+    \includegraphics[width=0.9\textwidth]{run2/jvm-static/mean-response-vs-throughput}
+    \caption{Test mit statischen Ressourcen im JVM mode: Durchschnittliche Latenz jeder Last}
+    \label{fig:jvm_static_mean_response}
 \end{figure}
 
-TODO Welche Perzentile
-\begin{figure}[h]
+Abbildung \ref{fig:jvm_static_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses im Hauptspeicher
+für jede \verb|workload| dar. Der allokierte Speicher für die genannten maximalen Durchsätze
+beträgt dabei bei der reaktiven Anwendung ~\verb|583 MB| und bei der
+blockierenden, nicht-reaktiven Anwendung ~\verb|826 MB|.
+
+\begin{figure}[ht!]
     \centering
-    \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-rss-vs-throughput}
-    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
-    \label{fig:static_mean_rss}
+    \includegraphics[width=0.9\textwidth]{run2/jvm-static/mean-rss-vs-throughput}
+    \caption{Test mit statischen Ressourcen im JVM mode: Allokierter Hauptspeicher pro workload}
+    \label{fig:jvm_static_mean_rss}
+\end{figure}
+\newpage
+Zu guter Letzt wird in Abbildung \ref{fig:jvm_static_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload| dargestellt.
+Bei der nicht-reaktiven Anwendung wird eine durschnittliche CPU-Auslastung von 99\% bereits bei einer Last von 50.000 Anfragen/Sekunde erreicht, die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 120.000 Anfragen/Sekunde.
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{run2/jvm-static/average-cpu-vs-throughput}
+    \caption{Test mit statischen Ressourcen im JVM mode: CPU Auslastung pro workload}
+    \label{fig:jvm_static_avg_cpu}
 \end{figure}
 
+In Tabelle \ref{table:static_jvm_measurement_results} werden die Resultate der gemessenen Benchmarks zusammengefasst
+und zueinander ins Verhältnis gesetzt. Im JVM mode mit statischen Ressourcen erreicht die reaktive Anwendung
+eine ~13\% schnellere durchschnittliche Startzeit bis vollständigen Bearbeitung der ersten Anfrage, sowie
+einen um ~30\% geringeren Speicherverbrauch.
+Darüber hinaus wird ein um etwa 97\% höherer maximaler Durchsatz erzielt, bevor die Latenz eine Sekunde übersteigt, und
+es können 140\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslastung, mit dem in Tabelle \ref{table:system_host}
+genannten CPU, bei 4 Kernen 99\% erreicht.
 
-\begin{figure}[h]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run2/jvm-static/average-cpu-vs-throughput}
-    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
-    \label{fig:static_avg_cpu}
-\end{figure}
-
-//TODO: anmerken das werte nur bis zum umschwenkpunkt interessant sind konkret also nicht bspw. max rss (weil dieser bei 135k req/sec auch stark steigt)
-// sondern lediglich bis 135k req/seq: worker thread : max req/sec 48k, io thread max req/sec 135k
-\begin{table}[h]
-    \centering
-    \begin{tabular}{| c | c | c | c |}
+\begin{table}[ht!]
+    \begin{tabular}{|l | c | c | c|}
         \hline
-        Run 2 - JVM Static                    & Blockierend & Reaktiv & Verhältnis \\
+        Run 2 - JVM mode - Static - 4 Cores & Blockierend & Reaktiv & Verhältnis \\
         \hline
-        Mean Start Time to First Request (ms) &             &         &            \\
+        \makecell{Durchschn. Startzeit bis erste Anfrage                         \\(ms)} & 1526.6      & 1344.8  & 87,4\%     \\
         \hline
-        Max RSS (MB)                          &             &         &            \\
+        Max. allokierter RAM (MB)           & 826         & 583     & 70.5\%     \\
         \hline
-        Max Throughput (req/sec)              &             &         &            \\
+        Max. Durchsatz (req/sec)            & 68.000      & 134.000 & 197\%      \\
         \hline
-        Max Req/Sec/MB                        &             &         &            \\
+        CPU Auslastung bei 99\% (req/sec)   & 50.000      & 120.000 & 240\%      \\
         \hline
-        CPU Auslastung 100\%                  &             &         &            \\
-        (req/sec)
     \end{tabular}
-    \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
-    \label{table:static_measurement_results}
+    \caption{Verhältnis der gemessenen Benchmarks für beide Anwendungen im JVM mode mit statischen Ressourcen}
+    \label{table:static_jvm_measurement_results}
 \end{table}
 
 \subsubsection{native mode}
 \label{subsubsec:static_native_mode}
-Quarkus IO-Thread: 27.8 ms
-Quarkus Worker-Pool: 28.2 ms
-//startzeiten
-//Speicherverbrauches
-//cpu Auslastung
-//durchsatz
-//TODO
+Wie aus Listing \ref{lst:starttimes_native_static} berechnet werden kann, liegt die durchschnittliche Zeit vom Start der Anwendung bis zur
+Bearbeitung der ersten Anfrage ohne Datenbankanbindung bei einer reaktiven Anwendung im \verb|native mode| bei 28 ms und bei einer
+blockierenden Anwendung bei 28.6 ms. Beide Anwendungen benötigen also in etwa die gleiche Zeit.
+
+\begin{lstlisting}[caption=5 gemessene Startzeiten bis zur Bearbeitung der ersten Anfrage: links ist die reaktive Anwendung und rechts
+    die blockierende Anwendung, captionpos=b, label=lst:starttimes_native_static]
+    28 ms     29 ms
+    28 ms     29 ms
+    28 ms     29 ms
+    28 ms     28 ms
+    28 ms     28 ms
+\end{lstlisting}
+
+In Abbildung \ref{fig:native_static_mean_response} wird die durchschnittlich gemessene Latenz für jede getestete \verb|workload|,
+in diesem Diagramm als Durchsatz beschrieben, dargestellt.
+Die höchste getestete \verb|workload| beträgt bei der reaktiven Anwendung \textbf{140.000} Anfragen/Sekunde und bei der
+nicht-reaktiven Anwendung \textbf{70.000} Anfragen/Sekunde.
+
+Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt ~\textbf{68.000} Anfragen/Sekunde mit einer
+Latenz von 60 ms und
+die reaktive Anwendung erreicht ~\textbf{134.000} Anfragen/Sekunde bei einer durchschnittlichen Latenz von 95ms.
+Bei höheren Lasten steigt die Latenz auf deutlich über eine Sekunde, weswegen der Durchsatz stagniert.
+
+Die reaktive Anwendung erreicht also in der vorliegenden Testumgebung für einen trivialen
+Endpunkt mit statischen Daten fast den doppelten Durchsatz.
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{run2/native-static/mean-response-vs-throughput}
+    \caption{Test mit statischen Ressourcen im native mode: Durchschnittliche Latenz jeder Last}
+    \label{fig:native_static_mean_response}
+\end{figure}
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{run2/native-static/mean-rss-vs-throughput}
+    \caption{Test mit statischen Ressourcen im native mode: Allokierter Hauptspeicher pro workload}
+    \label{fig:native_static_mean_rss}
+\end{figure}
+\newpage
+
+\begin{figure}[ht!]
+    \centering
+    \includegraphics[width=0.9\textwidth]{run2/native-static/average-cpu-vs-throughput}
+    \caption{Test mit statischen Ressourcen im native mode: CPU Auslastung pro workload}
+    \label{fig:native_static_avg_cpu}
+\end{figure}
+
+\begin{table}[ht!]
+    \begin{tabular}{|l | c | c | c|}
+        \hline
+        Run 2 - native mode - Static - 4 Cores & Blockierend & Reaktiv & Verhältnis \\
+        \hline
+        \makecell{Durchschn. Startzeit bis erste Anfrage                            \\(ms)} &       &   &      \\
+        \hline
+        Max. allokierter RAM (MB)              &             &         &            \\
+        \hline
+        Max. Durchsatz (req/sec)               &             &         &            \\
+        \hline
+        CPU Auslastung bei 99\% (req/sec)      &             &         &            \\
+        \hline
+    \end{tabular}
+    \caption{Verhältnis der gemessenen Benchmarks für beide Anwendungen im native mode mit statischen Ressourcen}
+    \label{table:static_native_measurement_results}
+\end{table}
+
+
+
+
+
 \subsection{Test: Datenbankzugriffe}
 \label{section:datenbankzugriffe}
 Im Folgenden werden die Testresultate der 2. Testreihe dargestellt und erläutert.
@@ -451,10 +543,11 @@ jeweils alle Elemente der Tabelle \textit{fruits} zurück. Wie bereits zu Beginn
 
 \subsection{Auswertung}
 \label{subsubsec:auswertung}
+//natürlich auch erwähnen das die versuchsreihen leicht varrieren bspw. bei startzeiten der native images
 //wie könnte ergebnis aussehen mit komplexeren queries
 //ressourcenbedarf von reaktiver anwendung könnte noch weiter gesenkt werden, allerdings wird der worker thread pool von vert.x aus
 kompatibilätsgründen zu blocking i/o genutzt
-
+//native anwendungen starten gleichschnell etc. unabhängig von der anwendungsarchitektur
 //native anwendungen können (noch) nicht den durchsatz von jvm anwendungen erreichen (ist aber theoretisch laut entwicklern möglich), da
 viele laufzeit optimierungen wegfallen
 //in startzeiten und ressourcenverbrauch native anwendungen allerdings überlegen

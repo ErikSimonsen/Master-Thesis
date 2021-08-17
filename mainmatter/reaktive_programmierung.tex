@@ -59,7 +59,7 @@ Abbildung \ref{fig:eventflow_mutiny} zeigt wie der obige, in Pseudocode, dargest
 mit der Reactive Programming-Bibliothek \verb|Mutiny| aussehen würde.
 Die Quelle ist dabei der \verb|Publisher|, die Operatoren die \verb|Processors| und die Senke ist der \verb|Subscriber|.
 
-\begin{figure}[h]
+\begin{figure}[ht!]
 	\centering
 	\includegraphics[width=0.9\textwidth]{EventFlow}
 	\caption{Exemplarische Abbildung eines Event Flow in der Reactive Programming-Bibliothek Mutiny \parencite{MutinyEventFlow}}
@@ -234,7 +234,7 @@ Klassen die dieses Interface implementieren repräsentieren in der Regel die Ope
 Sobald ein \verb|Processor| ein Fehler erhält kann er sich entweder davon erholen oder direkt das onError-Signal an seinen
 Downstream-Subscriber propagieren. Ein typischer Lebenszyklus eines reaktiven Datenstroms mit der Flow-API wird in
 Abbildung \ref{fig:flow-api} gezeigt.
-\begin{figure}[h]
+\begin{figure}[ht!]
 	\centering
 	\includegraphics[width=0.9\textwidth]{flow-api_manning.PNG}
 	\caption{Lebenszyklus eines reactive streams mit der Flow-API \parencite[Kapitel 17,  Figure 17.3]{JavaInAction}}
@@ -315,7 +315,7 @@ während ein nachrichtengesteuertes System auf adressierbaren Empfängern basier
 
 In Abbildung \ref{fig:reactive-traits} wird das Zusammenspiel der Eigenschaften eines reaktiven Systems dargestellt.
 
-\begin{figure}[h]
+\begin{figure}[ht!]
 	\centering
 	\includegraphics[width=0.9\textwidth]{reactive-traits}
 	\caption{Zusammenspiel der Eigenschaften eines reaktiven Systems \parencite{ReactiveSystems}}
@@ -410,7 +410,7 @@ Da es sich nicht um ein Framework handelt, gibt es keine vordefinierte Grundlage
 integriert werden.
 Der Kern des Toolkits \verb|vertx-core| stellt APIs für asynchrones Programmieren, \verb|Nonblocking I/O|, Streaming und Zugriff zu
 Netzwerkprokollen wie TCP, UDP, DNS HTTP oder WebSockets.
-\begin{figure}[h]
+\begin{figure}[ht!]
 	\centering
 	\includegraphics[width=1.0\textwidth]{vertx}
 	\caption{Vert.x Struktur \parencite{Ponge2020}}
