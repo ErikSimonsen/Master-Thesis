@@ -37,6 +37,7 @@
 % Bessere Tabellen
 \usepackage{array}
 %\usepackage[table]{xcolor}
+\usepackage{makecell}
 
 % Zeichensatz
 \usepackage[T1]{fontenc}
@@ -44,10 +45,15 @@
 % Schriftart
 \usepackage{lmodern}
 
-% Figure a b
-\usepackage{subcaption}
+% Captions für Figuren, Abbildungen und Tabellen
+\usepackage[font=small,labelfont=bf]{caption}
 
+% Subcaptions für Subfigures a b
+\usepackage[font=small,labelfont=bf]{subcaption}
+
+% Überschreibe LaTeX Standard Verhalten um zu ermitteln wo Figuren platziert werden
 \usepackage{float}
+
 % Code Highlighting
 \usepackage{listings}
 
