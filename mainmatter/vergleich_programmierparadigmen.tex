@@ -719,16 +719,16 @@ die niedrigen Startzeiten von \verb|native images| gegenüber JVM-Anwendungen da
 Anwendung hineinkompiliert wird. Der maximal mögliche Durchsatz ist außerdem (noch) deutlich niedriger da auf einige adaptive
 Laufzeitoptimierungen, wie JIT-Compiling, verzichtet wird.
 
-TODO
-//In beiden Szenarien ist der niedrigere Speicherverbrauch bei Maximallast(!!! ganz wichtig das zu erwähnen
-, denn der Speicherverbrauch ist konstant niedrig bis die Maximalllast erreicht wird)) damit zu begründen das die reaktive Anwendung
-zwar einen thread pool aus worker threads (vert.x hat immer(!) zwei thread pools) hat aber diesen nicht aktiv nutzt, außerdem
-kein dispatching genutzt
-//Besseres CPU Auslastung, da deutlich(!) weniger threadwechsel passieren
-//mehr anfragen da weniger threadwechsel -> mehr cpu zeit
-//optimale cpu auslastung da ein thread pro Kern
-//garkein dispatching seitens Vert.x nötig (blockierende anfragen werden immer auf dem IO thread entgegengenommen aber dann auf einen
-worker thread aus dem worker thread pool dispatched)
+In beiden Szenarien ist der niedrigere Speicherverbrauch der reaktiven Anwendung bei Maximallast darauf zurückzuführen, dass
+keine einziger blockierender Funktionsaufruf (\textit{pure io}) stattfindet, wodurch alle Anfragen über die wenigen
+Event Loops der \verb|IO Threads| abgearbeitet werden können und nicht auf \verb|Worker threads| aus dem \verb|Worker thread pool|
+\textit{dispatched} (siehe \ref{subsubsec:frameworks} Abschnitt \textit{Eclipse Vert.x}) werden müssen.
+
+Die erst bei deutlich höheren Durchsätzen auftretende maximale CPU-Auslastung resultiert aus der sehr geringen Anzahl an Threadwechseln
+, da jeweils ein Thread aus dem \verb|Event loop thread pool| genau einem CPU-Kern zugeordnet, wodurch eine optimale Auslastung erreicht
+wird. Darüber hinaus werden die \verb|Event loop threads| zu keinem Zeitpunkt blockiert, da, wie in \ref{subsec:nonblocking-i/o}
+beschrieben, das Ausführen von beliebigen I/O-Operationen, statt den Thread zu blockieren, die Kontrolle wieder an ihn zurückgibt,
+wodurch direkt die nächste I/O-Operation gestartet werden kann.
 
 \paragraph{Dynamische Ressourcen}
 Wie aus den gezeigten Resultaten (siehe Tabelle \ref{table:dynamic_jvm_measurement_results} und
@@ -743,7 +743,7 @@ TODO
 -> da datenbank irgendwann keien neuen verbindungen mehr annimmt -> werden gestellte anfragen in den warteschlangne (back pressure)
 gespeichert -> warteschlangen immer größer? aber ist das nicht genauso oben der fall (also ohne datenbank), wieso ist dann
 dort der speicherverbrauch bei max. auslastung trotzdem geringer, eventuell weil ohne dynamische ressourcen die anfragen
-trotzdem in den queues weiterverarbeitet werden, da der begrenzende faktor die cpu geschwindigkeit ist
+trotzdem in den queues weiterverarbeitet werden, da der begrenzende faktor die cpu geschwindigkeit/auslastung ist
 //warum mehr durchsatz - nur eine db connection pro io thread nötig, da anfragen nonblocking -> weniger threadwechsel
 von datenbankthreads bzw. im fall von postgresql sogar prozessen
 
@@ -780,3 +780,5 @@ viele laufzeit optimierungen wegfallen
 
 //natürlich nur benchmarks (nicht so aussagekräftig) für nicht-realistische workloads, da diese kaum nachstellbar sind,
 inder praxis wären die ansätze näher beisammen
+//eigentlich müsse man noch einen eigenen datenbank server haben, da realistischer, aber durch docker container mit begrenzung
+recht realistisch
