@@ -1,12 +1,68 @@
 \section{Fazit}
 \label{sec:fazit}
-TODO
+
 \subsection{Zusammenfassung}
-//auf fragestellung aus der einleitung eingehen
+\label{subsec:zusammenfassung}
+Ziel der Masterarbeit war es zu untersuchen, ob reaktive, auf \verb|Nonblocking I/O| und dem \verb|Multi-Reactor|-Modell basierende,
+Anwendungen das Problem der begrenzten Skalierbarkeit von nicht-reaktiven, auf \verb|Blocking I/O| und dem \verb|Thread per Request|
+-Modell basierenden Anwendungen durch Vermeidung von Threadwechseln lösen können, sowie mögliche Alternativen zu beschreiben.
+
+Für diesen Zweck wurden zwei simple Anwendungen als REST-APIs geschrieben, jeweils reaktiv und nicht-reaktiv, deren
+performancekritische Metriken durch mehrere Reihen von Lasttests mit variierenden \verb|workloads| gemessen wurden.
+Diese Metriken sind die CPU-Auslastung, der Speicherverbrauch, die Startzeit bis zur Bearbeitung der ersten Anfrage,
+sowie der Durchsatz und die durchschnittliche Latenz.
+Die Anwendungen wurden sowohl im \verb|JVM mode| als auch im \verb|native mode| jeweils mit statischen Ressourcen und dynamischen
+Ressourcen, also einer Datenbankanbindung, getestet.
+Anschließend wurden die resultierenden Benchmarks der beiden Anwendungen im jeweiligen Modi und Ressourcentyp ausgewertet und
+miteinander verglichen.
+\newline
+Zusammenfassend lassen sich folgende Ergebnisse nennen:\newline
+
+Generell benötigen die \verb|native images| zum Starten nur wenige Millisekunden, was nur ein Bruchteil der Startzeit
+von \verb|JVM|-Anwendungen darstellt und allokieren weniger Speicher. Allerdings können Sie nur einen deutlich
+geringeren maximalen Durchsatz aufweisen, da auf eine Vielzahl an Laufzeitoptimierungen verzichtet wird.
+Sowohl für statische, als auch für dynamische Daten beträgt der maximale Durchsatz der Anwendungen im \verb|native mode|
+daher nur circa die Hälfte der Anwendungen im \verb|JVM mode|.
+
+Im \verb|JVM mode| für statische Daten ist die reaktive Anwendung in jeder Metrik überlegen und erzielt mit 140.000 Anfragen/Sekunde
+einen ~102\% höheren maximalen Durchsatz, sowie ~31\% weniger Speicherbedarf, eine ~11\% schnellere Startzeit und kann ~120\%
+mehr Anfragen bearbeiten, bevor die CPU-Auslastung maximal wird.
+
+Auch im \verb|JVM mode| für dynamische Daten mit Datenbankanbindung ist die reaktive Anwendung in jeder Metrik überlegen und erzielt
+mit 36.000 Anfragen/Sekunde einen ~38\% höheren maximalen Durchsatz, sowie ~24\% weniger Speicherbedarf, eine ~17\% schnellere
+Startzeit und kann ~80\% mehr Anfragen bearbeiten, bevor die CPU-Auslastung maximal wird.
+
+Abschließend kann festgestellt werden, dass die vorliegende reaktive Anwendung in jeder gemessenen Metrik bessere Werte als ihr
+nicht-reaktives, blockierendes Gegenstück erzielen. Während bei statischen Daten die Durchsatzsteigerung über 100\% beträgt, ist die
+Steigerung bei dynamischen Daten mit 38\% deutlich geringer, allerdings ist der maximale Durchsatz bei dynamischen Daten auch
+um 104.000 Anfragen/Sekunde geringer als bei statischen Daten. Die Datenbank ist bei den Lasttests der begrenzende Faktor.
+
+Die Nachteile von reaktiven Anwendungen sind allerdings der grundlegend unterschiedliche asynchrone, eventorientierte Programmfluss
+und der damit verbundene Refactoring-Aufwand, sowie die schwierige Integration in bestehende Programme.
+
+Wenn darüber hinaus der gesamte Leistungsvorteil von reaktiven Anwendungen ausgeschöpft werden soll, ist es erforderlich
+dass alle Programmschichten reaktiv sind bzw. reaktive Treiber haben, damit keine Dispatching Kosten verursacht und Threadwechsel
+verursacht werden.
+
+\subsection{grenzen der arbeit}
+\label{subsec:grenzen_der_arbeit}
+Eine vollständige Antwort auf die Frage, ob reaktive Anwendungen besser skalieren als nicht-reaktive Anwendungen
+mit \verb|Blocking I/O| kann nicht gegeben werden, da die in dieser Arbeit vorliegenden exemplarischen \verb|workloads|, sowie
+die Anwendungsarchitektur und die Datenbankkomplexität von realistischen Systemen abweichen, weswegen die gezeigten Benchmarks
+wahrscheinlich nicht zu halten wären.
+Darüber hinaus werden Komponenten, welche die Performance eines Gesamtsystems erhöhen wie Load Balancer und Cache-Server
+nicht berücksichtigt.
+
+An dieser Stelle empfehlen sich weitere Untersuchungen mit definierten, realitätsnäheren Testumgebungen, um die Vorteile
+von reaktiven Anwendungen in der Praxis noch besser beurteilen zu können.
+Da die Systemarchitekturen und Arbeitsweisen aber bei jedem Unternehmen variieren, ist für eine schlussendliche Beurteilung
+eine individuelle Anpassung essentiell.
+
 \subsection{Ausblick}
-//lösungen wie project loom deutlich komfortabler in  zukunft
-Bezug auf in Einleitung angegebene Ziele
+\label{subsec:ausblick}
+//verweis auf project loom und andere lösungen die nicht erfordern dass anderer programmfluss und programmierparadigma
+Es sind noch die folgenden Schritte notwendig…
 
+Wünschenswert ist ein Vergleich der Ergebnisse mit …
 
-//eher fazit
-und erfordern das alle komponenten reaktiv sind (also auch alle library hersteller)
+Eine lohnende Aufgabe für die nahe Zukunft ist …

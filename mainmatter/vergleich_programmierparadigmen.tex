@@ -502,7 +502,7 @@ und zueinander ins Verhältnis gesetzt. Im JVM mode mit statischen Ressourcen er
 die gleiche durchschnittliche Startzeit bis vollständigen Bearbeitung der ersten Anfrage, sowie
 einen um 35,5\% geringeren Speicherverbrauch.
 Darüber hinaus wird ein um etwa 100\% höherer maximaler Durchsatz erzielt, bevor die Latenz eine Sekunde übersteigt, und
-es können 47\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslastung, mit dem in Tabelle \ref{table:system_host}
+es können 66,6\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslastung, mit dem in Tabelle \ref{table:system_host}
 genannten CPU, bei 4 Kernen 98\% erreicht.
 
 \begin{table}[ht!]
@@ -516,7 +516,7 @@ genannten CPU, bei 4 Kernen 98\% erreicht.
         \hline
         Max. Durchsatz (req/sec)     & 37.000      & 74.000  & 200\%      \\
         \hline
-        \makecell[l]{CPU Auslastung bei 98\%                              \\ (req/sec)} & 34.000 & 50.000 & 147\%  \\
+        \makecell[l]{CPU Auslastung bei 98\%                              \\ (req/sec)} & 30.000 & 50.000 & 166,6\%  \\
         \hline
     \end{tabular}
     \caption{Verhältnis der gemessenen Benchmarks für beide Anwendungen im native mode mit statischen Ressourcen}
@@ -656,7 +656,7 @@ der reaktiven Anwendung ~\verb|561 MB| und bei der blockierenden, nicht-reaktive
 \end{figure}
 
 Zu guter Letzt wird in Abbildung \ref{fig:native_dynamic_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
-dargestellt. Bei der nicht-reaktiven Anwendung wird eine durschnittliche CPU-Auslastung von 98\% bereits bei einer Last von
+dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-Auslastung von 98\% bereits bei einer Last von
 12.000 Anfragen/Sekunde erreicht, die reaktive Anwendung erreicht diese Auslastung erst bei 15.000 Anfragen/Sekunde.
 \newpage
 \begin{figure}[ht!]
@@ -698,6 +698,7 @@ Während die Ergebnisse der Testreihen geringfügig variieren bewegen sich alle 
 
 \subsubsection{Statische Ressourcen}
 \label{subsubsec:auswertung_static}
+//TODO: ERKLÄRUNG DER KORRELATION ZWISCHEN LATENZSTEIGERUNG UND MAXIMALER CPU AUSLASTUNG -> Latenz steigt erst sobald CPU auslastung maximal wird
 Wie aus den gezeigten Resultaten (siehe Tabelle \ref{table:static_jvm_measurement_results} und
 \ref{table:static_native_measurement_results}) hervorgeht, ist der Durchsatz, sowie der Ressourcenverbrauch bei der
 reaktiven Anwendung nach dem \verb|Multi Reactor| Modell für rein \verb|statische Ressourcen| sowohl im JVM, als auch im native mode,
@@ -712,7 +713,7 @@ Standards nicht unterstützen.
 Im \verb|native mode| ist die Startzeit beider Anwendungen gleich, befindet sich aber im zweistelligen Millisekunden Bereich statt
 im Sekundenbereich.
 Auch hier ist die reaktive der nicht-reaktiven Anwendung in jeder Benchmark überlegen. So wird 35,5\% weniger Speicher bei maximaler Last
-benötigt, ein 100\% (37.000 Anfragen/Sekunde) höherer  Durchsatz erzielt und es können 47\% (16.000) mehr Anfragen/Sekunde bearbeitet
+benötigt, ein 100\% (37.000 Anfragen/Sekunde) höherer  Durchsatz erzielt und es können 66,6\% (20.000) mehr Anfragen/Sekunde bearbeitet
 werden, bevor die CPU-Auslastung maximal ist.
 
 Wie bereits in Kapitel \ref{subsubsec:frameworks} Abschnitt \textit{Quarkus und native image} erwähnt, sind der geringere Speicherverbrauch und
@@ -829,3 +830,12 @@ Benchmarks mit trivialen Anwendungen auf einer sehr kleinen, unkonfigurierten Da
 die Unterschiede zwischen den Funktionsweisen und Limitierungen von reaktiven und nicht-reaktiven Anwendungen aufzuzeigen.
 Für realistischere \verb|workloads| mit konfigurierten Anwendungsservern, Datenbanken und weiteren Komponenten wie Load Balancern und
 Cache-Servern können die Ergebnisse deutlich abweichen.
+Des Weiteren ist die reine Performance kein alleiniger Faktor für den Einsatz von neuen Technologien, sondern auch deren
+Erlernbarkeit, Rentabilität und Integrationsfähigkeit in bestehende Lösungen.
+Gerade der deutlich vom klassischen, imperativen Modell abweichende Datenfluss und die Programmstruktur, sowie die weiteren Besonderheiten
+von asynchronen Programmen erschweren vielen Entwicklern das Verständnis und machen das Refactoring von bestehenden, nicht ausreichend
+skalierenden Programmen und Systemen komplex und zeitlich, als auch finanziell schwer einzuschätzen.
+Obwohl Frameworks wie Vert.x durch Mechanismen wie \verb|Dispatching| verhältnismäßig einfach in bestehende Systeme integriert werden
+können, wird die bestmögliche Performance nur erzielt, wenn alle, an der Abarbeitung einer Anfrage beteiligten, Komponenten und
+Anwendungsschichten reaktiv sind und ohne blockierende Anfragen bzw. \verb|Blocking I/O| auskommen. Dies ist gerade für
+große Enterprise-Anwendungen ein immenser Aufwand und sollte gründlich durchdacht und gegen die erhofften Vorteile abgewogen werden.
