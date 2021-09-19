@@ -1,5 +1,23 @@
 \begin{abstract}
-\normalsize
-\noindent
-%ToDo
+    \normalsize
+    \noindent
+    Das Ziel der vorliegenden Masterarbeit ist es, das Konzept von reaktiver Programmmierung und reaktiven Systemen,
+    speziell im Java Ökosystem, zu erläutern und zu prüfen, ob eine reaktive Anwendung nach dem \verb|Reactor Pattern| die, durch
+    Blocking I/O und Threadwechseln  bedingten, Skalierungs-Probleme von traditionellen, nicht-reaktiven Anwendungen nach dem
+    \verb|Thread per Request|-Pattern bei hohen Lasten lösen kann.
+    Dafür wurden in einem Versuchsaufbau eine Reihe von Lasttests mit stetig steigenden Lasten, sowie mit und ohne Datenbankanbindung,
+    an zwei konzeptionellen Anwendungen,
+    reaktiv und nicht-reaktiv, durchgeführt und Performance-bezogene Metriken wie Durchsatz, Speicherbedarf und CPU-Auslastung gemessen.
+    Anschließend wurden die Ergebnisse beider Anwendungen ausgewertet und miteinander verglichen.
+    Beide Anwendungen wurden dabei mit dem Full-Stack, Kubernetes-nativen Java-Anwendungsframework \verb|Quarkus| implementiert.
+    \newline\newline
+    Die Auswertung der Benchmarks zeigt, dass reaktive Anwendungen sowohl beim Arbeiten mit statischen, als auch dynamischen Daten mit
+    Datenbankanbindungg in jeder gemessenen Metrik, besonders im Durchsatz, überlegen sind, allerdings auch einige Nachteile bezüglich
+    Verständlichkeit, Wartbarkeit und Integrationsfähigkeit mit sich bringen. Allerdings sind die Testergebnisse durch eine Vielzahl
+    an Faktoren, wie leistungsfähigere Hardware oder Datenbankgröße, beeinflussbar, und der Autor empfiehlt die Testumgebung an die
+    eigenen Anforderungen anzupassen.
+    Darüber hinaus wurden Alternativen zum reaktiven Modell im Java-Umfeld dargestellt und bewertet.
+
+    Weiterführende Arbeiten in diesem Bereich könnten die Performance von alternativen Ansätzen, wie virtuelle Threads durch Project Loom,
+    in einem ähnlichen Versuchsaufbau prüfen und mit einer reaktiven Anwendung vergleichen.
 \end{abstract}

@@ -44,7 +44,7 @@ Wenn darüber hinaus der gesamte Leistungsvorteil von reaktiven Anwendungen ausg
 dass alle Programmschichten reaktiv sind bzw. reaktive Treiber haben, damit keine Dispatching Kosten verursacht und Threadwechsel
 verursacht werden.
 
-\subsection{grenzen der arbeit}
+\subsection{Grenzen der Arbeit}
 \label{subsec:grenzen_der_arbeit}
 Eine vollständige Antwort auf die Frage, ob reaktive Anwendungen besser skalieren als nicht-reaktive Anwendungen
 mit \verb|Blocking I/O| kann nicht gegeben werden, da die in dieser Arbeit vorliegenden exemplarischen \verb|workloads|, sowie
@@ -60,9 +60,18 @@ eine individuelle Anpassung essentiell.
 
 \subsection{Ausblick}
 \label{subsec:ausblick}
-//verweis auf project loom und andere lösungen die nicht erfordern dass anderer programmfluss und programmierparadigma
-Es sind noch die folgenden Schritte notwendig…
+Wünschenswert für die Zukunft ist ein Vergleich der Ergebnisse mit einem ähnlichen Versuchsaufbau unter Nutzung von Project Loom,
+also virtuellen Threads die von der Laufzeitumgebung verwaltet werden und nur einen nativen Thread pro CPU-Kern nutzen.
+Durch die virtuellen Threadwechsel entstehen nahezu keine Kosten. Darüber hinaus muss der Programmablauf, wie es bei reaktiven Anwendungen
+der Fall ist, nicht komplett neustrukturiert werden.
 
-Wünschenswert ist ein Vergleich der Ergebnisse mit …
+Allerdings ist die Veröffentlichung von Project Loom, Stand dieser Arbeit, noch fern. Dazu kommt, dass eine Vielzahl
+an JavaEE-APIs an die Nutzung von virtuellen Threads angepasst werden müssen. Da Project Loom allerdings direkt in die Standard-Library
+integriert wird und viele Java-APIs auf virtuelle Threads umstellt, ist der Aufwand wohl verhältnismäßg gering.
+Andere Programmiersprachen und dessen Laufzeitumgebungen nutzen diesen Ansatz bereits erfolgreich in der Praxis.
 
-Eine lohnende Aufgabe für die nahe Zukunft ist …
+Project Loom wird eine ernsthafte Alternative zu \verb|Reactive Programming|-Bibliotheken darstellen, da sowohl der Entwicklungs-, als auch
+der Integrationsaufwand in bestehende Anwendungen deutlich geringer ist.
+Konzepte wie \verb|backpressure| und Nachrichten-basierte Kommunikation zur Realisierung von reaktiven Systemen
+bleiben aber auch weiterhin für Systeme und Komponenten interessant, die in Zukunft kein \verb|Reactive Programming| nutzen.
+Dementsprechend werden auch Frameworks und Toolkits wie Vert.x für die Realisierung von reaktiven Systemkomponenten nicht obsolet.
