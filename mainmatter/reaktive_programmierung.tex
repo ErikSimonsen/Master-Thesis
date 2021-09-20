@@ -206,7 +206,7 @@ extends Flow.Subscriber<T>, Flow.Publisher<R> {
 }
 \end{lstlisting}\parencite[Kapitel 5.11]{JavaSE9StandardBibliothek}
 
-Die vier \verb|Callback|-Methoden des \verb|Subscriber|-Interface werden vom \verb|Publisher| aufgerufen sobald eines der jeweiligen Events ausgelöst wird.
+Die vier \gls{callback}(*)-Methoden des \verb|Subscriber|-Interface werden vom \verb|Publisher| aufgerufen sobald eines der jeweiligen Events ausgelöst wird.
 Die Events müssen dabei immer in der gleichen Reihenfolge veröffentlicht (und die jeweiligen Callback-Methoden ausgeführt) werden:
 \begin{enumerate}
     \item onSubscribe
@@ -479,12 +479,12 @@ Dafür nutzt Quarkus eine, von Oracle entwickelte, Technologie namens \verb|Graa
 Dabei handelt es sich um eine polyglotte, virtuelle Maschine und Laufzeitumgebung die auf dem OpenJDK basiert, und über
 JVMCI \footnote{Java Virtual Machine Compiler Interface} den C2-Compiler der zugrundeliegenden HotSpot-JVM durch den
 polyglotten Graal Compiler ersetzt.\parencite{GraalVM}
-Beim C2-Compiler handelt es sich dabei um einen aggressiv optimierenden \verb|just-in-time| (JIT) Compiler für Serveranwendungen, bei denen es nicht auf
+Beim C2-Compiler handelt es sich dabei um einen aggressiv optimierenden \verb|just-in-time|-Compiler (JIT) für Serveranwendungen, bei denen es nicht auf
 schnelle Startzeiten und geringen Ressourcenverbrauch, sondern auf höchsten Durchsatz ankommt.
-Dabei wird der unoptimierte Bytecode während der Laufzeit in Maschinencode umgesetzt und ausgeführt. Sobald eine Methode hinreichend oft
+Dabei wird der unoptimierte Bytecode während der Laufzeit in Maschinencode übersetzt und ausgeführt. Sobald eine Methode hinreichend oft
 ausgeführt wurde, daher auch als \verb|JIT Warm up| bezeichnet, und der Profiler genügend Informationen gesammelt hat, kann der JIT-Compiler
-sie entsprechend optimieren, bevor sie in Maschinencode umgesetzt wird.
-Der Graal Compiler kann sowohl als JIT-Compiler genutzt werden (JVM mode), als auch als AOT-Compiler (native mode).\newline
+sie entsprechend optimieren, bevor sie in Maschinencode übersetzt wird.
+Der Graal Compiler kann als JIT-Compiler im JVM mode genutzt werden, als auch als \verb|ahead-of-time|-Compiler (AOT) im native mode.\newline
 
 Um ein \verb|native image| zu erstellen, wird mithilfe des GraalVM-Compilers vor der Kompilierung, also \verb|ahead-of-time| (AOT), der Anwendung in Maschinencode
 ermittelt welche möglichen Pfade das Programm bei einem gegebenen Klassenpfad durchlaufen kann. Da dadurch nur die tatsächlich benötigten Klassen

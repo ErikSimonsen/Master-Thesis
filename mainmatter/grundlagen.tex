@@ -11,7 +11,7 @@ und bieten Entwicklern verhältnismäßig leichten Zugriff auf parallelle Progra
 
 \subsubsection{Kernel-Threads}
 \label{subsubsec:kernel-threads}
-Als \verb|Kernel-Threads| werden Threads bezeichnet dessen Ablaufplanung vom Betriebssystem übernommen wird.
+Als \verb|Kernel-Threads| werden Threads bezeichnet, deren Ablaufplanung vom Betriebssystem übernommen wird.
 Konkret bedeutet das, das die Zuweisung der Rechenzeit für einen Thread, sowie die Threadwechsel (siehe \ref{subsubsec:threadwechsel})
 vom Scheduler \& Dispatcher des Kernels übernommen werden.
 
@@ -26,18 +26,18 @@ verhältnismäßig günstig Sie zu erstellen oder zu zerstören. \parencite[Kapi
 \label{subsubsec:user-threads}
 Die Funktionalität von \verb|User-Threads| \footnote{Auch als Fiber oder virtueller Thread bezeichnet} ist, im Gegensatz zu \verb|Kernel-Threads|
 nicht im Kernel implementiert, sondern in einer Programmbibliothek im Benutzeradressraum des Betriebssystems.
-Da sich das Scheduling-System des Kernels daher nicht um die Verwaltung dieser Threads kümmern kann muss dies über einen eigenen Scheduling-Algorithmus
-der jeweiligen Anwendung erfolgen.
+Da sich das Scheduling-System des Kernels nicht um die Verwaltung solcher Threads kümmern kann, muss dies über einen eigenen Scheduling-Algorithmus
+der jeweiligen Laufzeitumgebung erfolgen.
 Ein Vorteil dieser Vorgehensweise ist die Möglichkeit, die Schedulingstrategie individuell an die Arbeitslast des Programms anzupassen.
 
 Im Gegensatz zu \verb|Kernel-Threads| kann einem User-Thread, der einen blockierenden Systemaufruf macht, aber nicht vom Scheduler die Kontrolle über die CPU
-entzogen werden, da der gesamte Prozess vom Kernel blockiert wird. Aus der Sicht des Kernels existiert lediglich der Main-Thread des Prozesses und dieser
+entzogen werden, da der gesamte Prozess vom Kernel blockiert würde. Aus der Sicht des Kernels existiert nämlich lediglich der Main-Thread des Prozesses und dieser
 führt einen blockierenden Aufruf aus. \footnote{Hier könnte lediglich, abhängig von der Schedulingstrategie des Kernels, ein Prozesswechsel stattfinden}
 Daher kann während dieser Zeit kein anderer \verb|User-Thread| des Prozesses ausgeführt werden.
 
-Eine Lösung für dieses Problem ist die Nutzung einer programminternen, nichtblockierenden API für I/O-Operationen.
+Eine Lösung für dieses Problem ist die Nutzung einer programminternen, nichtblockierenden \acrshort{api}(*) für \gls{io}-Operationen(*).
 Dadurch wird, statt des gesamten Prozesses, lediglich der auszuführende \verb|User-Thread| blockiert und dem Programm sofort
-die Kontrolle zurückgegeben. Dadurch kann durch die Schedulingstrategie direkt ein weiterer \verb|User-Thread| in der Zwischenzeit ausgeführt werden.
+die Kontrolle zurückgegeben. Dadurch kann, mit der richtigen Schedulingstrategie, direkt ein weiterer \verb|User-Thread| in der Zwischenzeit ausgeführt werden.
 \parencite[Kapitel 2.2.4]{Tanenbaum2016}
 Dieses Prinzip der nichtblockierenden I/O-Operationen ist im Rahmen dieser Arbeit von hoher Relevanz und wird in \ref{subsec:nonblocking-i/o}
 genauer erläutert.
@@ -72,7 +72,7 @@ Kernel-Modus (Kontextwechsel auf privilegierten Ring 0) zu erzwingen, sowie auf 
 Bei \verb|User-Threads| bzw. \verb|virtuellen Threads| sind Threadwechsel extrem effizient und deutlich schneller als bei \verb|Kernel-Threads|
 da sie sich komplett im Benutzeradressraum befinden und keinerlei Interaktion mit dem Kernel erfolgt.
 Der Prozess führt eine Thread-Tabelle mit, in der der gesamte Thread-Kontext gespeichert ist.
-Bei einem Threadwechsel wird der Thread-Kontext des aktiven \verb|User-Threads| in diese Tabelle gespeichert, und anschließend für den neuen Thread
+Bei einem Threadwechsel wird der Thread-Kontext des aktiven \verb|User-Threads| in dieser Tabelle gespeichert, und anschließend für den neuen Thread
 aus dieser Tabelle in die Maschinen-Register geladen.
 \parencite[Kapitel 2.2.6 Thread Scheduling]{Tanenbaum2016}
 \newpage
@@ -92,14 +92,14 @@ auch blockiert.
 \label{subsubsec:thread per request}
 Daher binden \Gls{servlet-container}(*) üblicherweise jede vom Webserver weitergeleitete HTTP-Anfrage an einen
 Thread im Servlet-API, welcher die jeweilige Anfrage imperativ abarbeitet
-(daher auch als\textit{worker thread} bezeichnet). Sie nutzen das \verb|Thread per Request|-Modell.
+(daher auch als \textit{worker thread} bezeichnet). Sie nutzen das \verb|Thread per Request|-Modell.
 Der auszuführende Code ist in diesem Ansatz, wie in Abbildung \ref{fig:blocking_thread_per_request}
 an den jeweiligen Thread gekoppelt, und falls ein Thread durch eine I/O-Operation blockiert werden
 die anderen Threads bzw. die zu bearbeitenden Anfragen davon nicht direkt beeinflusst.
 \begin{figure}[ht!]
   \centering
   \includegraphics[width=0.6\textwidth]{Blocking-IO-Thread-Per-Request-MultiThread}
-  \caption{Thread per Request mit Blocking I/O durch java.nio.channels.selector \parencite{NettyInAction}}
+  \caption{Thread per Request mit Blocking I/O}
   \label{fig:blocking_thread_per_request}
 \end{figure}
 
@@ -115,9 +115,9 @@ Der Grad der Parallelität ist bei diesem Ansatz durch die Größe des Threadpoo
 \newpage
 \subsection{Nonblocking I/O}
 \label{subsec:nonblocking-i/o}
-APIs die \verb|Blocking I/O| basieren blocken also den Thread bis die Operation abgeschlossen ist, und verursachen somit
+APIs die auf \verb|Blocking I/O| basieren blocken also den Thread bis die Operation abgeschlossen ist, und verursachen somit
 immer einen Threadwechsel.
-Ressourcenzugriffe in \verb|Nonblocking I/O|-APIs kommen hingegen sofort zurück und blockieren der Thread nicht.
+Funktionsaufrufe mit Ressourcenzugriffen in \verb|Nonblocking I/O|-APIs kommen hingegen sofort zurück und blockieren der Thread nicht.
 Dieser kann dadurch den weiteren Code des Programms ausführen.
 Sobald das Ergebnis des Zugriffs bereit ist, wird der Aufrufer darüber informiert.
 
