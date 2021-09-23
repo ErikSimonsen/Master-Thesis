@@ -8,7 +8,7 @@ Diese Events werden dann von einem oder mehreren \verb|Subscribern| konsumiert. 
 Die treibende Kraft bzw. der Stimulus von reaktiven Anwendungen sind also interne Änderungen innerhalb der Datenströme, wie beispielsweise das
 Hinzufügen eines Elements, welche anschließend den weiteren Programmablauf durch das Auslösen eines Events (durch einen Publisher) starten.
 
-Die Grundidee orientiert sich am Observer-Pattern und dessen Ausprägung dem Publish-Subscribe Pattern, erweitert diese aber
+Die Grundidee orientiert sich am Observer-Pattern und dessen Ausprägung dem Publish-Subscribe Pattern, erweitert dieses aber
 noch um die Benachrichtigungen des Subscribers:
 \begin{enumerate}
     \item Sobald keine Events mehr kommen
@@ -17,14 +17,14 @@ noch um die Benachrichtigungen des Subscribers:
 Indem Änderungen eines Datenstroms direkt propagiert werden und der Subscriber diesen nicht modifizieren kann, sondern lediglich über Änderungen informiert wird,
 können Programme ohne jeglichen Zustand realisiert werden\parencite{Escoffier2017}.
 
-Während ein Datenstrom selber von außen unverändlich ist, kann aber dennoch der Inhalt, also die Daten,
-des vom Publisher veröffentlichten Events modifiziert werden, bis es vom
+Während ein Datenstrom selber von außen unverändlich ist, kann aber dennoch der Inhalt
+des vom Publisher veröffentlichten Events, also die Daten, modifiziert werden, bis es vom
 Subscriber konsumiert wird, und zwar in beliebig vielen Schritten.
 
 Für eine solche Verkettung von Verarbeitungsschritten für Events bzw. Daten
 wird oft der Begriff \verb|Pipeline| verwendet und jeder Verarbeitungsschritt als \verb|Pipe| bezeichnet.
 Durch diese Pipelines \textit{fließen} Elemente in Form von Events bzw. Daten von ihrer Quelle
-bis zu einer Senke, dem Ziel bzw. dem eigentlichen Subscriber der \verb|Pipeline|.
+bis zu einer Senke, dem Subscriber der \verb|Pipeline|.
 
 Daher wird dieser Prozess auch als \verb|event flow| oder \verb|data flow| bezeichnet.
 Jede \verb|Pipe| kann ein Element ändern, löschen oder auch neue Elemente erstellen und dem \verb|flow| hinzufügen.
