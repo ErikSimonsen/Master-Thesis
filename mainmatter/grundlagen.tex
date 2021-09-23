@@ -115,7 +115,7 @@ Der Grad der Parallelität ist bei diesem Ansatz durch die Größe des Threadpoo
 \newpage
 \subsection{Nonblocking I/O}
 \label{subsec:nonblocking-i/o}
-APIs die auf \verb|Blocking I/O| basieren blocken also den Thread bis die Operation abgeschlossen ist, und verursachen somit
+APIs die auf \verb|Blocking I/O| basieren blocken den Thread bis die Operation abgeschlossen ist, und verursachen somit
 immer einen Threadwechsel.
 Funktionsaufrufe mit Ressourcenzugriffen in \verb|Nonblocking I/O|-APIs kommen hingegen sofort zurück und blockieren der Thread nicht.
 Dieser kann dadurch den weiteren Code des Programms ausführen.
@@ -126,13 +126,12 @@ bzw. \verb|Event notification API| durch jedes moderne Betriebssystem bereitgest
 
 \subsubsection{Synchronous Event Demultiplexing}
 \label{subsubsec:event demultiplexing}
-Der Begriff Demultiplexing beschreibt dabei das Aufteilen eines, aus mehreren Signalen zusammengesetzes, Signals
+Der Begriff Demultiplexing beschreibt dabei das Aufteilen eines, aus mehreren Signalen bestehenden, Signals
 in seine ursprünglichen Komponenten.
 
-Mit diesem Mechanismus lässt sich eine Menge an Ressourcen (bspw. Sockets oder Dateihandles) beobachten.
+Mit diesem Mechanismus lässt sich eine Menge an Ressourcen, wie Sockets oder Dateihandles, beobachten.
 Sobald eine I/O-Operation, die auf einer der Ressourcen ausgeführt wurde, abgeschlossen ist, gibt der Demultiplexer eine Menge an Events
 zurück, die die Daten enthalten und Auskunft über den Zustand der Ressource geben.
-
 \verb|Synchronous Event Demultiplexing| bzw. die \verb|Event notification API| wird in Linux durch \verb|epoll|, in BSD mit \verb|kqueue| und in
 Windows durch \verb|IOCP| bereitgestellt.\footnote{Auf alten Systemen wird als Fallback die POSIX Funktion \textit{select()} genutzt.}
 
@@ -153,21 +152,21 @@ Abbildung \ref{fig:nonblocking_single_thread} stellt dar, wie mehrere Ressourcen
 \end{figure}
 
 
-Im Gegensatz zum beschriebenen \verb|Thread per Request|-Modell, können durch \verb|Nonblocking I/O|
+Im Gegensatz zum beschriebenen \verb|Thread per Request|-Modell, können durch \newline\verb|Nonblocking I/O|
 mehrere Anfragen parallel von einem Thread verarbeitet werden. Daher die Bezeichnung \verb|Single Threaded| Modell.
-Dies resultiert in einer geringenen Anzahl an benötigten Threads und demnach auch in weniger Threadwechseln.
+Dies resultiert in einer geringeren Anzahl an benötigten Threads und demnach auch in weniger Threadwechseln.
 Darüber hinaus wird die Möglichkeit eines gleichzeitigen Ressourcenzugriffs von mehreren Threads eines Prozesses
 durch die Nutzung eines einzigen Threads unterbunden und eine Thread-Synchronisation ist nicht erforderlich.
 
 Der Aufruf des \verb|Synchronous Event Demultiplexers| selber ist blockierend (daher auch der Zusatz \verb|Synchronous|)
-und zwar solange bis mind. eine Ressource ein bereit für eine I/O-Operation ist
+und zwar solange bis mindestens eine Ressource bereit für eine I/O-Operation ist
 \footnote{Ein typischer Polling-Algorithmus würde, durch die geringe Verfügbarkeit der Ressourcen,
   viel CPU-Rechenzeit verschwenden}.
 Sobald dies passiert ist der Aufruf beendet und eine Menge an Events wird an den Aufrufer zurückgegeben.
 
 \subsubsection{Event Loops}
 \label{subsubsec:event loops}
-Ein beliebtes Modell für die Verarbeitung von asynchronen Events ist die \textit{Event Loop}.
+Ein beliebtes Modell für die Verarbeitung von asynchronen Events ist die \textit{Event Loop}, die in Abbildung \ref{fig:eventloop} dargestellt wird.
 Sobald ein Event entsteht wird es einer Warteschlange (Queue) in der Event Loop hinzugefügt.
 Solange der ausführende Thread aktiv ist und die Queue Events enthält, wird in einer Schleife das nächste Event
 abgerufen und vollständig verarbeitet bevor die nächste Iteration beginnt.
@@ -176,6 +175,7 @@ abgerufen und vollständig verarbeitet bevor die nächste Iteration beginnt.
   \centering
   \includegraphics[width=1.0\textwidth]{EventLoop}
   \caption{Exemplarische Abbildung einer Event Loop. \parencite[Kapitel 1.7]{Ponge2020}}
+  \label{fig:eventloop}
 \end{figure}
 
 Dies können beispielsweise I/O-Events sein, die signalisieren das Daten bereit zur Weiterverarbeitung sind, aber auch jegliches andere Event.
@@ -191,8 +191,16 @@ Für ein laufendes Programm muss der, in \ref{subsubsec:event demultiplexing} be
 \verb|Synchronous Event Demultiplexing|-Mechanismus natürlich mehrmals aufgerufen werden.
 
 Ein veranschaulichendes Pseudocode-Beispiel, wie ein Synchronous Event Demultiplexer während der
-gesamten Programmlaufzeit aktiv ist und dessen zurückgegebene Events verarbeitet werden,
+gesamten Programmlaufzeit aktiv ist und dessen zurückgegebene Events in einer \verb|Event Loop| verarbeitet werden,
 wird in Listing \ref{lst:EventLoop_Pseudocode} dargestellt.
+\newline\newline
+Zu Beginn werden die Ressourcen und die darauf auszuführenden Operationen der \verb|watchedList| hinzugefügt.
+Diese Liste an Ressourcen wird vom Demultiplexer überwacht. Sobald eine der Ressourcen bereit
+für die jeweilige Operation ist gibt der Demultiplexer eine Menge an Events zurück die anschließend in einer
+Event Loop iteriert wird. Dabei wird der Inhalt der Events gelesen und, falls die Ressource
+geschlossen wurde, die Ressource von der \verb|watchedList| entfernt oder der Inhalt in \verb|consumeData| weiterverarbeitet.
+\parencite[Event Demultiplexing]{NodeJSDesignPatterns}
+\newline
 \begin{lstlisting}[caption=Einfaches Pseudocode-Beispiel für Synchronous Event Demultiplexing mit Event Loop),
 captionpos=b, label=lst:EventLoop_Pseudocode]
 //add resources to a data structure and associate them with a specific operation
@@ -216,14 +224,14 @@ while (events = demultiplexer.watch(watchedList)) {
 		}
  }
 }
-\end{lstlisting}\parencite[Event Demultiplexing]{NodeJSDesignPatterns}
+\end{lstlisting}
 \newpage
 \subsubsection{Reactor-Pattern}
 \label{subsubsec:reactor_pattern}
 Das \verb|Reactor-Pattern| ist eine spezielle Form der beschriebenen Algorithmen und wurde bereits 1995 beschrieben.\parencite{SchmidtReactorPattern}
 Die Hauptidee besteht darin jedem Event einer Ressource einen Event-Handler zuzuordnen.
 Dieser wird aufgerufen sobald das Event entsteht und von der \verb|Event Loop| abgearbeitet wird.
-
+Der grundlegende Aufbau und die Funktionsweise wird in Abbildung \ref{fig:reactor_pattern} dargestellt.
 \begin{figure}[H]
   \centering
   \includegraphics[width=1.0\textwidth]{reactor_pattern}
@@ -231,41 +239,42 @@ Dieser wird aufgerufen sobald das Event entsteht und von der \verb|Event Loop| a
   \label{fig:reactor_pattern}
 \end{figure}
 
-Zu Beginn generiert die Anwendung eine neue I/O-Operation indem eine Anfrage an den \verb|Event Demultiplexer| gestellt wird.
+Sobald die Anwendung eine I/O-Operation auf einer Ressource ausführen will, wird eine Anfrage an den
+\verb|Event Demultiplexer| gestellt, um diese Ressource zu beobachten.
 Dabei spezifiziert die Anwendung zudem einen Handler, welcher aufgerufen wird sobald die Operation abgeschlossen wurde.
 Das Verschicken einer Anfrage an den Event Demultiplexer ist ein nicht-blockierender Aufruf und gibt sofort die Kontrolle
 an die Anwendung zurück.
-Sobald eine Menge von I/O-Operationen abgeschlossen ist, schiebt der Event Demultiplexer eine Menge an entsprechenden Events
-in die \verb|Event Queue|.
-Die \verb|Event Loop| iteriert über die Element der \verb|Event Queue| und ruft für jedes Event den dazugehörigen Handler auf.
+Sobald eine I/O-Operation abgeschlossen ist und mindestens eine der beobachteten Ressourcen wieder verfügbar sind,
+fügt der Event Demultiplexer die Menge an entsprechenden Events der \verb|Event Queue| hinzu.
+Die \verb|Event Loop| iteriert über die Elemente der \verb|Event Queue| und ruft für jedes Event den dazugehörigen Handler auf.
 Der Event-Handler, der Teil des Anwendungscodes ist, gibt die Kontrolle an die \verb|Event Loop| zurück, sobald seine Ausführung
 beendet ist.
 
-Wärend der Event-Handler ausgeführt wird, kann er neue asynchrone Operationen ausführen, durch die wiedderum
+Während der Event-Handler ausgeführt wird, kann dieser weitere I/O-Operationen ausführen, durch die wiederrum
 neue Elemente bzw. Ressourcen zum \verb|Event Demultiplexer| hinzugefügt werden.
 Sobald alle Elemente in der \verb|Event Queue| verarbeitet wurden, blockiert die \verb|Event Loop| solange
-bis vom \verb|Event Demultiplexer| neue Events der \verb|Event Queue| hinzugefügt werden. \parencite{SchmidtReactorPattern}
+bis der \verb|Event Queue| neue Events vom \verb|Event Demultiplexer| hinzugefügt werden. \parencite{SchmidtReactorPattern}
 
 Das Reactor-Pattern wird unter Anderem von der JavaScript-Laufzeitumgebung Node.js und vom Java-Framework \verb|Netty| implementiert.
 
 \paragraph{Netty}
 
-Die \verb|java.nio|-API bietet lediglich die Grundlage für asynchrone Anwendungen
-durch die Schnittstelle für die Nutzung von \verb|Nonblocking I/O|.
-Sie gibt aber kein Threading-Modell vor, bietet keine Unterstützung für Protokolle höherer Level (beispielsweise HTTP) und
+Die \verb|java.nio|-API bietet mit der Schnittstelle für die Nutzung von \verb|Nonblocking I/O|  die Grundlage für asynchrone Anwendungen.
+Sie gibt aber kein Threading-Modell vor, bietet keine Unterstützung für Protokolle höherer Ebene (beispielsweise HTTP) und
 kann die asynchronen I/O Events nicht verarbeiten, weswegen Entwickler in der Praxis selten direkt mit der \verb|java.nio|-API
 konfrontiert sind.
 
 Diese nicht-trivialen Aufgaben werden, auf der Basis von \verb|java.nio|, durch das Client-Server Framework \verb|Netty| implementiert.
 Dabei handelt es sich um ein asynchrones, eventgesteuertes Framework welches
-die Programmierung von hochperformanten Low-Level Netzwerk-Anwendungen, wie TCP- oder UDP-Socket Server simplifiziert. \parencite{NettyUserAction}
+die Programmierung von hochperformanten Low-Level Netzwerk-Anwendungen, wie TCP- oder UDP-Socket Server simplifiziert, indem
+es bereits eine breite Anzahl an Low-Level Protokollen und Transportmechanismen unterstützt (siehe Abbildung \ref{fig:netty}). \parencite{NettyUserAction}
 
 Das Projekt verspricht dabei, gegenüber ähnlichen Frameworks, eine komfortable User Experience durch eine einheitliche API für
 blockierende, und nicht-blockierende I/O-Sockets. Das flexible und erweiterbare Event-Modell erlaubt zudem eine saubere Trennung der Zuständigkeiten.
 Darüber hinaus beschränkt sich Netty nicht auf ein \verb|Single-Thread|-Modell, sondern kann auch einen oder mehrere \verb|Thread-Pools| nutzen.
 
-Gegenüber Frameworks die ähnliche Funktionalität bieten, allerdings auf \verb|Blocking I/O| basieren, resultiere die Nutzung von Netty
-in besserem Durchsatz, geringerer \Gls{latenz}(*) und weniger Ressourcenverbrauch. \parencite{Netty}
+Gegenüber Frameworks die ähnliche Funktionalität bieten, allerdings auf \verb|Blocking I/O| basieren, resultiere außerdem die Nutzung von Netty
+in besserem Durchsatz, niedrigerer \Gls{latenz}(*) und geringerem Ressourcenverbrauch. \parencite{Netty}
 
 \begin{figure}[h!]
   \centering
