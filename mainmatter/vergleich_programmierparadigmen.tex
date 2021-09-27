@@ -7,8 +7,8 @@ diesem Kapitel beide Ansätze hinsichtlich verschiedener Metriken in einem feste
 
 Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung, in 5 Testreihen, jeweils zwei Lasttests unterzogen:
 \begin{enumerate}
-    \item Abfrage von statischen Daten
-    \item Abfrage von dynamischen Daten (mit Datenbankanbindung)
+  \item Abfrage von statischen Daten
+  \item Abfrage von dynamischen Daten (mit Datenbankanbindung)
 \end{enumerate}
 Dabei wird pro Lasttest eine Reihe an Lasten bzw. \textit{workloads} von einem Client generiert und über eine feste Dauer in kleinen Zeitinvervallen
 an einen ausgewählten HTTP-Endpunkt der Anwendung gesendet.
@@ -36,10 +36,10 @@ wird der abzuarbeitende Code dann auf einem blockierenden \textit{worker thread}
 
 \newpage
 \begin{figure}[h]
-    \centering
-    \includegraphics[width=0.9\textwidth]{Quarkus_HTTP_Layer}
-    \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
-    \label{fig:quarkus_http_schicht}
+  \centering
+  \includegraphics[width=0.9\textwidth]{Quarkus_HTTP_Layer}
+  \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
+  \label{fig:quarkus_http_schicht}
 \end{figure}
 
 Die \textit{IO threads} sind dafür zuständig alle IO-Operationen asynchron auszuführen und die jeweiligen EventListener bzw. Subscriber
@@ -47,10 +47,10 @@ auszulösen sobald die Operationen abgeschlossen sind.
 Damit sich beide Anwendungen nahe an einer realen Java-EE CRUD REST-API orientieren, haben
 sie (zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks) folgende Projekt-Abhängigkeiten:
 \begin{itemize}
-    \item \acrshort{jax-rs} Implementierung
-    \item \Gls{jsong}(*) Unterstützung
-    \item PostgreSQL - Datenbanktreiber
-    \item \Gls{jpag}(*) Implementierung
+  \item \acrshort{jax-rs} Implementierung
+  \item \Gls{jsong}(*) Unterstützung
+  \item PostgreSQL - Datenbanktreiber
+  \item \Gls{jpag}(*) Implementierung
 \end{itemize}
 
 Diese Abhängigkeiten wurden vom Quarkus Maven-Repository sowohl in blockierender,
@@ -60,22 +60,22 @@ als auch in nicht-blockierender, reaktiver und in \verb|native image|-kompatible
 % the height of each row is set to 1.5 relative to its default height
 \renewcommand{\arraystretch}{1.5}
 \begin{table}[ht!]
-    \centering
-    \begin{tabular}{| c | c | c |}
-        \hline
-                                       & Blockierend      & Nicht-blockierend (reaktiv) \\
-        \hline
-        JAX-RS                         & Resteasy         & Resteasy Reactive           \\
-        \hline
-        \acrshort{json}                & Resteasy-Jackson & Resteasy-Reactive-Jackson   \\
-        \hline
-        Datenbanktreiber               & JDBC-Postgresql  & Reactive-Pg-Client          \\
-        \hline
-        \acrshort{jpa}-/\acrshort{orm} & Hibernate-ORM    & Hibernate-Reactive          \\
-        \hline
-    \end{tabular}
-    \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
-    \label{table:dependencies}
+  \centering
+  \begin{tabular}{| c | c | c |}
+    \hline
+                                   & Blockierend      & Nicht-blockierend (reaktiv) \\
+    \hline
+    JAX-RS                         & Resteasy         & Resteasy Reactive           \\
+    \hline
+    \acrshort{json}                & Resteasy-Jackson & Resteasy-Reactive-Jackson   \\
+    \hline
+    Datenbanktreiber               & JDBC-Postgresql  & Reactive-Pg-Client          \\
+    \hline
+    \acrshort{jpa}-/\acrshort{orm} & Hibernate-ORM    & Hibernate-Reactive          \\
+    \hline
+  \end{tabular}
+  \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
+  \label{table:dependencies}
 \end{table}
 
 In Listing \ref{lst:update_reactive} und \ref{lst:update_blocking} ist jeweils die Update Methode der REST-APIs abgebildet, um den
@@ -139,25 +139,25 @@ Zudem müssen beide Systeme per SSH von einem (idealerweise vorhandenem) dritten
 \footnote{Dies kann allerdings auch der Client-Host selber sein}
 erreichbar sein, damit dieses den Testablauf in der korrekten Abfolge ausführen kann.
 Der Einfachheit halber empfiehlt es sich, dass sich alle Geräte im gleichen Netzwerk befinden.
-Beide Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks, welches wiederrum Version 20.1 der GraalVM nutzt.
+Beide Anwendungen verwenden Version 1.12.1 des Quarkus Frameworks, welches wiederum Version 20.1 der GraalVM nutzt.
 Um eine reproduzierbare Anwendungsumgebung und Ressourcenallokation zu ermöglichen, laufen beide Anwendungen auf dem Server-Host in
 jeweils einem Docker-Container mit fest definierten Ressourcen:
 \begin{itemize}
-    \item Nutzung von 4 CPU-Kernen
-    \item 1024 MB RAM
-    \item 256 MB Heap Größe für den Java-Prozess
-          \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \parencite{Java10ReleaseNotes}}
+  \item Nutzung von 4 CPU-Kernen
+  \item 1024 MB RAM
+  \item 256 MB Heap Größe für den Java-Prozess
+        \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \parencite{Java10ReleaseNotes}}
 \end{itemize}
 Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
 \begin{itemize}
-    \item 4 CPU-Kerne
-    \item 2048 MB RAM
+  \item 4 CPU-Kerne
+  \item 2048 MB RAM
 \end{itemize}
 
 Die Größe des von Vert.x verwendeten \verb|Worker Thread Pools| (siehe Abbildung \ref{fig:quarkus_http_schicht}) beträgt standardmäßig 20 und bleibt
 unverändert, die Größe des \verb|Event-Loop Thread Pools| hingegen wird für die Tests manuell auf 8 gesetzt, da die Anwendung durch die Ressourcenallokation
 des Docker-Containers nur 4 CPU-Kerne nutzen darf und jeder dieser CPU-Kerne Hyperthreading unterstützt. \footnote{Wodurch jeder physische CPU-Kern über
-    zwei \glsplural{logische CPU}(*) verfügt} Damit kann die optimale Verteilung von einem \verb|Event-Loop Thread| bzw. \verb|IO-Thread| pro
+  zwei \glsplural{logische CPU}(*) verfügt} Damit kann die optimale Verteilung von einem \verb|Event-Loop Thread| bzw. \verb|IO-Thread| pro
 logischer CPU erreicht werden.
 Standardmäßig wird die Ressourcenbegrenzung durch Container von Vert.x nicht beachtet und die Anzahl der \verb|Event loop|-Threads auf die doppelte
 Anzahl der verfügbaren CPU-Kerne des Container-Hosts gesetzt, weswegen es für ressourcenbegrenzte Container der beschriebenen Korrektur bedarf.
@@ -167,51 +167,51 @@ reaktiven Anwendung bzw. \verb|Nonblocking I/O| genutzt wird.
 Die Anwendung, die auf dem Client-Host die \textit{work load} für die beiden zu testenden Anwendungen generiert,
 nutzt in dieser Testumgebung 4 Threads.
 \footnote{Welche Laufzeitumgebungen und Tools für die Tests auf den jeweiligen Hosts vorhanden sein müssen, und wie diese installiert werden
-    wird in der README.md-Datei des Projektverzeichnisses beschrieben.}
+  wird in der README.md-Datei des Projektverzeichnisses beschrieben.}
 
 Da die Messergebnisse je nach verwendeter Hardware der Client- und Server-Hosts durchaus variieren können werden im Folgenden
 die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
 \begin{table}[ht!]
-    \centering
-    \begin{tabular}{| c | c |}
-        \hline
-        Server-Host                                                  \\
-        \hline
-        CPU's          & AMD Ryzen 7 2700x eight-core processor x 16 \\
-        \hline
-        RAM            & 16GB                                        \\
-        \hline
-        Speicher       & 1,5 TB                                      \\
-        \hline
-        Betriebssystem & Fedora 34 (Workstation Edition)             \\
-        \hline
-        Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64|   \\
-        \hline
-    \end{tabular}
-    \caption{Systemspezifikationen der verwendeten Server-Maschine}
-    \label{table:system_host}
+  \centering
+  \begin{tabular}{| c | c |}
+    \hline
+    Server-Host                                                  \\
+    \hline
+    CPU's          & AMD Ryzen 7 2700x eight-core processor x 16 \\
+    \hline
+    RAM            & 16GB                                        \\
+    \hline
+    Speicher       & 1,5 TB                                      \\
+    \hline
+    Betriebssystem & Fedora 34 (Workstation Edition)             \\
+    \hline
+    Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64|   \\
+    \hline
+  \end{tabular}
+  \caption{Systemspezifikationen der verwendeten Server-Maschine}
+  \label{table:system_host}
 \end{table}
 
 \begin{table}[ht!]
-    \centering
-    \begin{tabular}{| c | c |}
-        \hline
-        Client-Host                                                \\
-        Hardware       & Acer Aspire VN7-591G                      \\
-        \hline
-        CPU            & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4   \\
-        \hline
-        RAM            & 8GB                                       \\
-        \hline
-        Speicher       & 500 GB                                    \\
-        \hline
-        Betriebssystem & Fedora 34 (Workstation Edition)           \\
-        \hline
-        Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64| \\
-        \hline
-    \end{tabular}
-    \caption{Systemspezifikationen der verwendeten Client-Maschine}
-    \label{table:system_client}
+  \centering
+  \begin{tabular}{| c | c |}
+    \hline
+    Client-Host                                                \\
+    Hardware       & Acer Aspire VN7-591G                      \\
+    \hline
+    CPU            & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4   \\
+    \hline
+    RAM            & 8GB                                       \\
+    \hline
+    Speicher       & 500 GB                                    \\
+    \hline
+    Betriebssystem & Fedora 34 (Workstation Edition)           \\
+    \hline
+    Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64| \\
+    \hline
+  \end{tabular}
+  \caption{Systemspezifikationen der verwendeten Client-Maschine}
+  \label{table:system_client}
 \end{table}
 
 \subsection{Testvorgehen / Testaufbau}
@@ -223,11 +223,11 @@ zur Erstellung von verschiedenen Benchmarks für den Quarkus Technologie-Stack g
 Um den gesamten Versuchsablauf zu automatisieren und über mehrere Server zu steuern wird ein Tool namens qDup eingesetzt.
 Damit können Shell-Kommandos als Skripte gruppiert, und verschiedenen Hosts je nach Rolle zugewiesen werden.
 \footnote{Die qDup Skripte mit dem gesamten Testablauf können im Verzeichnis \textit{/scripts/qDup} des Quellcodeverzeichnisses eingesehen und
-    angepasst werden.}
+  angepasst werden.}
 Um dem Ablauf korrekt zu steuern werden Signale definiert die ein Host sendet, und auf die die anderen Hosts warten um ihrerseits
 weitere Skripte auszuführen.
 \footnote{Beispielsweise sollte der Server-Host erst anfangen den Java-Prozess zu überwachen, sobald der Client-Host die \textit{workload}
-    generiert und nicht bereits davor}
+  generiert und nicht bereits davor}
 
 Wie bereits in \ref{section:testumgebung} angedeutet, nutzt qDup SSH um auf die jeweilige Hosts zuzugreifen.
 
@@ -252,9 +252,9 @@ Die \textit{workload} ist hier definiert als die Anzahl der, an den Server-Host,
 Für das Generieren und Übermitteln der \textit{workload} wird das Werkzeug \textit{wrk2} genutzt, welches das
 bewährte HTTP-Benchmarking Tool \textit{wrk} um folgende Funktionen erweitert:
 \begin{enumerate}
-    \item Konstanter \textit{workload} Durchsatz
-    \item Korrekteres Messverfahren der Antwort-Latenz durch Vermeidung von \verb|Coordinated Omission|
-    \item Hochexaktes Messen durch \Glsuseri{hdrHistogramm}(*)
+  \item Konstanter \textit{workload} Durchsatz
+  \item Korrekteres Messverfahren der Antwort-Latenz durch Vermeidung von \verb|Coordinated Omission|
+  \item Hochexaktes Messen durch \Glsuseri{hdrHistogramm}(*)
 \end{enumerate}\parencite{Wrk2, Wrk}
 
 \paragraph{Coordinated Omission Problem}
@@ -344,9 +344,9 @@ Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des
 Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host der das qDup Skript ausgeführt hat kopiert.
 
 \begin{figure}[ht]
-    \centering
-    \includegraphics[width=0.7\textwidth]{Testaufbau}
-    \caption{Testaufbau}
+  \centering
+  \includegraphics[width=0.7\textwidth]{Testaufbau}
+  \caption{Testaufbau}
 \end{figure}
 
 In einem Bash-Skript werden anschließend die Ausgaben von \verb|top| und \verb|wrk| für jede einzelne \verb|workload| eines Tests
@@ -392,28 +392,28 @@ Die reaktive Anwendung erreicht also in der vorliegenden Testumgebung für einen
 Endpunkt mit statischen Daten mehr als den doppelten Durchsatz.
 \newpage
 \begin{figure}[ht!]
-    \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-response-vs-throughput}
-    \caption{Test im JVM mode mit statischen Ressourcen: Durchschnittliche Latenzen}
-    \label{fig:jvm_static_mean_response}
+  \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-response-vs-throughput}
+  \caption{Test im JVM mode mit statischen Ressourcen: Durchschnittliche Latenzen}
+  \label{fig:jvm_static_mean_response}
 \end{figure}
 Abbildung \ref{fig:jvm_static_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses
 im Hauptspeicher für jede \verb|workload| dar. Der allokierte Speicher für die genannten maximalen Durchsätze beträgt dabei bei
 der reaktiven Anwendung ~\verb|580 MB| und bei der blockierenden, nicht-reaktiven Anwendung ~\verb|843 MB|.
 \newpage
 \begin{figure}[ht!]
-    \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-rss-vs-throughput}
-    \caption{Test im JVM mode mit statischen Ressourcen:: Allokierter Hauptspeicher}
-    \label{fig:jvm_static_mean_rss}
+  \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-rss-vs-throughput}
+  \caption{Test im JVM mode mit statischen Ressourcen:: Allokierter Hauptspeicher}
+  \label{fig:jvm_static_mean_rss}
 \end{figure}
 Zu guter Letzt wird in Abbildung \ref{fig:jvm_static_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
 dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-Auslastung von ~100\% bereits bei einer Last von
 50.000 Anfragen/Sekunde erreicht, die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 110.000 Anfragen/Sekunde.
 \newpage
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run2/jvm-static/average-cpu-vs-throughput}
-    \caption{Test mit statischen Ressourcen im JVM mode: CPU Auslastung pro workload}
-    \label{fig:jvm_static_avg_cpu}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run2/jvm-static/average-cpu-vs-throughput}
+  \caption{Test mit statischen Ressourcen im JVM mode: CPU Auslastung pro workload}
+  \label{fig:jvm_static_avg_cpu}
 \end{figure}
 
 In Tabelle \ref{table:static_jvm_measurement_results} werden die Resultate der gemessenen Benchmarks zusammengefasst
@@ -425,21 +425,21 @@ es können 120\% mehr Anfragen pro Sekunde verarbeitet werden bis die durchschni
 \ref{table:system_host} genannten CPU, bei 4 Kernen 100\% erreicht.
 
 \begin{table}[ht!]
-    \begin{tabular}{|l | c | c | c|}
-        \hline
-        Run 2 - JVM mode - static & Blockierend & Reaktiv & Verhältnis \\
-        \hline
-        \makecell[l]{Durchschn. Startzeit bis                          \\erste Anfrage (ms)} & 1516,6      & 1353  & 89,2\%     \\
-        \hline
-        Max. allokierter RAM (MB) & 843         & 580     & 68,8\%     \\
-        \hline
-        Max. Durchsatz (req/sec)  & 69.000      & 140.000 & 202\%      \\
-        \hline
-        \makecell[l]{CPU Auslastung bei 100\%                          \\ (req/sec)} & 50.000 & 110.000 & 220\%  \\
-        \hline
-    \end{tabular}
-    \caption{Verhältnis der Benchmarks im JVM mode mit statischen Ressourcen}
-    \label{table:static_jvm_measurement_results}
+  \begin{tabular}{|l | c | c | c|}
+    \hline
+    Run 2 - JVM mode - static & Blockierend & Reaktiv & Verhältnis \\
+    \hline
+    \makecell[l]{Durchschn. Startzeit bis                          \\erste Anfrage (ms)} & 1516,6      & 1353  & 89,2\%     \\
+    \hline
+    Max. allokierter RAM (MB) & 843         & 580     & 68,8\%     \\
+    \hline
+    Max. Durchsatz (req/sec)  & 69.000      & 140.000 & 202\%      \\
+    \hline
+    \makecell[l]{CPU Auslastung bei 100\%                          \\ (req/sec)} & 50.000 & 110.000 & 220\%  \\
+    \hline
+  \end{tabular}
+  \caption{Verhältnis der Benchmarks im JVM mode mit statischen Ressourcen}
+  \label{table:static_jvm_measurement_results}
 \end{table}
 
 \subsubsection{native mode}
@@ -468,20 +468,20 @@ Die reaktive Anwendung erreicht also in der vorliegenden Testumgebung für einen
 Endpunkt mit statischen Daten im \verb|native mode| den doppelten Durchsatz.
 \newpage
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run2/native-static/mean-response-vs-throughput}
-    \caption{Test im native mode mit statischen Ressourcen: Durchschnittliche Latenz}
-    \label{fig:native_static_mean_response}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run2/native-static/mean-response-vs-throughput}
+  \caption{Test im native mode mit statischen Ressourcen: Durchschnittliche Latenz}
+  \label{fig:native_static_mean_response}
 \end{figure}
 Abbildung \ref{fig:native_static_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses
 im Hauptspeicher für jede \verb|workload| dar. Der allokierte Speicher für die genannten maximalen Durchsätze beträgt dabei bei
 der reaktiven Anwendung ~\verb|364 MB| und bei der blockierenden, nicht-reaktiven Anwendung ~\verb|564 MB|.
 \newpage
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run2/native-static/mean-rss-vs-throughput}
-    \caption{Test im native mode mit statischen Ressourcen: Allokierter Hauptspeicher}
-    \label{fig:native_static_mean_rss}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run2/native-static/mean-rss-vs-throughput}
+  \caption{Test im native mode mit statischen Ressourcen: Allokierter Hauptspeicher}
+  \label{fig:native_static_mean_rss}
 \end{figure}
 
 Zu guter Letzt wird in Abbildung \ref{fig:native_static_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
@@ -489,10 +489,10 @@ dargestellt. Bei der nicht-reaktiven Anwendung wird eine durschnittliche CPU-Aus
 34.000 Anfragen/Sekunde erreicht, die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 50.000 Anfragen/Sekunde.
 \newpage
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run2/native-static/average-cpu-vs-throughput}
-    \caption{Test im native mode mit statischen Ressourcen: CPU Auslastung}
-    \label{fig:native_static_avg_cpu}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run2/native-static/average-cpu-vs-throughput}
+  \caption{Test im native mode mit statischen Ressourcen: CPU Auslastung}
+  \label{fig:native_static_avg_cpu}
 \end{figure}
 
 In Tabelle \ref{table:static_native_measurement_results} werden die Resultate der gemessenen Benchmarks zusammengefasst
@@ -504,21 +504,21 @@ es können 66,6\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Ausla
 genannten CPU, bei 4 Kernen 100\% erreicht.
 
 \begin{table}[ht!]
-    \begin{tabular}{|l | c | c | c|}
-        \hline
-        Run 2 - native mode - static & Blockierend & Reaktiv & Verhältnis \\
-        \hline
-        \makecell[l]{Durchschn. Startzeit bis                             \\erste Anfrage (ms)} &   27,6    &  27,6  &   100\%   \\
-        \hline
-        Max. allokierter RAM (MB)    & 564         & 364     & 64,5\%     \\
-        \hline
-        Max. Durchsatz (req/sec)     & 37.000      & 74.000  & 200\%      \\
-        \hline
-        \makecell[l]{CPU Auslastung bei 100\%                             \\ (req/sec)} & 30.000 & 50.000 & 166,6\%  \\
-        \hline
-    \end{tabular}
-    \caption{Verhältnis der Benchmarks im native mode mit statischen Ressourcen}
-    \label{table:static_native_measurement_results}
+  \begin{tabular}{|l | c | c | c|}
+    \hline
+    Run 2 - native mode - static & Blockierend & Reaktiv & Verhältnis \\
+    \hline
+    \makecell[l]{Durchschn. Startzeit bis                             \\erste Anfrage (ms)} &   27,6    &  27,6  &   100\%   \\
+    \hline
+    Max. allokierter RAM (MB)    & 564         & 364     & 64,5\%     \\
+    \hline
+    Max. Durchsatz (req/sec)     & 37.000      & 74.000  & 200\%      \\
+    \hline
+    \makecell[l]{CPU Auslastung bei 100\%                             \\ (req/sec)} & 30.000 & 50.000 & 166,6\%  \\
+    \hline
+  \end{tabular}
+  \caption{Verhältnis der Benchmarks im native mode mit statischen Ressourcen}
+  \label{table:static_native_measurement_results}
 \end{table}
 \newpage
 \subsection{Test: Datenbankzugriffe}
@@ -555,20 +555,20 @@ die reaktive Anwendung erreicht ~\textbf{36.000} Anfragen/Sekunde bei einer durc
 Bei höheren Lasten steigt die Latenz auf deutlich über eine Sekunde, weswegen der Durchsatz stagniert.
 \newpage
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run5/jvm-db/mean-response-vs-throughput}
-    \caption{Test im JVM mode mit dynamischen Daten: Durchschnittliche Latenz}
-    \label{fig:jvm_dynamic_mean_response}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run5/jvm-db/mean-response-vs-throughput}
+  \caption{Test im JVM mode mit dynamischen Daten: Durchschnittliche Latenz}
+  \label{fig:jvm_dynamic_mean_response}
 \end{figure}
 Abbildung \ref{fig:jvm_dynamic_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses
 im Hauptspeicher für jede \verb|workload| dar. Der allokierte Speicher für die genannten maximalen Durchsätze beträgt dabei bei
 der reaktiven Anwendung ~\verb|573 MB| und bei der blockierenden, nicht-reaktiven Anwendung ~\verb|754 MB|.
 \newpage
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run5/jvm-db/mean-rss-vs-throughput}
-    \caption{Test im JVM mode mit dynamischen Ressourcen: Allokierter Hauptspeicher}
-    \label{fig:jvm_dynamic_mean_rss}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run5/jvm-db/mean-rss-vs-throughput}
+  \caption{Test im JVM mode mit dynamischen Ressourcen: Allokierter Hauptspeicher}
+  \label{fig:jvm_dynamic_mean_rss}
 \end{figure}
 
 Zu guter Letzt wird in Abbildung \ref{fig:jvm_dynamic_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
@@ -576,10 +576,10 @@ dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-A
 20.000 Anfragen/Sekunde erreicht, die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 36.000 Anfragen/Sekunde.
 \newpage
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run5/jvm-db/average-cpu-vs-throughput}
-    \caption{Test im JVM mode mit dynamischen Ressourcen: CPU Auslastung}
-    \label{fig:jvm_dynamic_avg_cpu}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run5/jvm-db/average-cpu-vs-throughput}
+  \caption{Test im JVM mode mit dynamischen Ressourcen: CPU Auslastung}
+  \label{fig:jvm_dynamic_avg_cpu}
 \end{figure}
 
 In Tabelle \ref{table:dynamic_jvm_measurement_results} werden die Resultate der gemessenen Benchmarks zusammengefasst
@@ -590,21 +590,21 @@ Darüber hinaus wird ein um etwa 38\% höherer maximaler Durchsatz erzielt, bevo
 es können 80\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslastung bei 4 Kernen 100\% erreicht.
 
 \begin{table}[ht!]
-    \begin{tabular}{|l | c | c | c|}
-        \hline
-        Run 5 - JVM mode - dynamic & Blockierend & Reaktiv & Verhältnis \\
-        \hline
-        \makecell[l]{Durchschn. Startzeit bis                           \\erste Anfrage (ms)} &   1631,2    &  1349  &   82,6\%   \\
-        \hline
-        Max. allokierter RAM (MB)  & 754         & 573     & 75,9\%     \\
-        \hline
-        Max. Durchsatz (req/sec)   & 26.000      & 36.000  & 138\%      \\
-        \hline
-        \makecell[l]{CPU Auslastung bei 100\%                           \\ (req/sec)} & 20.000 & 36.000 & 180\%  \\
-        \hline
-    \end{tabular}
-    \caption{Verhältnis der Benchmarks im JVM mode mit dynamischen Ressourcen}
-    \label{table:dynamic_jvm_measurement_results}
+  \begin{tabular}{|l | c | c | c|}
+    \hline
+    Run 5 - JVM mode - dynamic & Blockierend & Reaktiv & Verhältnis \\
+    \hline
+    \makecell[l]{Durchschn. Startzeit bis                           \\erste Anfrage (ms)} &   1631,2    &  1349  &   82,6\%   \\
+    \hline
+    Max. allokierter RAM (MB)  & 754         & 573     & 75,9\%     \\
+    \hline
+    Max. Durchsatz (req/sec)   & 26.000      & 36.000  & 138\%      \\
+    \hline
+    \makecell[l]{CPU Auslastung bei 100\%                           \\ (req/sec)} & 20.000 & 36.000 & 180\%  \\
+    \hline
+  \end{tabular}
+  \caption{Verhältnis der Benchmarks im JVM mode mit dynamischen Ressourcen}
+  \label{table:dynamic_jvm_measurement_results}
 \end{table}
 
 
@@ -633,10 +633,10 @@ die reaktive Anwendung erreicht ~\textbf{18.500} Anfragen/Sekunde bei einer durc
 Bei höheren Lasten steigt die Latenz auf deutlich über eine Sekunde, weswegen der Durchsatz stagniert.
 
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run5/native-db/mean-response-vs-throughput}
-    \caption{Test im native mode mit dynamischen Ressourcen: Durchschnittliche Latenz}
-    \label{fig:native_dynamic_mean_response}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run5/native-db/mean-response-vs-throughput}
+  \caption{Test im native mode mit dynamischen Ressourcen: Durchschnittliche Latenz}
+  \label{fig:native_dynamic_mean_response}
 \end{figure}
 \newpage
 Abbildung \ref{fig:native_dynamic_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses
@@ -644,10 +644,10 @@ im Hauptspeicher für jede \verb|workload| dar. Der allokierte Speicher für die
 der reaktiven Anwendung ~\verb|561 MB| und bei der blockierenden, nicht-reaktiven Anwendung ~\verb|565 MB|.
 
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run5/native-db/mean-rss-vs-throughput}
-    \caption{Test im native mode mit dynamischen Ressourcen: Allokierter Hauptspeicher}
-    \label{fig:native_dynamic_mean_rss}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run5/native-db/mean-rss-vs-throughput}
+  \caption{Test im native mode mit dynamischen Ressourcen: Allokierter Hauptspeicher}
+  \label{fig:native_dynamic_mean_rss}
 \end{figure}
 
 Zu guter Letzt wird in Abbildung \ref{fig:native_dynamic_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
@@ -655,10 +655,10 @@ dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-A
 12.000 Anfragen/Sekunde erreicht, die reaktive Anwendung erreicht diese Auslastung erst bei 18.000 Anfragen/Sekunde.
 \newpage
 \begin{figure}[ht!]
-    \centering
-    \includegraphics[width=1.0\textwidth]{run5/native-db/average-cpu-vs-throughput}
-    \caption{Test im native mode mit dynamischen Ressourcen: CPU Auslastung}
-    \label{fig:native_dynamic_avg_cpu}
+  \centering
+  \includegraphics[width=1.0\textwidth]{run5/native-db/average-cpu-vs-throughput}
+  \caption{Test im native mode mit dynamischen Ressourcen: CPU Auslastung}
+  \label{fig:native_dynamic_avg_cpu}
 \end{figure}
 
 In Tabelle \ref{table:dynamic_native_measurement_results} werden die Resultate der gemessenen Benchmarks zusammengefasst
@@ -669,21 +669,21 @@ Darüber hinaus wird ein um etwa 19\% höherer maximaler Durchsatz erzielt, bevo
 es können 50\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslastung bei 4 Kernen 100\% erreicht.
 
 \begin{table}[ht!]
-    \begin{tabular}{|l | c | c | c|}
-        \hline
-        Run 5 - native mode - dynamic & Blockierend & Reaktiv & Verhältnis \\
-        \hline
-        \makecell[l]{Durchschn. Startzeit bis                              \\erste Anfrage (ms)} &   46    &  27,8 &   60\%   \\
-        \hline
-        Max. allokierter RAM (MB)     & 565         & 561     & 99,2\%     \\
-        \hline
-        Max. Durchsatz (req/sec)      & 15.500      & 18.500  & 119\%      \\
-        \hline
-        \makecell[l]{CPU Auslastung bei 100\%                              \\(req/sec)} & 12.000 & 18.000 & 150\%  \\
-        \hline
-    \end{tabular}
-    \caption{Verhältnis der Benchmarks im native mode mit dynamischen Ressourcen}
-    \label{table:dynamic_native_measurement_results}
+  \begin{tabular}{|l | c | c | c|}
+    \hline
+    Run 5 - native mode - dynamic & Blockierend & Reaktiv & Verhältnis \\
+    \hline
+    \makecell[l]{Durchschn. Startzeit bis                              \\erste Anfrage (ms)} &   46    &  27,8 &   60\%   \\
+    \hline
+    Max. allokierter RAM (MB)     & 565         & 561     & 99,2\%     \\
+    \hline
+    Max. Durchsatz (req/sec)      & 15.500      & 18.500  & 119\%      \\
+    \hline
+    \makecell[l]{CPU Auslastung bei 100\%                              \\(req/sec)} & 12.000 & 18.000 & 150\%  \\
+    \hline
+  \end{tabular}
+  \caption{Verhältnis der Benchmarks im native mode mit dynamischen Ressourcen}
+  \label{table:dynamic_native_measurement_results}
 \end{table}
 
 \subsection{Auswertung}
@@ -794,7 +794,7 @@ leistungsfähigere SSDs, und damit auch mehr I/O-Operationen, als die beschriebe
 Im Falle der Anbindung einer Datenbank, also bei dynamischen Daten, gibt es außerdem eine ganze Reihe an Optimierungsmöglichkeiten.
 So würde besonders die nicht-reaktive Anwendung stark davon profitieren, wenn ein ausreichend großer Pool an Datenbankverbindungen
 im vornherein erzeugt wird, den die \verb|Worker threads| immer wieder nutzen können.
-Zudem kann unter Anderem die Anzahl der maximal zulässigen
+Zudem kann unter anderem die Anzahl der maximal zulässigen
 Datenbankverbindungen und die Größe des Shared Memory erhöht werden, sowie zusätzliche Cache-Mechanismen genutzt werden.
 Natürlich ist auch die Wahl der Datenbank je nach Anwendungszweck ein sehr einflussreicher Faktor.
 \newline\newline

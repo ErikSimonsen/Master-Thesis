@@ -1,18 +1,17 @@
 \section{Einleitung}
 \label{sec:einleitung}
-In der folgenden Arbeit sind die ersten Vorkommen von Begriffen und Abkürzungen die möglicherweise nicht geläufig sind, aber
-nicht im Fließtext erklärt werden, mit einem \verb|(*)| gekennzeichnet.
-Diese Begriffe werden im Glossar und-/oder Acronymverzeichnis kurz erklärt.
+In der folgenden Arbeit sind die ersten Vorkommen von möglicherweise nicht geläufigen Begriffen und Abkürzungen, die
+im Fließtext nicht erklärt werden, mit einem \verb|(*)| gekennzeichnet.
+Diese Begriffe werden im Glossar und/oder Akronymverzeichnis kurz erklärt.
 
 \subsection{Problemstellung}
 \label{subsec:problemstellung}
-In den letzten Jahren sind die Anforderungen an Webanwendungen durch zunehmende Digitalisierung, und entsprechend steigenden Nutzerzahlen,
-sowie stark auf Client-Server-Kommunikation basierenden Architekturen, wie Microservices und \Glspl{spag}(*), erheblich gestiegen.
+In den letzten Jahren sind die Anforderungen an Webanwendungen durch zunehmende Digitalisierung und entsprechend steigenden Nutzerzahlen,
+sowie stark auf Client-Server Kommunikation basierenden Architekturen, wie Microservices und \Glspl{spag}(*), erheblich gestiegen.
 
 Während geschäftskritische Anwendungen lange Zeit mit ein paar Tausend Anfragen pro Sekunde als hoch frequentiert
 galten, müssen solche Webanwendungen heutzutage in der Lage sein eine vielfach höhere Last bewältigen zu können.
-Darüber hinaus müssen Sie \verb|skalierbar| sein, also in der Lage sein auf variable Lasten zu reagieren
-und sich anzupassen, ohne das es zu Performance-Einbußen kommt.
+Darüber hinaus müssen sie \verb|skalierbar| sein, also ohne Performance-Einbußen auf variable Lasten reagieren können.
 
 Das Standardmodell für Java-basierte Webanwendungen ist das \verb|Thread per Request|-Modell.
 Dabei wird jede \acrshort{http}(*)-Anfrage an einen Kernel-Thread gebunden, welcher anschließend die Anfrage sequentiell abarbeitet.
@@ -21,22 +20,24 @@ CPU-Rechenzeit eines CPU-Kerns zugewiesen. Sobald die Rechenzeit eines Threads a
 Funktionsaufruf in einen inaktiven Zustand versetzt wird, wird der nächste Thread bearbeitet: es erfolgt ein \verb|Threadwechsel|.
 
 Obwohl Threadwechsel, im Gegensatz zu Prozesswechseln, sehr kostengünstig sind, sind sie in diesem Modell ab einer kritischen Anzahl von HTTP-Anfragen
-pro Sekunde der begrenzende Skalierungsfaktor. Die Threadwechsel zwischen den Kernelthreads des Betriebssystems erfolgen nicht mehr
+pro Sekunde der begrenzende Skalierungsfaktor. Die Threadwechsel zwischen den Kernel-Threads des Betriebssystems erfolgen dann nicht mehr
 schnell genug um jede Anfrage bzw. jeden Thread innerhalb einer akzeptablen Zeit zu bearbeiten.
-Diese Begrenzung äußert sich letztendlich in nicht ausreichend skalierendem \Gls{durchsatz}(*) der Anwendung.
+Diese Begrenzung äußert sich letztendlich in einem nicht ausreichend skalierendem \Gls{durchsatz}(*) der Anwendung.
 
 \subsection{Ziel der Arbeit}
 \label{subsec:ziel}
 Um höhere Workloads zu bewältigen und Anwendungen skalierbarer zu machen existieren alternative
 Anwendungsmodelle, wie das in dieser Arbeit thematisierte \verb|Reactor-Pattern|.
 Das Modell nutzt einen Thread pro CPU-Kern und verzichtet somit auf anwendungsbedingte Threadwechsel.
-Die Voraussetzung dafür ist allerdings, dass die vorhandenen Threads niemals in einen inaktiven Zustand geraten,
-weswegen Anfragen an externe Komponenten wie Datenbanken oder Webservices den Thread nicht blockieren dürfen, und der vom Ergebniss abhängige
-Code reaktiv ausgeführt werden muss: man spricht von \verb|reaktiver Programmierung|. Reaktive Programmierung erfordert das die gesamte Programmlogik jeder
+Die Voraussetzung dafür ist allerdings, dass die vorhandenen Threads niemals in einen inaktiven Zustand geraten.
+Deswegen dürfen Anfragen an externe Komponenten, wie Datenbanken oder Webservices, den Thread nicht blockieren,
+und der vom Ergebnis abhängige Code muss reaktiv, also erst beim tatsächlichen Eintreffen der Antwort,
+ausgeführt werden: man spricht von \verb|reaktiver Programmierung|.
+Reaktive Programmierung erfordert, dass die Programmlogik jeder
 Anwendungsschicht asynchron und eventbasiert strukturiert wird.
 Nachdem eine Anfrage an eine externe Komponente abgesetzt wurde, beginnt der Thread bereits mit der Abarbeitung der nächsten
-HTTP-Anfrage. Sobald ein Resultat verfügbar ist wird es dem Thread mithilfe eines Events mitgeteilt, welcher daraufhin
-den, für dieses Event, hinterlegten Code ausführt. Mit dieser grundlegenden Funktionsweise wird auf anwendungsbedingte
+HTTP-Anfrage. Sobald ein Resultat verfügbar ist, wird es dem Thread mithilfe eines Events mitgeteilt.
+Dieser führt daraufhin den, für dieses Event hinterlegten, Code aus. Durch diese grundlegende Funktionsweise wird auf anwendungsbedingte
 Threadwechsel verzichtet.
 
 In dieser Arbeit wird untersucht, ob \verb|Reactive Programming| bzw. reaktive Anwendungen das Problem der Skalierbarkeit
@@ -44,25 +45,24 @@ für hohe Lasten praktikabel lösen können und welche alternativen Lösungsans�
 
 \subsection{Vorgehensweise}
 \label{subsec:vorgehensweise}
-Um das Verhalten der beiden Modelle unter Last zu prüfen und miteinander zu vergleichen, werden zwei triviale Anwendungen,
-reaktiv und nicht-reaktiv implementiert, einer Reihe von Lasttests mit unterschiedlichen \verb|workloads| unterzogen.
+Um das Verhalten der beiden Modelle unter Last zu prüfen und miteinander zu vergleichen, werden zwei triviale Anwendungen implementiert,
+reaktiv und nicht-reaktiv, und einer Reihe von Lasttests mit unterschiedlichen \verb|workloads| unterzogen.
 Dabei werden verschiedene \Glsplural{benchmark}(*), wie Durchsatz, Speicherbedarf und CPU-Auslastung gemessen.
-Die Anwendungen werden sowohl als \acrshort{jvm}(*)-Anwendung, als auch als nativ ausführbare Anwendung jeweils mit Datenbankenanbindung und
-ohne getestet.
+Die Anwendungen werden sowohl auf der \acrshort{jvm}(*), als auch nativ ausgeführt und jeweils mit und ohne Datenbankenanbindung getestet.
 
 \subsection{Aufbau}
 \label{subsec:aufbau}
-Zu Beginn der Arbeit werden in Kapitel \ref{sec:grundlagen} die Grundlagen der Thematik erläutert, also Kernel- und User-Threads,
-blockierende und nicht-blockierende Eingabe-/Ausgabe-Operationen, sowie die beiden darauf aufbauenden Design-Patterns
+Zu Beginn der Arbeit werden in Kapitel \ref{sec:grundlagen} die Grundlagen der Thematik erläutert. Diese beinhalten
+Kernel- und User-Threads, blockierende und nicht-blockierende Ein-/Ausgabe-Operationen sowie die beiden darauf aufbauenden Design-Patterns
 \verb|Thread per Request| und \verb|Reactor|.
 
-Anschließend werden in Kapitel \ref{section:reaktive_programmierung} die grundlegenden Konzepte von reaktiver Programmierung,
-wie reaktive Datenströme, erklärt, sowie dessen Vor- und Nachteile genannt. Darauffolgend werden die Eigenschaften von reaktiven
-Systemen und deren Beziehung untereinander beschrieben.
-Danach wird auf die Unterstützung für reaktive Anwendungen und Architekturen innerhalb des Java Ökosystem, sowie Alternativen
-eingegangen.
+Anschließend wird in Kapitel \ref{section:reaktive_programmierung} die Funktionsweise von \verb|Reactive Programming|, und dessen
+zugrundeliegendes Konzept von reaktiven Datenströmen erläutert. Danach werden die Vor- und Nachteile des Programmierparadigmas
+genannt.
+Darauffolgend werden die Eigenschaften von reaktiven Systemen und deren Beziehung untereinander beschrieben.
+Zum Ende des Kapitels wird auf die Unterstützung für reaktive Anwendungen und Architekturen innerhalb des Java Ökosystem
+sowie Alternativen eingegangen.
 
-In Kapitel \ref{section:vergleich_reaktiv_blockierend} werden zuerst die Testumgebung definiert und der Testaufbau,
-sowie der Testablauf beschrieben.
-Im Anschluss werden die Testresultate in Form von Diagrammen dargestellt und beschrieben.
-Zuletzt erfolgt die Auswertung und Erläuterung der Testresultate.
+In Kapitel \ref{section:vergleich_reaktiv_blockierend} wird zuerst die Testumgebung definiert sowie Testaufbau und Testablauf beschrieben.
+Im Anschluss werden die Testresultate genannt und in Form von Diagrammen dargestellt.
+Abschließend erfolgt die Auswertung und Erläuterung der Testresultate.

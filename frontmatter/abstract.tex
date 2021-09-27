@@ -1,22 +1,25 @@
 \begin{abstract}
     \normalsize
     \noindent
-    Das Ziel der vorliegenden Masterarbeit ist es, das Konzept von reaktiver Programmmierung und reaktiven Systemen,
-    speziell im Java Ökosystem, zu erläutern und zu untersuchen, ob eine reaktive Anwendung nach dem \verb|Reactor Pattern| das, durch
-    Threadwechsel bedingte, Skalierungs-Problem einer nicht-reaktiven, auf dem \verb|Thread per Request|-Pattern basierenden,
-    Anwendung bei hohen Lasten lösen kann.
-    Dafür wurden in einem Versuchsaufbau eine Reihe von Lasttests mit stetig steigenden Lasten, sowie mit und ohne Datenbankanbindung,
+    Das Ziel der vorliegenden Masterarbeit ist es, das Konzept von reaktiver Programmierung und reaktiven Systemen,
+    speziell im Java Ökosystem, zu erläutern. Zudem wird untersucht, ob eine reaktive Anwendung nach dem \verb|Reactor Pattern| das, durch
+    Threadwechsel bedingte, Skalierungsproblem einer nicht-reaktiven, auf dem \verb|Thread per Request|-Pattern basierenden,
+    Anwendung bei hohen Lasten lösen kann.\newline
+
+    Dafür wurden in einem Versuchsaufbau eine Reihe von Lasttests mit stetig steigenden Lasten, jeweils mit und ohne Datenbankanbindung,
     an zwei konzeptionellen Anwendungen,
-    reaktiv und nicht-reaktiv, durchgeführt und Performance-bezogene Metriken wie Durchsatz, Speicherbedarf und CPU-Auslastung gemessen.
+    reaktiv und nicht-reaktiv, durchgeführt. Dabei werden Performance-relevante Metriken wie Durchsatz, Speicherbedarf und CPU-Auslastung gemessen.
     Anschließend wurden die Ergebnisse beider Anwendungen ausgewertet und miteinander verglichen.
     Beide Anwendungen wurden dabei mit dem Full-Stack, Kubernetes-nativen Java-Anwendungsframework \verb|Quarkus| implementiert.\newline
 
-    Die Auswertung der Messergebnisse zeigt, dass reaktive Anwendungen sowohl beim Arbeiten mit statischen, als auch dynamischen Daten mit
-    Datenbankanbindung in jeder gemessenen Metrik, besonders im Durchsatz, überlegen sind, allerdings auch einige Nachteile bezüglich
-    Verständlichkeit, Wartbarkeit und Integrationsfähigkeit mit sich bringen. Allerdings sind die Testergebnisse durch eine Vielzahl
-    an Faktoren, wie leistungsfähigere Hardware oder Datenbankgröße, beeinflussbar, und der Autor empfiehlt die Testumgebung an die
-    eigenen Anforderungen anzupassen.
-    Darüber hinaus wurden Alternativen zum reaktiven Modell im Java-Umfeld dargestellt und bewertet.
+    Die Auswertung der Messergebnisse zeigt, dass die reaktive Anwendung sowohl beim Arbeiten mit statischen, als auch dynamischen Daten
+    mit Datenbankanbindung in jeder gemessenen Metrik, besonders im Durchsatz, der nicht-reaktiven Anwendung überlegen ist.
+    Bezüglich der Verständlichkeit, Wartbarkeit und Integrationsfähigkeit ist sie nach Auffassung des Autors gegenüber
+    einer nicht-reaktiven, traditionellen Anwendung jedoch im Nachteil.
+    Die Testergebnisse sind außerdem durch eine Vielzahl
+    an Faktoren, wie Leistungsfähigkeit der Hardware oder Datenbankgröße, beeinflussbar, weswegen der Autor empfiehlt die Testumgebung
+    an die eigenen Anforderungen anzupassen.
+    Darüber hinaus wurden Alternativen zum reaktiven Modell im Java-Umfeld dargestellt und bewertet.\newline
 
     Weiterführende Arbeiten in diesem Bereich könnten die Performance von alternativen Ansätzen, wie die Nutzung von virtuellen Threads durch Project Loom,
     in einem ähnlichen Versuchsaufbau untersuchen und mit einer reaktiven Anwendung vergleichen.
