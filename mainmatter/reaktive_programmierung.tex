@@ -235,7 +235,7 @@ und bildet die einzigartige Beziehung zwischen ihnen ab.
 Der \verb|Subscriber| kann die \verb|request|-Methode des \verb|Subscription|-Interfaces nutzen um den \verb|Publisher| zu informieren das er bereit
 ist eine gegebene Anzahl an Events zu verarbeiten (backpressure). Mit der \verb|cancel|-Methode kann er die \verb|Subscription| abbrechen und dem \verb|Publisher|
 somit mitteilen das er nicht länger Events erhalten will.
-\parencite{JavaSEFlow}
+\parencite{OracleFlow}
 
 Das \verb|Processor|-Interface erweitert \verb|Publisher| und \verb|Subscriber| ohne das weitere Methoden implementiert werden müssen.
 Dieses Interface repräsentiert eine Transformation der Events die durch den
@@ -574,7 +574,7 @@ das Scheduling der Laufzeitumgebung nicht ausführen kann, weil ein darüber lie
 eine blockierende I/O-Operation ausführt.
 Dies würde bei mehreren Kernel-Threads bzw. Carriern wieder zu Threadwechseln seitens des Kernel-Schedulers führen.
 Die vorgeschlagene Lösung besteht in der Nutzung einer asynchronen, nicht-blockierenden API für I/O Operationen von der Laufzeitumgebung.
- Dadurch erhält der Aufrufer, in diesem Fall der Carrier, unverzüglich nach dem Start einer blockierenden I/O-Operation
+Dadurch erhält der Aufrufer, in diesem Fall der Carrier, unverzüglich nach dem Start einer blockierenden I/O-Operation
 innerhalb eines virtuellen Threads die Kontrolle zurück und kann währenddessen einen neuen virtuellen Thread bearbeiten.\newline
 \verb|Project Looms| Versprechen ist allerdings eine Lösung zu finden die ohne asynchrone APIs für I/O-Operationen auskommt.
 Diese gerade bei großen Systemen schwierig zu warten und zu verstehen.\newline
