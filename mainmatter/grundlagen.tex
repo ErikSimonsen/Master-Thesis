@@ -44,7 +44,7 @@ Zeit auch kein anderer \verb|User-Thread| ausgeführt wird.
 
 Eine Lösung für dieses Problem ist die Nutzung einer asynchronen, nichtblockierenden \acrshort{api}(*) für \gls{io}-Operationen(*)
 seitens der Anwendung.
-Dadurch wird statt des Main-Threads lediglich der auszuführende \verb|User-Thread| blockiert und dem aufrufenden Programm bzw. Main-Thread
+Dadurch wird statt des Main-Threads lediglich der auszuführende \verb|User-Thread| blockiert und dem aufrufenden Main-Thread
 sofort die Kontrolle zurückgegeben. Mit der richtigen Schedulingstrategie kann in der Zwischenzeit direkt ein
 weiterer \verb|User-Thread| ausgeführt werden. \parencite[Kapitel 2.2.4]{Tanenbaum2016}
 Das Prinzip von nichtblockierenden I/O-Operationen ist im Rahmen dieser Arbeit von hoher Relevanz und wird in Kapitel \ref{subsec:nonblocking-i/o}

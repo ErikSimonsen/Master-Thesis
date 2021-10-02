@@ -13,26 +13,27 @@ Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung, in 5 T
 Dabei wird pro Lasttest eine Reihe an Lasten bzw. \textit{workloads} von einem Client generiert und über eine feste Dauer in kleinen Zeitinvervallen
 an einen ausgewählten HTTP-Endpunkt der Anwendung gesendet.
 In dieser Zeit wird das Zeitinvervall vom Starten der Anwendung bis zur Beantwortung der ersten Anfrage,
-der benötigte Arbeitsspeicher und CPU-Auslastung des Prozesses, der Durchsatz, sowie die Latenz gemessen.
+der benötigte Arbeitsspeicher und die CPU-Auslastung des Prozesses, der Durchsatz, sowie die Latenz gemessen.
 
-Für Container- und Cloud-Umgebungen eignen sich, primär aus Kostengründen, Anwendungen die, statt auf hohen Durchsatz und lange Laufzeiten, auf
-schnelle Startzeiten und geringen Ressourcenverbrauch setzen.
-Aus diesem Grund werden die beiden Anwendungen sowohl im \textit{JVM mode} als auch im \textit{native mode}
+Primär aus Kostengründen eignen sich für Container- und Cloud-Umgebungen Anwendungen die, statt auf hohen Durchsatz und lange Laufzeiten,
+auf schnelle Startzeiten und geringen Ressourcenverbrauch setzen.
+Aus diesem Grund werden die beiden Anwendungen den beiden Lasttests sowohl im \textit{JVM mode}, als auch im \textit{native mode}
 (siehe Absatz \verb|Quarkus und native image| in Kapitel \ref{subsubsec:frameworks})
-den beiden Lasttests unterzogen. Ingesamt ergeben sich also 4 Testszenarien pro Anwendung.
+unterzogen. Ingesamt ergeben sich also 4 Testszenarien pro Anwendung.
 
 \subsection{Implementierung \& Systemaufbau}
 \label{section:implementierung}
-Die beiden Anwendungen implementieren mit dem Quarkus-Framework jeweils eine simple \acrshort{rest}-Schnittstelle mit HTTP-\acrshort{crud} Methoden
+Die beiden Anwendungen implementieren mit dem Quarkus-Framework jeweils eine simple \acrshort{rest}-Schnittstelle mit HTTP-\acrshort{crud} Methoden,
 und einer angebundenen PostgreSQL-Datenbank.
 Dabei ist vorallem die HTTP-Schicht von Interesse. Die HTTP-Unterstützung von Quarkus basiert auf einem reaktiven, nicht-blockierenden
-Unterbau: der Vert.x Engine (siehe Kapitel \ref{subsubsec:reaktive_systeme}).
-Jede HTTP-Anfrage wird auf einem der \textit{event-loop threads} bzw. \textit{IO threads}
-verarbeitet und durch eine Routing-Schicht an den Anwendungscode weitergeleitet.
-Je nachdem welcher Ansatz zur Implementierung des jeweiligen HTTP-Endpunktes gewählt wurde,
-wird der abzuarbeitende Code dann auf einem blockierenden \textit{worker thread}, ganz nach dem \verb|Thread-Per-Request Modell|, aus dem
-\textit{worker thread pool} (Servlet, \Gls{jaxrsg}(*)) oder, nach dem \verb|Multi-Reactor-Modell|, weiter auf einem der
-\textit{IO threads} (Reactive Routes, Reactive Resteasy) ausgeführt.
+Unterbau: der \verb|Vert.x Engine| (siehe Kapitel \ref{subsubsec:reaktive_systeme}).
+Jede HTTP-Anfrage wird auf einem der \verb|event-loop threads| bzw. \verb|IO threads|
+verarbeitet, und durch eine Routing-Schicht an den Anwendungscode weitergeleitet.
+
+Abhängig vom verwendeten Ansatz zur Implementierung des jeweiligen HTTP-Endpunktes wird der Code auf unterschiedliche Art und Weise abgearbeitet.
+Der Code wird entweder auf einem blockierenden \verb|worker thread| aus dem \verb|worker thread pool| (Servlet, \Gls{jaxrsg}(*))
+, ganz nach dem \verb|Thread-Per-Request Modell|, oder weiterhin auf einem der \verb|IO threads| (Reactive Routes, Reactive Resteasy),
+nach dem \verb|Multi-Reactor-Modell|, ausgeführt.
 
 \newpage
 \begin{figure}[h]
@@ -42,10 +43,10 @@ wird der abzuarbeitende Code dann auf einem blockierenden \textit{worker thread}
   \label{fig:quarkus_http_schicht}
 \end{figure}
 
-Die \textit{IO threads} sind dafür zuständig alle IO-Operationen asynchron auszuführen und die jeweiligen EventListener bzw. Subscriber
+Die \verb|IO threads| sind dafür zuständig alle IO-Operationen asynchron auszuführen, und die jeweiligen EventListener bzw. Subscriber
 auszulösen sobald die Operationen abgeschlossen sind.
 Damit sich beide Anwendungen nahe an einer realen Java-EE CRUD REST-API orientieren, haben
-sie (zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks) folgende Projekt-Abhängigkeiten:
+sie, zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks, folgende Projekt-Abhängigkeiten:
 \begin{itemize}
   \item \acrshort{jax-rs} Implementierung
   \item \Gls{jsong}(*) Unterstützung
@@ -54,7 +55,7 @@ sie (zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks) fo
 \end{itemize}
 
 Diese Abhängigkeiten wurden vom Quarkus Maven-Repository sowohl in blockierender,
-als auch in nicht-blockierender, reaktiver und in \verb|native image|-kompatibler Form bereitgestellt: \parencite{MavenQuarkusIO}
+als auch in nicht-blockierender, reaktiver und \verb|native image|-kompatibler Form bereitgestellt: \parencite{MavenQuarkusIO}
 % space between the text and the left/right border of its containing cell is set to 18 pt
 \setlength{\tabcolsep}{18pt}
 % the height of each row is set to 1.5 relative to its default height
@@ -79,12 +80,12 @@ als auch in nicht-blockierender, reaktiver und in \verb|native image|-kompatible
 \end{table}
 
 In Listing \ref{lst:update_reactive} und \ref{lst:update_blocking} ist jeweils die Update Methode der REST-APIs abgebildet, um den
-Unterschied der beiden Paradigmen auf Code-Ebene darzustellen.
+Unterschied der beiden Paradigmen anhand von Code darzustellen.
 
-Dabei wird versucht eine Entity mit der übergebenen \verb|id| des API-Endpunktes
-aus der Datenbank abzurufen und, falls eine Entity mit der \verb|id| gefunden werden konnte, dessen Name mit dem Wert
+Dabei wird versucht eine Entity mit der übergebenen \verb|id| der HTTP-Anfrage
+aus der Datenbank abzurufen und, falls eine gefunden werden konnte, dessen Name mit dem Wert
 aus dem Request-Body der Anfrage zu überschreiben. Anschließend wird die Entity mit dem neuen Namen wieder in die Datenbank zurückgeschrieben
-und HTTP-Statuscode 422 an den Client zurückgegeben. Falls keine Entity gefunden werden konnte, wird stattdessen
+und der HTTP-Statuscode 422 an den Client zurückgegeben. Falls keine Entity gefunden werden konnte, wird stattdessen
 HTTP-Statuscode 404 zurückgegeben.
 
 In der reaktiven Anwendung ist die gesamte Logik, sowie Fehler- und Nullprüfung in einer einzigen Pipeline abgebildet.
@@ -93,9 +94,26 @@ angegeben. \verb|Uni| repräsentiert dabei einen Datenstrom der entweder ein Ele
 \verb|Multi| repräsentiert einen Datenstrom der entweder 0, 1, \verb|n| oder unendlich viele Elemente emittieren kann.
 Der \verb|Subscriber| ist in diesem Fall der Aufrufer der \verb|update|-Methode und sorgt dafür, dass die Pipeline überhaupt ausgeführt wird.
 
-Jede \verb|Pipe| bzw. \verb|Processor| der Pipeline der \verb|update|-Methode gibt ein \verb|Uni|, dieses kann entweder
-vom Typ \verb|Void| (für null-Werte) oder von der jeweiligen Entität sein, an den Downstream weiter
-\footnote{invoke() und call() sind Abkürzungen, um die Lesbarkeit zu verbessern\parencite{MutinyShortcuts}}.
+Jede \verb|Pipe| bzw. \verb|Processor| der Pipeline gibt ein \verb|Uni|an den Downstream weiter.
+Dieses kann entweder vom Typ \verb|Void| (für null-Werte) oder von der jeweiligen Entität sein.
+\footnote{invoke() und call() in Listing \ref{lst:update_reactive} sind Abkürzungen, um die Lesbarkeit in Mutiny zu verbessern\parencite{MutinyShortcuts}}.
+
+\begin{lstlisting}[caption=Update Methode der nicht-reaktiven Anwendung, language=Java, captionpos=b, label=lst:update_blocking]
+  @PUT
+  @Path("/{id}")
+  public Response update(Fruit fruit, @PathParam("id") Long id) {
+    if (fruit == null || fruit.getName() == null) {
+      return Response.status(422).build();
+    }
+    Fruit storedFruit = fruitRepository.findById(id);
+    if (storedFruit == null) {
+      return Response.status(Response.Status.NOT_FOUND).build();
+    }
+    storedFruit.setName(fruit.getName());
+    fruitRepository.update(storedFruit);
+    return Response.status(Response.Status.OK).build();
+  }
+\end{lstlisting}
 
 \begin{lstlisting}[caption=Update Methode der reaktiven Anwendung, language=Java, captionpos=b, label=lst:update_reactive]
 @PUT
@@ -112,24 +130,7 @@ public Uni<Response> update(Long id, Fruit fruit) {
 			.onItem().ifNull().continueWith(Response.status(Status.NOT_FOUND).build());
 }
 \end{lstlisting}
-\begin{lstlisting}[caption=Update Methode der nicht-reaktiven Anwendung, language=Java, captionpos=b, label=lst:update_blocking]
-@PUT
-@Path("/{id}")
-public Response update(Fruit fruit, @PathParam("id") Long id) {
-	if (fruit == null || fruit.getName() == null) {
-		return Response.status(422).build();
-	}
-	Fruit storedFruit = fruitRepository.findById(id);
-	if (storedFruit == null) {
-		return Response.status(Response.Status.NOT_FOUND).build();
-	}
-	storedFruit.setName(fruit.getName());
-	fruitRepository.update(storedFruit);
-	return Response.status(Response.Status.OK).build();
-}
-\end{lstlisting}
-
-Der Projekt-Code dieser Arbeit kann von GitHub unter \url{https://github.com/ErikSimonsen/quarkus-iothread-workerpool} eingesehen und abgerufen werden.
+Der Projekt-Code dieser Arbeit kann von GitHub unter \url{https://github.com/ErikSimonsen/Master-Thesis-Sourcecode} abgerufen und modifiziert werden.
 
 \subsection{Testumgebung}
 \label{section:testumgebung}
@@ -146,25 +147,26 @@ jeweils einem Docker-Container mit fest definierten Ressourcen:
   \item Nutzung von 4 CPU-Kernen
   \item 1024 MB RAM
   \item 256 MB Heap Größe für den Java-Prozess
-        \footnote{Seit Java 10 wird automatisch ~1/4 des Speicher Limits des Containers genutzt \parencite{Java10ReleaseNotes}}
+        \footnote{Seit Java 10 wird automatisch 1/4 des Speicher Limits des Containers genutzt \parencite{Java10ReleaseNotes}}
 \end{itemize}
-Der jeweilige Docker-Container für die Postgresql-Datenbank allokiert:
+Der Docker-Container für dies Postgresql-Datenbank allokiert:
 \begin{itemize}
   \item 4 CPU-Kerne
   \item 2048 MB RAM
 \end{itemize}
 
 Die Größe des von Vert.x verwendeten \verb|Worker Thread Pools| (siehe Abbildung \ref{fig:quarkus_http_schicht}) beträgt standardmäßig 20 und bleibt
-unverändert, die Größe des \verb|Event-Loop Thread Pools| hingegen wird für die Tests manuell auf 8 gesetzt, da die Anwendung durch die Ressourcenallokation
+unverändert. Die Größe des \verb|Event-Loop Thread Pools| hingegen wird manuell auf 8 gesetzt, da die Anwendung durch die Ressourcenallokation
 des Docker-Containers nur 4 CPU-Kerne nutzen darf und jeder dieser CPU-Kerne Hyperthreading unterstützt. \footnote{Wodurch jeder physische CPU-Kern über
-  zwei \glsplural{logische CPU}(*) verfügt} Damit kann die optimale Verteilung von einem \verb|Event-Loop Thread| bzw. \verb|IO-Thread| pro
-logischer CPU erreicht werden.
-Standardmäßig wird die Ressourcenbegrenzung durch Container von Vert.x nicht beachtet und die Anzahl der \verb|Event loop|-Threads auf die doppelte
-Anzahl der verfügbaren CPU-Kerne des Container-Hosts gesetzt, weswegen es für ressourcenbegrenzte Container der beschriebenen Korrektur bedarf.
-Der \verb|Worker Thread Pool| wird vom \verb|Thread-per-Request Modell| bzw. \verb|Blocking I/O| genutzt, während der \verb|Event-Loop Thread Pool| von der
-reaktiven Anwendung bzw. \verb|Nonblocking I/O| genutzt wird.
+  zwei \glsplural{logische CPU}(*) verfügt}
+Damit kann die optimale Verteilung von einem \verb|Event-Loop Thread| bzw. \verb|IO-Thread| pro logischer CPU erreicht werden.
+Standardmäßig wird die Ressourcenbegrenzung durch Container von Vert.x nicht beachtet und die Anzahl der \verb|Event loop|-Threads wird auf die doppelte
+Anzahl der verfügbaren CPU-Kerne des Container-Hosts gesetzt, weswegen es für ressourcenbegrenzte Container der beschriebenen Anpassung bedarf.
 
-Die Anwendung, die auf dem Client-Host die \textit{work load} für die beiden zu testenden Anwendungen generiert,
+Der \verb|worker thread pool| wird von der nicht-reaktiven, blockierenden Anwendung nach dem \verb|Thread-per-Request|-Modell genutzt.
+Die reaktive Anwendung nach dem \verb|Multi Reactor|-Modell nutzt hingegen den \verb|event-loop thread tool|.
+
+Die Anwendung die auf dem Client-Host die \textit{work load} für die beiden zu testenden Anwendungen generiert,
 nutzt in dieser Testumgebung 4 Threads.
 \footnote{Welche Laufzeitumgebungen und Tools für die Tests auf den jeweiligen Hosts vorhanden sein müssen, und wie diese installiert werden
   wird in der README.md-Datei des Projektverzeichnisses beschrieben.}
@@ -196,8 +198,7 @@ die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
   \centering
   \begin{tabular}{| c | c |}
     \hline
-    Client-Host                                                \\
-    Hardware       & Acer Aspire VN7-591G                      \\
+    Client-Host    & Acer Aspire VN7-591G                      \\
     \hline
     CPU            & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4   \\
     \hline
@@ -220,24 +221,24 @@ Der im Folgenden erläuterte Versuchsaufbau basiert auf einer, vom Autor erweite
 zur Erstellung von verschiedenen Benchmarks für den Quarkus Technologie-Stack genutzt wurde.
 \parencite{QuarkusBlog, QuarkusJohnaohara}
 
-Um den gesamten Versuchsablauf zu automatisieren und über mehrere Server zu steuern wird ein Tool namens qDup eingesetzt.
+Um den gesamten Versuchsablauf zu automatisierenm, und über mehrere Server zu steuern wird ein Tool namens qDup eingesetzt.
 Damit können Shell-Kommandos als Skripte gruppiert, und verschiedenen Hosts je nach Rolle zugewiesen werden.
 \footnote{Die qDup Skripte mit dem gesamten Testablauf können im Verzeichnis \textit{/scripts/qDup} des Quellcodeverzeichnisses eingesehen und
   angepasst werden.}
-Um dem Ablauf korrekt zu steuern werden Signale definiert die ein Host sendet, und auf die die anderen Hosts warten um ihrerseits
+
+Um dem Ablauf korrekt zu steuern werden Signale definiert die ein Host sendet, und auf welche die anderen Hosts warten, um ihrerseits
 weitere Skripte auszuführen.
 \footnote{Beispielsweise sollte der Server-Host erst anfangen den Java-Prozess zu überwachen, sobald der Client-Host die \textit{workload}
   generiert und nicht bereits davor}
 
 Wie bereits in \ref{section:testumgebung} angedeutet, nutzt qDup SSH um auf die jeweilige Hosts zuzugreifen.
-
-Im ersten Schritt \textit{build applications} wird auf dem Server-Host das Quellcodeverzeichnis geklont und beide Anwendungen werden, für
-ein einfaches Deployment in den Docker-Container, jeweils als \gls{uber-jar}(*) und \verb|native image| gebaut.
+Im ersten Schritt \textit{build applications} wird auf dem Server-Host das Quellcodeverzeichnis geklont und beide Anwendungen werden
+jeweils als \gls{uber-jar}(*), für ein einfaches Deployment in den Docker-Container, und als \verb|native image| gebaut.
 
 Anschließend wird über ein JavaScript-Skript, welches in der Laufzeitumgebung Node.js läuft,
 die \verb|Mean Start Time to First Request|, also das durchschnittliche Zeitintervall zwischem dem Start einer Anwendung bis
 zur Verarbeitung der ersten Anfrage, mehrfach gemessen und als Textdatei gespeichert.
-Dabei wird die gebaute Anwendung, ohne Docker-Container, auf dem Server-Host gestartet und die Zeit genommen. Anschließend werden in einer Schleife
+Dabei wird die gebaute Anwendung ohne Docker-Container auf dem Server-Host gestartet und die Zeitmessung gestartet. Anschließend werden in einer Schleife
 solange Anfragen an einen Endpunkt der Anwendung gestellt bis das Ergebnis ein Statuscode 200 ist, was den Endpunkt der Messung markiert.
 Aus den gemessenen Startzeiten wird in der Auswertung der Daten anschließend der Durchschnitt gebildet, um somit die \verb|Mean Start Time to First Request|
 der Anwendung zu erhalten.
@@ -248,47 +249,53 @@ Darüber hinaus werden die Docker-Container der Datenbank
 Beim zweiten Schritt \textit{run applications} wird der Docker-Container der jeweiligen Anwendung gestartet und anschließend signalisiert,
 dass die Anwendung nun bereit ist.
 Daraufhin wird auf dem Client-Host das Skript \textit{generate load} gestartet.
-Die \textit{workload} ist hier definiert als die Anzahl der, an den Server-Host, versendeten \textit{HTTP-Anfragen pro Sekunde}.
+Die \textit{workload} ist hier definiert als die Anzahl der an den Server-Host versendeten \textit{HTTP-Anfragen pro Sekunde}.
 Für das Generieren und Übermitteln der \textit{workload} wird das Werkzeug \textit{wrk2} genutzt, welches das
-bewährte HTTP-Benchmarking Tool \textit{wrk} um folgende Funktionen erweitert:
+bewährte HTTP-Benchmarking Tool \textit{wrk} um folgende Funktionen erweitert:\parencite{Wrk2, Wrk}
 \begin{enumerate}
   \item Konstanter \textit{workload} Durchsatz
-  \item Korrekteres Messverfahren der Antwort-Latenz durch Vermeidung von \verb|Coordinated Omission|
+  \item Korrekteres Messverfahren der Antwort-Latenz durch\linebreak Vermeidung von \verb|Coordinated Omission|
   \item Hochexaktes Messen durch \Glsuseri{hdrHistogramm}(*)
-\end{enumerate}\parencite{Wrk2, Wrk}
+\end{enumerate}
 
 \paragraph{Coordinated Omission Problem}
 Der Begriff \verb|Coordinated Omission Problem| wurde von Gil Tene, CTO und Mitgründer von Azul Systems, um 2012 geprägt.
-Koordinierte Auslassung beschreibt in diesem Kontext das Problem, wenn ein Messsystem sich mit dem zu messenden System versehentlich so koordiniert,
+Koordinierte Auslassung beschreibt in diesem Kontext das Problem, wenn ein Messsystem sich mit dem zu messenden System unabsichtlich so koordiniert,
 dass es vermieden wird Ausreißer zu messen.
 
 Viele Lastgeneratoren (load generator) berechnen die Latenz für eine Anfrage als die vergangene Zeit zwischen dem Senden des ersten Bytes einer Anfrage
 bis zum Erhalt der kompletten Antwort. Während dieses Modell die tatsächliche Bearbeitungszeit individueller Anfragen korrekt misst,
 liegt dabei ein starker koordinierter Auslassungseffekt vor,
 wodurch die meisten Artefakte mit hoher Latenz, die der gemessene Server aufweist, ignoriert werden.
-Da jede Verbindung erst anfängt eine neue Anfrage zu senden, nachdem eine Antwort bezüglich der vorherigen Anfrage erhalten wurde,
+Da jede Verbindung erst anfängt eine neue Anfrage zu senden nachdem eine Antwort bezüglich der vorherigen Anfrage erhalten wurde,
 resultieren Antworten mit hoher Latenz darin, dass der Lastgenerator in einem bestimmten Zeitintervall weniger Anfragen an den Server schickt als in einer
-Phase niedriger Latenz, da die weiteren Anfragen alle verzögert werden. Ähnlich wie bei \verb|Event Loops| \textit{blockieren}
+Phase niedriger Latenz, da die nachfolgenden Anfragen verzögert werden. Ähnlich wie bei \verb|Event Loops| \textit{blockieren}
 Anfragen mit hoher Latenz also das Absenden weiterer Anfragen.
-Dadurch koordiniert der Lastgenerator sich unbeabsichtigt mit dem Server um weitere Messungen während Phasen hoher Latenz zu vermeiden, da die Last die der Server
-in dieser Phase abzuarbeiten hat deutlich geringer ist als bei niedriger Latenz. Das Hauptproblem ist also, dass die Last die der Server empfängt
+
+Um weitere Messungen während Phasen hoher Latenz zu vermeiden koordiniert sich der Lastgenerator dadurch unbeabsichtigt mit dem Server, da die Last
+die der Server in einer solchen Phase abzuarbeiten hat, deutlich geringer ist als bei niedriger Latenz.
+
+Das Hauptproblem ist also, dass die Last die der Server empfängt
 nicht durchgehend \verb|konstant| ist, sondern von der Antwortszeit des Servers abhängt \parencite{mci/Friedrich2017}.
-\newline\newline
+
+\newpage
 \verb|Wrk2|, dessen Author auch Gil Tene ist, umgeht das \verb|Coordinated Omission Problem| in dem es eine konstante Durchsatzlast (als Befehlsargument) mit
-einer Latenzmessung, die den beabsichtigten konstanten Durchsatz berücksichtigt, kombiniert. Anstatt dabei die Antwortlatenz ab dem Zeitpunkt zu messen,
-zu dem die tatsächliche Übertragung einer Anfrage aufgetreten ist, misst wrk2 die Antwortlatenz ab dem Zeitpunkt, zu dem die Übertragung,
-gemäß dem für den Durchlauf konfigurierten konstanten Durchsatz, hätte erfolgen \textit{sollen} bis zum Erhalt der vollständigen Antwort\parencite{Wrk2}.
+einer Latenzmessung, die den beabsichtigten konstanten Durchsatz berücksichtigt, kombiniert.
+
+Dabei wird die Antwortlatenz nicht ab dem Zeitpunkt gemessen, zu dem die tatsächliche Übertragung einer Anfrage aufgetreten ist.
+Stattdessen misst wrk2 die Antwortlatenz ab dem Zeitpunkt zu dem die Übertragung,
+gemäß dem konfigurierten konstanten Durchsatz, hätte erfolgen \textit{sollen} bis zum Erhalt der vollständigen Antwort\parencite{Wrk2}.
 
 Pro Test (siehe Anfang des Kapitels \ref{section:vergleich_reaktiv_blockierend}) werden Benchmarks für eine ganze Reihe an \textit{workloads} gemessen.
 Jede \textit{workload} wird sekündlich über einen Zeitraum von 60 Sekunden über 100 offene HTTP-Verbindungen an den Server-Host übermittelt.
-In den Tests nutzt \verb|wrk2| für das Generieren und Übermitteln der \textit{workload}, sowie das Messen der Antwortszeit
-4 Threads.
+In den Tests nutzt \verb|wrk2| 4 Threads für das Generieren und Übermitteln der \textit{workload}, sowie das Messen der Antwortszeit.
 \newline\newline
 Damit der Anwendungscode des angesteuerten HTTP-Endpunkts durch den JIT-Compiler der JVM (siehe Absatz \verb|Quarkus und native image| in Kapitel
 \ref{subsubsec:frameworks}) optimiert wird, findet pro \textit{workload} vor der eigentlichen Mess-Phase eine identische Warmup-Phase statt.
 
-Listing \ref*{lst:generateLoad} zeigt den Aufruf von \verb|wrk2| mit den beschriebenen Parametern in der Warmup- und Mess-Phase,
-\verb|${RUN_RATE}| enthält dabei die \textit{workload}.
+Listing \ref*{lst:generateLoad} zeigt den Aufruf von \verb|wrk2| mit den beschriebenen Parametern in der Warmup- und Mess-Phase.
+\verb|${{RUN_RATE}}| enthält dabei die \textit{workload}, \verb|${{RUNTIME.name}}| den Namen der Anwendung und \verb|${{TEST_DYNAMIC_ENDPOINT}}| den
+URI des API-Endpunktes mit dynamischen Daten..
 \footnote{Das manuelle Kompilieren des Quellcodes von wrk2 produziert, wie wrk auch, ein executable namens wrk}
 
 \begin{lstlisting}[caption=Auszug des qDup Skripts generate load, captionpos=b, label=lst:generateLoad]
@@ -320,12 +327,12 @@ Requests/sec: 113929.77
 Transfer/sec:      7.93MB
 \end{lstlisting}
 
-Bevor die Warmup-Phase und die Belastungs-Phase vom Client-Host ausgeführt werden, wird dem Server-Host signalisiert, dass
+Bevor die Warmup- und die Belastungs-Phase vom Client-Host ausgeführt werden, wird dem Server-Host signalisiert, dass
 er das Skript \textit{capture platform stats} ausführen soll.
 In diesem Skript wird die Observation des Anwendungs-Prozesses durch das Kommandozeilenprogramm \verb|top| gestartet.
 \verb|Top| wird dabei im Batch-Modus gestartet mit einer Wiederholrate von einer Sekunde.
 
-Die Prozess-Zeile der Ausgabe von \verb|top| enthält eine Vielzahl an Informationen zu dem beobachteten Prozess, von besonderem
+Die Prozess-Zeile der Ausgabe von \verb|top| enthält eine Vielzahl an Informationen zu dem beobachteten Prozess. Von besonderem
 Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des Prozesses. \parencite{linuxTopManual}
 
 \begin{lstlisting}[language=sh, caption=Auszug des qDup Skripts capture-platform-stats, captionpos=b]
@@ -341,7 +348,7 @@ Interesse sind hierbei die CPU-Auslastung und der verwendete Arbeitsspeicher des
 - sh: kill -9 $TOP_PID
   \end{lstlisting}
 
-Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host der das qDup Skript ausgeführt hat kopiert.
+Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host auf den User-Host, der das qDup Skript ausgeführt hat, kopiert.
 
 \begin{figure}[ht]
   \centering
@@ -349,26 +356,26 @@ Im letzten Schritt werden alle Ausgaben über SSH vom Client- und Server-Host au
   \caption{Testaufbau}
 \end{figure}
 
-In einem Bash-Skript werden anschließend die Ausgaben von \verb|top| und \verb|wrk| für jede einzelne \verb|workload| eines Tests
-über ein Java-Skript, das mit dem Tool \textit{JBang} ausgeführt wird \footnote{JBang erlaubt das direkte Ausführen von .java Dateien},
-eingelesen, analysiert und jeweils der Durchschnitt, das Minimum und das Maximum des Durchsatzes, Speicherverbrauches und CPU-Auslastung pro Last ermittelt.
-Diese werden dann für die visuelle Darstellung in eine \verb|.json|-Datei geschrieben.
-Zu guter Letzt werden die aufbereiteten Daten durch die Node.js-Bibliothek \textit{d3node-linechart} als Liniendiagramme visuell dargestellt.
+Die Ausgaben von \verb|top| und \verb|wrk| werden anschließend für jede einzelne \verb|workload| eines Tests durch ein Java-Script, welches mit
+dem Tool \textit{JBang}\footnote{JBang erlaubt das direkte Ausführen von .java Dateien} ausgeführt wird, eingelesen, geparsed und ausgewertet.
+Dabei wird jeweils der Durchschnitt, das Minimum und das Maximum von Durchsatz, Speicherverbrauch und CPU-Auslastung pro Last ermittelt.
+Die Resultate werden dann für die visuelle Darstellung in eine \verb|.json|-Datei geschrieben.
+Abschließend werden die aufbereiteten Daten durch die Node.js-Bibliothek \textit{d3node-linechart} als Liniendiagramme visuell dargestellt.
 
 \subsection{Test: Statische Daten}
 \label{subsection:statische_daten}
 Im Folgenden werden die Testresultate der \verb|2.| Testreihe dargestellt, erläutert und anschließend zusammengefasst.
 Die Ergebnisse der anderen Testreihen liegen in den gleichen Größenordnungen und können im Projektverzeichnis unter \verb|results/data| und \verb|results/graphs| eingesehen werden.
 Der Lasttest mit statischen Daten wird ohne Datenbankanbindung durchgeführt und der angesteuerte Endpunkt \verb|/greeting/{name}| gibt bei beiden Anwendungen
-jeweils einen statischen String zurück. Wie bereits zu Beginn des Kapitels erwähnt, wird jede Anwendung sowohl im \verb|JVM mode|, als auch im
+jeweils einen statischen String zurück. Wie bereits zu Beginn des Kapitels erwähnt, wird jede Anwendung sowohl im \verb|JVM mode| als auch im
 \verb|native mode| getestet.
 Die qDup-Skripte befinden sich im Projektverzeichnis im Verzeichnis \verb|scripts/benchmark-jvm-static.yaml| und
 \verb|scripts/benchmark-native-static.yaml|.
 
 \subsubsection{JVM mode}
 \label{subsubsec:static_jvm_mode}
-Wie aus Listing \ref{lst:starttimes_jvm_static} berechnet werden kann, liegt die durchschnittliche Zeit vom Start der Anwendung bis zur
-Bearbeitung der ersten Anfrage ohne Datenbankanbindung bei einer reaktiven Anwendung im \verb|JVM mode| bei 1353 ms und bei einer
+Wie aus Listing \ref{lst:starttimes_jvm_static} berechnet werden kann, liegt die \verb|Mean Start Time to First Request|
+ohne Datenbankanbindung bei einer reaktiven Anwendung im \verb|JVM mode| bei 1353 ms und bei einer
 blockierenden Anwendung bei 1516,6 ms.
 \begin{lstlisting}[caption=Startzeiten im JVM mode mit statischen Ressourcen, captionpos=b, label=lst:starttimes_jvm_static]
     1356 ms     1531 ms
@@ -383,13 +390,13 @@ in diesem Diagramm als Durchsatz beschrieben, dargestellt.
 Die höchste getestete \verb|workload| beträgt bei der reaktiven Anwendung \textbf{142.000} Anfragen/Sekunde und bei der
 nicht-reaktiven Anwendung \textbf{71.000} Anfragen/Sekunde.
 
-Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt ~\textbf{69.000} Anfragen/Sekunde mit einer
-Latenz von ~217,5 ms und
-die reaktive Anwendung erreicht ~\textbf{140.000} Anfragen/Sekunde bei einer durchschnittlichen Latenz von ~646,5 ms.
+Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt \textbf{69.000} Anfragen/Sekunde mit einer
+Latenz von 217,5 ms und
+die reaktive Anwendung erreicht \textbf{140.000} Anfragen/Sekunde bei einer durchschnittlichen Latenz von 646,5 ms.
 Bei höheren Lasten steigt die durchschnittliche Latenz auf deutlich über eine Sekunde, weswegen der Durchsatz stagniert.
 
-Die reaktive Anwendung erreicht also in der vorliegenden Testumgebung für einen trivialen
-Endpunkt mit statischen Daten mehr als den doppelten Durchsatz.
+Die reaktive Anwendung erreicht also in der vorliegenden Testumgebung, für einen trivialen
+Endpunkt mit statischen Daten, mehr als den doppelten Durchsatz.
 \newpage
 \begin{figure}[ht!]
   \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-response-vs-throughput}
@@ -398,16 +405,16 @@ Endpunkt mit statischen Daten mehr als den doppelten Durchsatz.
 \end{figure}
 Abbildung \ref{fig:jvm_static_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses
 im Hauptspeicher für jede \verb|workload| dar. Der allokierte Speicher für die genannten maximalen Durchsätze beträgt dabei bei
-der reaktiven Anwendung ~\verb|580 MB| und bei der blockierenden, nicht-reaktiven Anwendung ~\verb|843 MB|.
+der reaktiven Anwendung \verb|580 MB| und bei der blockierenden, nicht-reaktiven Anwendung \verb|843 MB|.
 \newpage
 \begin{figure}[ht!]
   \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-rss-vs-throughput}
   \caption{Test im JVM mode mit statischen Ressourcen:: Allokierter Hauptspeicher}
   \label{fig:jvm_static_mean_rss}
 \end{figure}
-Zu guter Letzt wird in Abbildung \ref{fig:jvm_static_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
-dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-Auslastung von ~100\% bereits bei einer Last von
-50.000 Anfragen/Sekunde erreicht, die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 110.000 Anfragen/Sekunde.
+In Abbildung \ref{fig:jvm_static_avg_cpu} wird abschließend die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
+dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-Auslastung von 100\% bereits bei einer Last von
+50.000 Anfragen/Sekunde erreicht. Die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 110.000 Anfragen/Sekunde.
 \newpage
 \begin{figure}[ht!]
   \centering
@@ -417,11 +424,11 @@ dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-A
 \end{figure}
 
 In Tabelle \ref{table:static_jvm_measurement_results} werden die Resultate der gemessenen Benchmarks zusammengefasst
-und zueinander ins Verhältnis gesetzt. Im JVM mode mit statischen Ressourcen erreicht die reaktive Anwendung
-eine 11,8\% schnellere durchschnittliche Startzeit bis vollständigen Bearbeitung der ersten Anfrage, sowie
-einen um 31,2\% geringeren Speicherverbrauch.
-Darüber hinaus wird ein um etwa 102\% höherer maximaler Durchsatz erzielt, bevor die Latenz eine Sekunde übersteigt, und
-es können 120\% mehr Anfragen pro Sekunde verarbeitet werden bis die durchschnittliche CPU Auslastung, mit dem in Tabelle
+und zueinander ins Verhältnis gesetzt.
+Im JVM Mode mit statischen Ressourcen weist die reaktive Anwendung eine durchschnittlich 10,8\% geringere \verb|Mean Start Time to First Request|
+sowie einen 31,2\% geringeren Speicherverbrauch auf.
+Darüber hinaus wird ein um etwa 102\% höherer maximaler Durchsatz erzielt, bevor die Latenz einen Wert von einer Sekunde übersteigt.
+Außerdem können 120\% mehr Anfragen pro Sekunde verarbeitet werden bis die durchschnittliche CPU Auslastung, mit dem in Tabelle
 \ref{table:system_host} genannten CPU, bei 4 Kernen 100\% erreicht.
 
 \begin{table}[ht!]
@@ -429,7 +436,7 @@ es können 120\% mehr Anfragen pro Sekunde verarbeitet werden bis die durchschni
     \hline
     Run 2 - JVM mode - static & Blockierend & Reaktiv & Verhältnis \\
     \hline
-    \makecell[l]{Durchschn. Startzeit bis                          \\erste Anfrage (ms)} & 1516,6      & 1353  & 89,2\%     \\
+    \makecell[l]{Mean Start Time to                                \\ First Request (ms)} & 1516,6      & 1353  & 89,2\%     \\
     \hline
     Max. allokierter RAM (MB) & 843         & 580     & 68,8\%     \\
     \hline
@@ -444,9 +451,9 @@ es können 120\% mehr Anfragen pro Sekunde verarbeitet werden bis die durchschni
 
 \subsubsection{native mode}
 \label{subsubsec:static_native_mode}
-Wie aus Listing \ref{lst:starttimes_native_static} berechnet werden kann, liegt die durchschnittliche Zeit vom Start der Anwendung bis
-zur Bearbeitung der ersten Anfrage ohne Datenbankanbindung sowohl bei einer reaktiven Anwendung, als auch bei einer blockierenden
-Anwendung im \verb|native mode| bei 27,6 ms.
+Wie aus Listing \ref{lst:starttimes_native_static} berechnet werden kann, liegt die \verb|Mean Start Time to First Request|
+ohne Datenbankanbindung, sowohl bei einer reaktiven Anwendung als auch bei einer blockierenden
+Anwendung im \verb|native mode|, bei 27,6 ms.
 \begin{lstlisting}[caption=Startzeiten im native mode mit statischen Ressourcen, captionpos=b, label=lst:starttimes_native_static]
     27 ms     27 ms
     27 ms     27 ms
@@ -459,9 +466,9 @@ in diesem Diagramm als Durchsatz beschrieben, dargestellt.
 Die höchste getestete \verb|workload| beträgt bei der reaktiven Anwendung \textbf{76.000} Anfragen/Sekunde und bei der
 nicht-reaktiven Anwendung \textbf{39.000} Anfragen/Sekunde.
 
-Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt ~\textbf{37.000} Anfragen/Sekunde mit einer
-Latenz von ~283,3 ms und
-die reaktive Anwendung erreicht ~\textbf{74.000} Anfragen/Sekunde bei einer durchschnittlichen Latenz von ~680,6 ms.
+Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt \textbf{37.000} Anfragen/Sekunde mit einer
+Latenz von 283,3 ms und
+die reaktive Anwendung erreicht \textbf{74.000} Anfragen/Sekunde bei einer durchschnittlichen Latenz von 680,6 ms.
 Bei höheren Lasten steigt die Latenz auf deutlich über eine Sekunde, weswegen der Durchsatz stagniert.
 
 Die reaktive Anwendung erreicht also in der vorliegenden Testumgebung für einen trivialen
@@ -475,7 +482,7 @@ Endpunkt mit statischen Daten im \verb|native mode| den doppelten Durchsatz.
 \end{figure}
 Abbildung \ref{fig:native_static_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses
 im Hauptspeicher für jede \verb|workload| dar. Der allokierte Speicher für die genannten maximalen Durchsätze beträgt dabei bei
-der reaktiven Anwendung ~\verb|364 MB| und bei der blockierenden, nicht-reaktiven Anwendung ~\verb|564 MB|.
+der reaktiven Anwendung \verb|364 MB| und bei der blockierenden, nicht-reaktiven Anwendung \verb|564 MB|.
 \newpage
 \begin{figure}[ht!]
   \centering
@@ -484,9 +491,9 @@ der reaktiven Anwendung ~\verb|364 MB| und bei der blockierenden, nicht-reaktive
   \label{fig:native_static_mean_rss}
 \end{figure}
 
-Zu guter Letzt wird in Abbildung \ref{fig:native_static_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
-dargestellt. Bei der nicht-reaktiven Anwendung wird eine durschnittliche CPU-Auslastung von 100\% bereits bei einer Last von
-34.000 Anfragen/Sekunde erreicht, die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 50.000 Anfragen/Sekunde.
+In Abbildung \ref{fig:native_static_avg_cpu} wird abschließend die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
+dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-Auslastung von 100\% bereits bei einer Last von
+34.000 Anfragen/Sekunde erreicht. Die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 50.000 Anfragen/Sekunde.
 \newpage
 \begin{figure}[ht!]
   \centering
@@ -496,19 +503,18 @@ dargestellt. Bei der nicht-reaktiven Anwendung wird eine durschnittliche CPU-Aus
 \end{figure}
 
 In Tabelle \ref{table:static_native_measurement_results} werden die Resultate der gemessenen Benchmarks zusammengefasst
-und zueinander ins Verhältnis gesetzt. Im JVM mode mit statischen Ressourcen erreicht die reaktive Anwendung
-die gleiche durchschnittliche Startzeit bis vollständigen Bearbeitung der ersten Anfrage, sowie
-einen um 35,5\% geringeren Speicherverbrauch.
-Darüber hinaus wird ein um etwa 100\% höherer maximaler Durchsatz erzielt, bevor die Latenz eine Sekunde übersteigt, und
-es können 66,6\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslastung, mit dem in Tabelle \ref{table:system_host}
-genannten CPU, bei 4 Kernen 100\% erreicht.
+und zueinander ins Verhältnis gesetzt. Im JVM mode mit statischen Ressourcen weist die reaktive Anwendung
+die gleiche \verb|Mean Start Time to First Request|, sowie
+einen um 35,5\% geringeren Speicherverbrauch auf.
+Darüber hinaus wird ein um etwa 100\% höherer maximaler Durchsatz erzielt, bevor die Latenz eine Sekunde übersteigt.
+Außerdem können 66,6\% mehr Anfragen pro Sekunde verarbeitet werden bevor die CPU Auslastung bei 4 Kernen 100\% erreicht.
 
 \begin{table}[ht!]
   \begin{tabular}{|l | c | c | c|}
     \hline
     Run 2 - native mode - static & Blockierend & Reaktiv & Verhältnis \\
     \hline
-    \makecell[l]{Durchschn. Startzeit bis                             \\erste Anfrage (ms)} &   27,6    &  27,6  &   100\%   \\
+    \makecell[l]{Mean Start Time to                                   \\ First Request (ms)} &   27,6    &  27,6  &   100\%   \\
     \hline
     Max. allokierter RAM (MB)    & 564         & 364     & 64,5\%     \\
     \hline
@@ -526,14 +532,14 @@ genannten CPU, bei 4 Kernen 100\% erreicht.
 Im Folgenden werden die Testresultate der \verb|5.| Testreihe dargestellt und erläutert.
 Die Ergebnisse der anderen Testreihen können im Projektverzeichnis unter \verb|results/data| und \verb|results/graphs| eingesehen werden.
 Der Lasttest mit dynamischen Daten wird mit Datenbankanbindung durchgeführt und der angesteuerte Endpunkt \verb|/fruits| gibt bei beiden Anwendungen
-jeweils alle Elemente der Tabelle \textit{fruits} zurück. Wie bereits zu Beginn des Kapitels erwähnt, wird jede Anwendung sowohl im \verb|JVM mode|, als auch im
+jeweils alle Elemente der Tabelle \textit{fruits} zurück. Wie bereits zu Beginn des Kapitels erwähnt, wird jede Anwendung sowohl im \verb|JVM mode| als auch im
 \verb|native mode| getestet, die qDup-Skripte befinden sich im Projektverzeichnis im Verzeichnis \verb|scripts/benchmark-jvm-db.yaml| und
 \verb|scripts/benchmark-native-db.yaml|.
 
 \subsubsection{JVM mode}
 \label{subsubsec:dynamic_jvm_mode}
-Wie aus Listing \ref{lst:starttimes_jvm_dynamic} berechnet werden kann, liegt die durchschnittliche Zeit vom Start der Anwendung bis zur
-Bearbeitung der ersten Anfrage mit Datenbankanbindung bei einer reaktiven Anwendung im \verb|JVM mode| bei 1349 ms und bei einer
+Wie aus Listing \ref{lst:starttimes_jvm_dynamic} berechnet werden kann, liegt die \verb|Mean Start Time to First Request|
+mit Datenbankanbindung bei einer reaktiven Anwendung im \verb|JVM mode| bei 1349 ms und bei einer
 blockierenden Anwendung bei 1631,2 ms.
 
 \begin{lstlisting}[caption=Startzeiten im JVM mode mit dynamischen Ressourcen, captionpos=b, label=lst:starttimes_jvm_dynamic]
@@ -549,9 +555,9 @@ in diesem Diagramm als Durchsatz beschrieben, dargestellt.
 Die höchste getestete \verb|workload| beträgt bei der reaktiven Anwendung \textbf{37.000} Anfragen/Sekunde und bei der
 nicht-reaktiven Anwendung \textbf{28.000} Anfragen/Sekunde.
 
-Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt ~\textbf{26.000} Anfragen/Sekunde mit einer
-Latenz von ~56,6 ms und
-die reaktive Anwendung erreicht ~\textbf{36.000} Anfragen/Sekunde bei einer durchschnittlichen Latenz von ~253,8 ms.
+Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt \textbf{26.000} Anfragen/Sekunde mit einer
+Latenz von 56,6 ms und
+die reaktive Anwendung erreicht \textbf{36.000} Anfragen/Sekunde bei einer durchschnittlichen Latenz von 253,8 ms.
 Bei höheren Lasten steigt die Latenz auf deutlich über eine Sekunde, weswegen der Durchsatz stagniert.
 \newpage
 \begin{figure}[ht!]
@@ -562,7 +568,7 @@ Bei höheren Lasten steigt die Latenz auf deutlich über eine Sekunde, weswegen 
 \end{figure}
 Abbildung \ref{fig:jvm_dynamic_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses
 im Hauptspeicher für jede \verb|workload| dar. Der allokierte Speicher für die genannten maximalen Durchsätze beträgt dabei bei
-der reaktiven Anwendung ~\verb|573 MB| und bei der blockierenden, nicht-reaktiven Anwendung ~\verb|754 MB|.
+der reaktiven Anwendung \verb|573 MB| und bei der blockierenden, nicht-reaktiven Anwendung \verb|754 MB|.
 \newpage
 \begin{figure}[ht!]
   \centering
@@ -571,9 +577,9 @@ der reaktiven Anwendung ~\verb|573 MB| und bei der blockierenden, nicht-reaktive
   \label{fig:jvm_dynamic_mean_rss}
 \end{figure}
 
-Zu guter Letzt wird in Abbildung \ref{fig:jvm_dynamic_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
+In Abbildung \ref{fig:jvm_dynamic_avg_cpu} wird abschließend die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
 dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-Auslastung von 100\% bereits bei einer Last von
-20.000 Anfragen/Sekunde erreicht, die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 36.000 Anfragen/Sekunde.
+20.000 Anfragen/Sekunde erreicht. Die reaktive Anwendung hingegen erreicht diese Auslastung erst bei 36.000 Anfragen/Sekunde.
 \newpage
 \begin{figure}[ht!]
   \centering
@@ -583,18 +589,18 @@ dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-A
 \end{figure}
 
 In Tabelle \ref{table:dynamic_jvm_measurement_results} werden die Resultate der gemessenen Benchmarks zusammengefasst
-und zueinander ins Verhältnis gesetzt. Im JVM mode mit dynamischen Ressourcen erreicht die reaktive Anwendung
-eine 17,4\% schnellere durchschnittliche Startzeit bis vollständigen Bearbeitung der ersten Anfrage, sowie
-einen um 24,1\% geringeren Speicherverbrauch.
-Darüber hinaus wird ein um etwa 38\% höherer maximaler Durchsatz erzielt, bevor die Latenz eine Sekunde übersteigt, und
-es können 80\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslastung bei 4 Kernen 100\% erreicht.
+und zueinander ins Verhältnis gesetzt. Im JVM mode mit dynamischen Ressourcen weist die reaktive Anwendung
+eine 17,4\% schnellere durchschnittliche \verb|Mean Start Time to First Request| sowie
+einen um 24,1\% geringeren Speicherverbrauch auf.
+Darüber hinaus wird ein um etwa 38\% höherer maximaler Durchsatz erzielt, bevor die Latenz eine Sekunde übersteigt.
+Außerdem können 80\% mehr Anfragen pro Sekunde verarbeitet werden bevor die CPU Auslastung bei 4 Kernen 100\% erreicht.
 
 \begin{table}[ht!]
   \begin{tabular}{|l | c | c | c|}
     \hline
     Run 5 - JVM mode - dynamic & Blockierend & Reaktiv & Verhältnis \\
     \hline
-    \makecell[l]{Durchschn. Startzeit bis                           \\erste Anfrage (ms)} &   1631,2    &  1349  &   82,6\%   \\
+    \makecell[l]{Mean Start Time to                                 \\ First Request (ms)} &   1631,2    &  1349  &   82,6\%   \\
     \hline
     Max. allokierter RAM (MB)  & 754         & 573     & 75,9\%     \\
     \hline
@@ -607,11 +613,11 @@ es können 80\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslast
   \label{table:dynamic_jvm_measurement_results}
 \end{table}
 
-
+\newpage
 \subsubsection{native mode}
 \label{subsubsec:dynamic_native_mode}
-Wie aus Listing \ref{lst:starttimes_native_dynamic} berechnet werden kann, liegt die durchschnittliche Zeit vom Start der Anwendung
-bis zur Bearbeitung der ersten Anfrage mit Datenbankanbindung bei einer reaktiven Anwendung im \verb|native mode| bei 27,8 ms und bei
+Wie aus Listing \ref{lst:starttimes_native_dynamic} berechnet werden kann, liegt die \verb|Mean Start Time to First Request|
+mit Datenbankanbindung bei einer reaktiven Anwendung im \verb|native mode| bei 27,8 ms und bei
 einer blockierenden Anwendung bei 46 ms.
 
 \begin{lstlisting}[caption=Startzeiten im JVM mode mit dynamischen Ressourcen, captionpos=b, label=lst:starttimes_native_dynamic]
@@ -627,9 +633,9 @@ in diesem Diagramm als Durchsatz beschrieben, dargestellt.
 Die höchste getestete \verb|workload| beträgt bei der reaktiven Anwendung \textbf{20.000} Anfragen/Sekunde und bei der
 nicht-reaktiven Anwendung \textbf{16.000} Anfragen/Sekunde.
 
-Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt ~\textbf{15.500} Anfragen/Sekunde mit einer
-Latenz von ~80,5 ms und
-die reaktive Anwendung erreicht ~\textbf{18.500} Anfragen/Sekunde bei einer durchschnittlichen Latenz von ~14,3 ms.
+Der maximale serverseitige Durchsatz der nicht-reaktiven Anwendung beträgt \textbf{15.500} Anfragen/Sekunde mit einer
+Latenz von 80,5 ms und
+die reaktive Anwendung erreicht \textbf{18.500} Anfragen/Sekunde bei einer durchschnittlichen Latenz von 14,3 ms.
 Bei höheren Lasten steigt die Latenz auf deutlich über eine Sekunde, weswegen der Durchsatz stagniert.
 
 \begin{figure}[ht!]
@@ -641,7 +647,7 @@ Bei höheren Lasten steigt die Latenz auf deutlich über eine Sekunde, weswegen 
 \newpage
 Abbildung \ref{fig:native_dynamic_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses
 im Hauptspeicher für jede \verb|workload| dar. Der allokierte Speicher für die genannten maximalen Durchsätze beträgt dabei bei
-der reaktiven Anwendung ~\verb|561 MB| und bei der blockierenden, nicht-reaktiven Anwendung ~\verb|565 MB|.
+der reaktiven Anwendung \verb|561 MB| und bei der blockierenden, nicht-reaktiven Anwendung \verb|565 MB|.
 
 \begin{figure}[ht!]
   \centering
@@ -650,9 +656,9 @@ der reaktiven Anwendung ~\verb|561 MB| und bei der blockierenden, nicht-reaktive
   \label{fig:native_dynamic_mean_rss}
 \end{figure}
 
-Zu guter Letzt wird in Abbildung \ref{fig:native_dynamic_avg_cpu} die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
+In Abbildung \ref{fig:native_dynamic_avg_cpu} wird abschließend die durchschnittlich gemessene CPU-Auslastung für jede \verb|workload|
 dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-Auslastung von 100\% bereits bei einer Last von
-12.000 Anfragen/Sekunde erreicht, die reaktive Anwendung erreicht diese Auslastung erst bei 18.000 Anfragen/Sekunde.
+12.000 Anfragen/Sekunde erreicht. Die reaktive Anwendung erreicht diese Auslastung erst bei 18.000 Anfragen/Sekunde.
 \newpage
 \begin{figure}[ht!]
   \centering
@@ -662,18 +668,18 @@ dargestellt. Bei der nicht-reaktiven Anwendung wird eine durchschnittliche CPU-A
 \end{figure}
 
 In Tabelle \ref{table:dynamic_native_measurement_results} werden die Resultate der gemessenen Benchmarks zusammengefasst
-und zueinander ins Verhältnis gesetzt. Im native mode mit dynamischen Ressourcen erreicht die reaktive Anwendung
-eine 40\% schnellere durchschnittliche Startzeit bis vollständigen Bearbeitung der ersten Anfrage, sowie einen fast identischen
-Speicherverbrauch.
-Darüber hinaus wird ein um etwa 19\% höherer maximaler Durchsatz erzielt, bevor die Latenz eine Sekunde übersteigt, und
-es können 50\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslastung bei 4 Kernen 100\% erreicht.
+und zueinander ins Verhältnis gesetzt. Im native mode mit dynamischen Ressourcen weist die reaktive Anwendung
+eine 40\% schnellere durchschnittliche \verb|Mean Start Time to First Request|, sowie einen fast identischen
+Speicherverbrauch auf.
+Darüber hinaus wird ein um etwa 19\% höherer maximaler Durchsatz erzielt, bevor die Latenz eine Sekunde übersteigt.
+Außerdem können 50\% mehr Anfragen pro Sekunde verarbeitet werden bevor die CPU Auslastung bei 4 Kernen 100\% erreicht.
 
 \begin{table}[ht!]
   \begin{tabular}{|l | c | c | c|}
     \hline
     Run 5 - native mode - dynamic & Blockierend & Reaktiv & Verhältnis \\
     \hline
-    \makecell[l]{Durchschn. Startzeit bis                              \\erste Anfrage (ms)} &   46    &  27,8 &   60\%   \\
+    \makecell[l]{Mean Start Time to                                    \\ First Request (ms)} &   46    &  27,8 &   60\%   \\
     \hline
     Max. allokierter RAM (MB)     & 565         & 561     & 99,2\%     \\
     \hline
@@ -685,21 +691,23 @@ es können 50\% mehr Anfragen pro Sekunde verarbeitet werden bis die CPU Auslast
   \caption{Verhältnis der Benchmarks im native mode mit dynamischen Ressourcen}
   \label{table:dynamic_native_measurement_results}
 \end{table}
-
+\newpage
 \subsection{Auswertung}
 \label{subsubsec:auswertung}
-Während die Ergebnisse der Testreihen geringfügig variieren bewegen sich alle in den gleichen Größenordnungen.
-
+Obwohl die Ergebnisse der Testreihen geringfügig variieren bewegen sie sich in den gleichen Größenordnungen.
 \subsubsection{Statische Ressourcen}
 \label{subsubsec:auswertung_static}
 Wie aus den gezeigten Resultaten (siehe Tabelle \ref{table:static_jvm_measurement_results} und
-\ref{table:static_native_measurement_results}) hervorgeht, ist der Durchsatz, sowie der Ressourcenverbrauch bei der
-reaktiven Anwendung nach dem \verb|Multi Reactor| Modell für rein \verb|statische Ressourcen| sowohl im JVM, als auch im native mode,
-deutlich besser gegenüber einer traditionellen, blockierenden Anwendung mit einem Thread-Per-Request Modell.
-So erreicht die reaktive Anwendung im \verb|JVM mode| dabei eine 11\% schnellere Startzeit, 31,2\% geringeren Speicherverbrauch bei
-\verb|maximaler| Last und ist in der Lage einen um 102\% (71.000 Anfragen/Sekunde) erhöhten Durchsatz zu erzielen,
+\ref{table:static_native_measurement_results}) hervorgeht, ist der Durchsatz und der Ressourcenverbrauch bei der
+reaktiven Anwendung nach dem \verb|Multi Reactor|-Modell für rein \verb|statische Ressourcen| sowohl im JVM, als auch im native mode,
+deutlich besser gegenüber einer traditionellen, blockierenden Anwendung nach dem \verb|Thread-Per-Request|-Modell.\newline
+So erreicht die reaktive Anwendung im \verb|JVM mode| einen 31,2\% geringeren Speicherverbrauch bei \textit{maximaler} Last
+sowie eine 11\% bessere \verb|Mean Start Time to First Request|.
+
+Sie ist in der Lage einen 102\% (71.000 Anfragen/Sekunde) höheren Durchsatz zu erzielen,
 sowie 120\% (60.000) mehr Anfragen/Sekunde zu bearbeiten bevor die CPU-Auslastung maximal ist.
-Die bessere Startzeit ist dabei hauptsächlich darin begründet, dass die reaktiven Komponenten (siehe Tabelle \ref{table:dependencies})
+Die bessere \verb|Mean Start Time to First Request| ist dabei hauptsächlich darin zu begründen, dass die reaktiven
+Abhängigkeiten (siehe Tabelle \ref{table:dependencies})
 überwiegend von Grund auf neu geschrieben wurden und einige Legacy-Features und Anforderungen der jeweiligen
 Standards nicht unterstützen.
 
@@ -711,7 +719,7 @@ und jede Steigerung zu einer wachsenden Verzögerung beim Abarbeiten der Anfrage
 
 Im \verb|native mode| ist die Startzeit beider Anwendungen gleich, befindet sich aber im zweistelligen Millisekunden Bereich statt
 im Sekundenbereich.
-Auch hier ist die reaktive der nicht-reaktiven Anwendung in jeder Benchmark überlegen. So wird 35,5\% weniger Speicher bei maximaler Last
+Auch hier ist die reaktive Anwendung der nicht-reaktiven Anwendung in jeder Benchmark überlegen. So wird 35,5\% weniger Speicher bei maximaler Last
 benötigt, ein 100\% (37.000 Anfragen/Sekunde) höherer  Durchsatz erzielt und es können 66,6\% (20.000) mehr Anfragen/Sekunde bearbeitet
 werden, bevor die CPU-Auslastung maximal ist.
 
@@ -719,30 +727,31 @@ Wie bereits in Kapitel \ref{subsubsec:frameworks} Abschnitt \textit{Quarkus und 
 die niedrigen Startzeiten von \verb|native images| gegenüber JVM-Anwendungen darin begründet, dass die Laufzeitumgebung in die
 Anwendung hineinkompiliert wird. Der maximal mögliche Durchsatz ist hingegen (noch) deutlich niedriger da auf einige adaptive
 Laufzeitoptimierungen, wie JIT-Compiling, verzichtet wird. Die Anwendungen im \verb|native mode| schaffen daher lediglich
-circa die Hälfte des Durchsatzes der Anwendungen im \verb|JVM mode|
+etwa die Hälfte des Durchsatzes der Anwendungen im \verb|JVM mode|.
 
-In beiden Szenarien ist der niedrigere Speicherverbrauch der reaktiven- gegenüber der nicht-reaktiven Anwendung
+In beiden Szenarien ist der niedrigere Speicherverbrauch der reaktiven Anwendung gegenüber der nicht-reaktiven Anwendung
 bei Maximallast darauf zurückzuführen, dass
 keine einziger blockierender Funktionsaufruf (\textit{pure io}) stattfindet, wodurch alle Anfragen über die wenigen
 Event Loops der \verb|IO Threads| abgearbeitet werden können und nicht auf \verb|Worker threads| aus dem \verb|Worker thread pool|
 \textit{dispatched} (siehe \ref{subsubsec:frameworks} Abschnitt \textit{Eclipse Vert.x}) werden müssen.
 
 Die erst bei deutlich höheren Durchsätzen auftretende maximale CPU-Auslastung resultiert aus der sehr geringen Anzahl an Threadwechseln
-, da jeweils ein Thread aus dem \verb|Event loop thread pool| genau einem CPU-Kern zugeordnet, wodurch eine optimale Auslastung erreicht
+, da jeweils ein Thread aus dem \verb|Event loop thread pool| genau einem CPU-Kern zugeordnet ist, wodurch eine optimale Auslastung erreicht
 wird. Darüber hinaus werden die \verb|Event loop threads| zu keinem Zeitpunkt blockiert, da, wie in \ref{subsec:nonblocking-i/o}
-beschrieben, das Ausführen von beliebigen I/O-Operationen, statt den Thread zu blockieren, die Kontrolle wieder an ihn zurückgibt,
+beschrieben, das Ausführen von beliebigen I/O-Operationen die Kontrolle an den Thread zurückgibt, anstatt ihn zu blockieren,
 wodurch direkt die nächste I/O-Operation gestartet werden kann.
-
 \subsubsection{Dynamische Ressourcen}
 \label{subsubsec:auswertung_dynamic}
 Wie aus den gezeigten Resultaten (siehe Tabelle \ref{table:dynamic_jvm_measurement_results} und
-\ref{table:dynamic_native_measurement_results}) hervorgeht, ist der Durchsatz, sowie der Ressourcenverbrauch bei der
-reaktiven Anwendung nach dem \verb|Multi Reactor| Modell für rein \verb|dynamische Ressourcen| sowohl im JVM, als auch im native mode,
-besser gegenüber einer traditionellen, blockierenden Anwendung mit einem Thread-Per-Request Modell. Im Gegensatz zu den
-Größenordnungen mit rein statischen Ressourcen ist der Unterschied mit dynamischen Ressourcen allerdings deutlich geringer.
+\ref{table:dynamic_native_measurement_results}) hervorgeht, ist der Durchsatz sowie der Ressourcenverbrauch bei der
+reaktiven Anwendung nach dem \verb|Multi Reactor| Modell für rein \verb|dynamische Ressourcen| sowohl im JVM als auch im native mode,
+besser gegenüber einer traditionellen, blockierenden Anwendung nach dem \verb|Thread-Per-Request|-Modell.
+Die Größenordnung des Unterschieds ist bei dynamischen Ressourcen allerdings deutlich geringer als bei statischen Resourcen.
 
-So erreicht die reaktive Anwendung im \verb|JVM mode| dabei eine 17,4\% schnellere Startzeit, einen 24,1\% geringeren
-Speicherverbrauch bei Maximallast und ist in der Lage einen 38\% (10.000 Anfragen/Sekunde) höheren Durchsatz zu erzielen,
+So erreicht die reaktive Anwendung im \verb|JVM mode| einen 24,1\% geringeren Speicherverbrauch bei \textit{maximaler} Last
+sowie eine 17,4\% bessere \verb|Mean Start Time to First Request|.
+
+Sie ist in der Lage einen 38\% (10.000 Anfragen/Sekunde) höheren Durchsatz zu erzielen,
 sowie 80\% (16.000) mehr Anfragen/Sekunde zu bearbeiten bevor die CPU-Auslastung maximal ist.
 
 Im \verb|native mode| erzielt die reaktive Anwendung einen 19\% (3000 Anfragen/Sekunde) höheren Durchsatz, verarbeitet bis zu
@@ -750,91 +759,93 @@ Im \verb|native mode| erzielt die reaktive Anwendung einen 19\% (3000 Anfragen/S
 Der Speicherverbrauch bei Maximallast ist in diesem Modus zwischen beiden Anwendungen fast identisch.
 
 Da, im Gegensatz zu den statischen Ressourcen, bei dynamischen Daten für jede HTTP-Anfrage eine Datenbankabfrage abgesetzt werden
-muss, wirkt sich dieser Umstand auch auf die Zeit vom Start bis zur Bearbeitung der ersten Anfrage aus.
-Die schlechteren Werte der nicht-reaktiven Anwendung in dieser Metrik in beiden Modi sind auf den blockierenden, initialen
-Verbindungsaufbau mit der externen Datenbank zurückzuführen, sowie die in Abschnitt \textit{Statische Ressourcen} bereits
+muss, wirkt sich dieser Umstand auch auf die \verb|Mean Start Time to First Request| aus.
+Die schlechteren Werte der nicht-reaktiven Anwendung in dieser Metrik in beiden Modi sind auf den initialen, blockierenden
+Verbindungsaufbau mit der Datenbank zurückzuführen, sowie die in Kapitel \ref{subsubsec:auswertung_static} bereits
 beschriebenen unterschiedlichen Abhängigkeiten der Anwendungen.
 
 Wie bei den Tests mit \textit{statischen Ressourcen} ist es auch bei \textit{dynamischen Ressourcen} der Fall, dass Anwendungen im
-\verb|native mode| nur circa die Hälfte des maximalen Durchsatzes von den jeweiligen Anwendungen im \verb|JVM mode| leisten können.
+\verb|native mode| nur circa die Hälfte des maximalen Durchsatzes der jeweiligen Anwendungen im \verb|JVM mode| leisten können.
 
-Die Begründungen aus Unterkapitel \ref{subsubsec:auswertung_static} bezüglich des höheren Durchsatzes und niedrigeren Speicherverbrauches
-von reaktiven- im Gegensatz zu nicht-reaktiven Anwendungen im \verb|JVM mode| und \verb|native mode| sind auch für
+Die Begründungen aus Kapitel \ref{subsubsec:auswertung_static} bezüglich des höheren Durchsatzes und niedrigeren Speicherverbrauches
+von reaktiven Anwendungen gegenüber nicht-reaktiven Anwendungen im \verb|JVM mode| und \verb|native mode| sind auch für
 \textit{Dynamische Ressourcen} zutreffend.
 Dazu kommt allerdings, dass die Datenbank und die Kommunikation zwischen der Anwendung und der Datenbank in den vorliegenden Testresultaten
 bei höheren Lasten der begrenzende Faktor ist, was sich bei beiden Modi in einem deutlich niedrigeren maximalen Durchsatz widerspiegelt.
 
 Der höhere Durchsatz der reaktiven Anwendungen ist zusätzlich damit zu erklären, dass pro aktivem IO-Thread lediglich eine
-Datenbankverbindung erstellt werden muss und diese für die gesamte Laufzeit aktiv bleibt, da es durch die nichtblockierenden
-Aufrufe keine Threadwechsel gibt. Im Gegensatz dazu muss die nicht-reaktive Anwendung mit dem Thread-Per-Request Modell
-für jede neue Anfrage eine neue Datenbankverbindung erstellen.
+Datenbankverbindung erstellt werden muss, und diese für die gesamte Laufzeit aktiv bleibt, da es durch die nichtblockierenden
+Aufrufe keine Threadwechsel gibt. Im Gegensatz dazu muss die nicht-reaktive Anwendung nach dem \verb|Thread-Per-Request|-Modell
+für jede Anfrage eine neue Datenbankverbindung erstellen.
 \newpage
 
 \subsubsection{Kritische Reflexion}
 \label{subsubsec:auswertung_kritische_reflexion}
 Die beschriebenen Tests mit dem in Kapitel \ref{section:vorgehen} und \ref{section:testumgebung} beschriebenen Testaufbau und Testumgebung
-basieren auf einer verhältnismäßig simplen Systemarchitektur mit einer sehr kleinen, unoptimierten Datenbank und verzichten auf eine
-Vielzahl an möglichen Optimierungen, um die Anzahl der Einflussgrößen so gering wie möglich zu halten, um somit die Funktionsweise und die
+basieren auf einer verhältnismäßig simplen Systemarchitektur mit einer sehr kleinen, nicht-optimierten Datenbank und verzichten auf mögliche Optimierungen.
+Dadurch wird die Anzahl der Einflussgrößen so gering wie möglich gehalten, um somit die Funktionsweise und die
 Performance-Auswirkungen der beiden Architektur-Ansätze zu verdeutlichen.
 
-Darüber hinaus sind die Messungen der Benchmarks nicht punktgenau, da nahe der voraussichtlichen Extrema die \verb|workloads|
-nur in zwei- oder eintausender Schritten gemessen werden, statt in hunderter oder zehner Schritten. Dies liegt darin begründet, dass
-ansonsten die Dauer der Testdurchführung den Zeitrahmen gesprengt hätte.
+Darüber hinaus sind die Messungen der Benchmarks nicht exakt, da nahe der voraussichtlichen Extrema die \verb|workloads|
+nur in zwei- oder eintausender Schritten gemessen werden, statt in Hunderter oder Zehner Schritten.
+Ansonsten hätte die Dauer der Testdurchführung den Zeitrahmen gesprengt.
 Generell kann der höchste Durchsatz in der Regel bei der Last gemessen werden, deren durchschnittliche Latenz sich am ehesten
 einer Sekunde annähert, da der Durchsatz die bearbeiteten Anfragen pro Sekunde angibt.
 \newline\newline
 In einer realistischen Anwendungsumgebung würden die Testresultate durch eine Vielzahl an Möglichkeiten beeinflusst werden.
-So könnte ein größerer \verb|Worker thread pools| die Leistungsfähigkeit der nicht-reaktiven, blockierenden
-Anwendung bis zu einem gewissen Maße bei hohen Lasten steigern, allerdings nur solange bis auch hier die Kosten der Threadwechsel
+So könnte ein größerer \verb|Worker thread pool| die Leistungsfähigkeit der nicht-reaktiven, blockierenden
+Anwendung bis zu einem gewissen Maße bei hohen Lasten steigern. Allerdings nur solange bis auch hier die Kosten der Threadwechsel
 überwiegen. Auch das Weglassen von Vert.x könnte die Leistung der blockierenden Anwendung verbessern, sofern weiterhin
-ein \verb|Worker thread pool| genutzt wird, da der Prozess des \verb|Dispatching| der Anfragen von den \verb|Event loop threads| auf
+ein \verb|Worker thread pool| genutzt wird, da das \verb|Dispatching| der Anfragen von den \verb|Event loop threads| auf
 \verb|Worker threads| wegfiele. Darüber hinaus würden geschäftskritische Anwendungen deutlich mehr Speicherkapazitäten, CPU-Kerne und
-leistungsfähigere SSDs, und damit auch mehr I/O-Operationen, als die beschriebenen Docker-Container zur Verfügung haben.
+leistungsfähigere SSDs, und damit auch mehr I/O-Operationen, benötigen als die beschriebenen Docker-Container zur Verfügung haben.
 
 Im Falle der Anbindung einer Datenbank, also bei dynamischen Daten, gibt es außerdem eine ganze Reihe an Optimierungsmöglichkeiten.
 So würde besonders die nicht-reaktive Anwendung stark davon profitieren, wenn ein ausreichend großer Pool an Datenbankverbindungen
-im vornherein erzeugt wird, den die \verb|Worker threads| immer wieder nutzen können.
-Zudem kann unter anderem die Anzahl der maximal zulässigen
+im Voraus erzeugt wird, den die \verb|Worker threads| immer wieder nutzen könnten.
+Zudem könnte unter anderem die Anzahl der maximal zulässigen
 Datenbankverbindungen und die Größe des Shared Memory erhöht werden, sowie zusätzliche Cache-Mechanismen genutzt werden.
-Natürlich ist auch die Wahl der Datenbank je nach Anwendungszweck ein sehr einflussreicher Faktor.
+Natürlich ist auch die Wahl der Datenbank-Software je nach Anwendungszweck ein sehr einflussreicher Faktor.
 \newline\newline
 Ein weiterer Faktor ist die Größe und die Struktur der Tabellen, sowie die Komplexität der Queries.
 Die für die Tests mit dynamischen Daten verwendete Datenbank nutzt lediglich eine Tabelle mit einigen wenigen Datensätzen und die
-Datenbank-Operationen sind triviale Lese-Operationen
+Datenbank-Operationen sind triviale Lese-Operationen,
 da die eigentliche Performance von Datenbanksystemen im Kontext von reaktiven Systemen nicht der Fokus dieser Arbeit ist.
 
-Es liegt allerdings nahe, dass sehr große Datenbanken und verschachtelte Queries den maximal möglichen Durchsatz erheblich verringern,
-die reaktive Anwendung aber dabei denoch deutlich besser skalieren würde als die blockierende Anwendung, da die Blockierungs-Dauer
+Es ist allerdings naheliegend, dass sehr große Datenbanken und verschachtelte Queries den maximal möglichen Durchsatz erheblich verringern.
+Die reaktive Anwendung würde dabei aber denoch deutlich besser skalieren als die blockierende Anwendung, da die Blockierungs-Dauer
 eines Threads sich im Thread-per-Request Modell direkt auf die nachfolgenden Anfragen und die bereits arbeitenden parallellen Threads
-auswirkt.
+auswirkt. Umso mehr Zeit Datenbank-Queries also benötigen, umso länger sind die einzelnen Worker-Threads blockiert.
+
 Beim Multi-Reactor-Pattern hätte die Bearbeitungsdauer der Anfrage hingegen keinen direkten Einfluss auf die restlichen Anfragen, und der
 begrenzende Faktor wäre die Skalierbarkeit der Datenbank.
 
-Weiteren Optimierungsspielraum gäbe es natürlich im Architekturbereich und umfasst Ansätze wie Load Balancing und Cache-Server.
+Weiteren Optimierungsspielraum gäbe es außerdem im Bereich der Systemarchitektur und umfasst Ansätze wie Load Balancing und Cache-Server.
 \subsubsection{Zusammenfassung}
 \label{subsubsec:auswertung_zusammenfassung}
-Insgesamt kann aus den präsentierten Testergebnissen abgeleitet werden, dass reaktive Anwendungen in jeder gemessenen
-Benchmark deutlich bessere Werte erzielen als nicht-reaktive Anwendungen, im Vergleich zu rein statischen Ressourcen
-sind die Größenordnungen bei dynamischen Ressourcen allerdings deutlich niedriger.
-Die vorgestellten Benchmarks basieren allerdings auf nicht-realistischen \verb|workloads| und haben eine Vielzahl an möglichen
+Insgesamt kann aus den Testergebnissen abgeleitet werden, dass reaktive Anwendungen in jeder gemessenen
+Benchmark deutlich bessere Werte erzielen als nicht-reaktive Anwendungen.
+Im Vergleich zu rein statischen Ressourcen
+sind die Größenordnungen der Unterschiede bei dynamischen Ressourcen allerdings deutlich niedriger.
+Die vorgestellten Benchmarks basieren allerdings auf nicht-realistischen \verb|workloads| und hätten eine Vielzahl an möglichen
 Einflussgrößen und Optimierungsmöglichkeiten.
 
 Darüber hinaus sind Anwendungen im \verb|native mode| denen im \verb|JVM mode| in Startzeiten und Speicherverbrauch deutlich überlegen,
-wodurch sie sich hervorragend für Cloud- und Containerumgebungen eignen, erzielen aber in der Regel nur die Hälfte des maximalen Durchsatzes.
+wodurch sie sich hervorragend für Cloud- und Containerumgebungen eignen. Allerdings erzielen sie in der Regel nur die Hälfte des maximalen Durchsatzes.
 Bei den Tests mit dynamischen Ressourcen war nicht die Anwendung bzw. die darunterliegende Architektur der begrenzende Faktor,
-sondern die unkonfigurierte Datenbank, welche die Anfragen ab einer bestimmten Last nicht mehr rechtzeitig verarbeitet hat.
+sondern die unkonfigurierte Datenbank, welche die Anfragen ab einer bestimmten Last nicht mehr schnell genug verarbeiten konnte.
 
-Wie in \ref{subsubsec:auswertung_kritische_reflexion} allerdings bereits beschrieben handelt es sich bei diesen Lasttests nur um
-Benchmarks mit trivialen Anwendungen auf einer sehr kleinen, unkonfigurierten Datenbank und begrenzten Ressourcen um
+Wie in \ref{subsubsec:auswertung_kritische_reflexion} allerdings bereits beschrieben, handelt es sich bei diesen Lasttests nur um
+Benchmarks mit trivialen Anwendungen auf einer sehr kleinen, unkonfigurierten Datenbank und begrenzten Ressourcen, um
 die Unterschiede zwischen den Funktionsweisen und Limitierungen von reaktiven und nicht-reaktiven Anwendungen aufzuzeigen.
 Für realistischere \verb|workloads| mit konfigurierten Anwendungsservern, Datenbanken und weiteren Komponenten wie Load Balancern und
-Cache-Servern können die Ergebnisse deutlich abweichen.
+Cache-Servern,  können die Ergebnisse deutlich abweichen.
 Des Weiteren ist die reine Performance kein alleiniger Faktor für den Einsatz von neuen Technologien, sondern auch deren
 Erlernbarkeit, Rentabilität und Integrationsfähigkeit in bestehende Lösungen.
 Gerade der deutlich vom klassischen, imperativen Modell abweichende Datenfluss und die Programmstruktur, sowie die weiteren Besonderheiten
 von asynchronen Programmen erschweren vielen Entwicklern das Verständnis und machen das Refactoring von bestehenden, nicht ausreichend
-skalierenden Programmen und Systemen komplex und zeitlich, als auch finanziell schwer einzuschätzen.
+skalierenden Programmen und Systemen komplex und sowohl zeitlich als auch finanziell schwer einschätzbar.
 Obwohl Frameworks wie Vert.x durch Mechanismen wie \verb|Dispatching| verhältnismäßig einfach in bestehende Systeme integriert werden
 können, wird die bestmögliche Performance nur erzielt, wenn alle, an der Abarbeitung einer Anfrage beteiligten, Komponenten und
 Anwendungsschichten reaktiv sind und ohne blockierende Anfragen bzw. \verb|Blocking I/O| auskommen. Dies ist gerade für
-große Enterprise-Anwendungen ein immenser Aufwand und sollte gründlich durchdacht und gegen die erhofften Vorteile abgewogen werden.
+große Enterprise-Anwendungen ein immenser Aufwand und sollte gegen die erhofften Vorteile abgewogen werden.
