@@ -11,10 +11,10 @@ sowie stark auf Client-Server Kommunikation basierenden Architekturen, wie Micro
 
 Während geschäftskritische Anwendungen lange Zeit mit ein paar Tausend Anfragen pro Sekunde als hoch frequentiert
 galten, müssen solche Webanwendungen heutzutage in der Lage sein eine vielfach höhere Last bewältigen zu können.
-Darüber hinaus müssen sie \verb|skalierbar| sein, also ohne Performance-Einbußen auf variable Lasten reagieren können.
+Darüber hinaus müssen sie \verb|skalierbar| sein, also ohne Leistungseinbußen auf variable Lasten reagieren können.
 
 Das Standardmodell für Java-basierte Webanwendungen ist das \verb|Thread per Request|-Modell.
-Dabei wird jede \acrshort{http}(*)-Anfrage an einen Kernel-Thread gebunden, welcher anschließend die Anfrage sequentiell abarbeitet.
+Dabei wird jede HTTP-Anfrage an einen Kernel-Thread gebunden, welcher anschließend die Anfrage sequentiell abarbeitet.
 Damit eine möglichst hohe Anzahl an Anfragen parallel abgearbeitet werden kann, wird jedem Thread nur ein Teil der verfügbaren
 CPU-Rechenzeit eines CPU-Kerns zugewiesen. Sobald die Rechenzeit eines Threads abgelaufen ist, oder er durch einen blockierenden
 Funktionsaufruf in einen inaktiven Zustand versetzt wird, wird der nächste Thread bearbeitet: es erfolgt ein \verb|Threadwechsel|.

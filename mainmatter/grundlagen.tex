@@ -42,7 +42,7 @@ führt einen blockierenden Aufruf aus. \footnote{Hier könnte lediglich, abhäng
 In Folge der Blockade des Main-Threads kann dieser auch das Scheduling der Programmbibliothek nicht ausführen, weswegen während dieser
 Zeit auch kein anderer \verb|User-Thread| ausgeführt wird.
 
-Eine Lösung für dieses Problem ist die Nutzung einer asynchronen, nichtblockierenden \acrshort{api}(*) für \gls{io}-Operationen(*)
+Eine Lösung für dieses Problem ist die Nutzung einer asynchronen, nichtblockierenden API für \gls{io}-Operationen(*)
 seitens der Anwendung.
 Dadurch wird statt des Main-Threads lediglich der auszuführende \verb|User-Thread| blockiert und dem aufrufenden Main-Thread
 sofort die Kontrolle zurückgegeben. Mit der richtigen Schedulingstrategie kann in der Zwischenzeit direkt ein

@@ -7,7 +7,7 @@ Anwendungen das Problem der begrenzten Skalierbarkeit von nicht-reaktiven, auf \
 basierenden Anwendungen durch Vermeidung von Threadwechseln lösen können, sowie mögliche Alternativen zu beschreiben.
 
 Für diesen Zweck wurden zwei simple Anwendungen als REST-APIs geschrieben, jeweils reaktiv und nicht-reaktiv, deren
-performancekritische Metriken durch mehrere Reihen von Lasttests mit variierenden \verb|workloads| gemessen wurden.
+leistungsrelevante Metriken durch mehrere Reihen von Lasttests mit variierenden \verb|workloads| gemessen wurden.
 Diese Metriken sind die CPU-Auslastung, der Speicherverbrauch, die Startzeit bis zur Bearbeitung der ersten Anfrage,
 sowie der Durchsatz und die durchschnittliche Latenz.
 Die Anwendungen wurden sowohl im \verb|JVM mode| als auch im \verb|native mode| jeweils mit statischen als auch mit dynamischen
@@ -50,7 +50,7 @@ Eine umfassende Antwort der Frage, ob reaktive Anwendungen besser skalieren als 
 mit \verb|Blocking I/O| kann nicht erfolgen, da die in dieser Arbeit vorliegenden exemplarischen \verb|workloads|, sowie
 die Anwendungsarchitektur und die Datenbankkomplexität von realistischen Systemen abweichen, weswegen die gezeigten Benchmarks
 wahrscheinlich nicht zu halten wären.
-Darüber hinaus werden Komponenten wie Load Balancer und Cache-Server, welche die Performance eines Gesamtsystems erhöhen ,
+Darüber hinaus werden Komponenten wie Load Balancer und Cache-Server, welche die Gesamtleistung eines Systems erhöhen ,
 nicht berücksichtigt.
 
 An dieser Stelle empfehlen sich weitere Untersuchungen mit definierten, praxisnahen Testumgebungen, um die Vorteile

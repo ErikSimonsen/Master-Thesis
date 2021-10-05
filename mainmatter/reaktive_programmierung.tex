@@ -300,10 +300,10 @@ Die Wiederherstellung jeder Komponente (self-healing) wird an eine andere, mögl
 Die Hochverfügbarkeit der Komponenten wird, wo notwendig, durch Redundanz gewährleistet.
 
 \paragraph{Elastisch}Das System bleibt reaktionsschnell unter variierenden Arbeitslasten. Auf Änderungen der Arbeitslast wird durch
-Anpassung der allokierten Ressourcen, insbesondere Replikation, reagiert. Das impliziert ein Systemdesign das keine zentralen Performance-Bottlenecks oder
+Anpassung der allokierten Ressourcen, insbesondere Replikation, reagiert. Das impliziert ein Systemdesign das keine zentralen Bottlenecks oder
 Reibungspunkte hat, damit Komponenten problemlos repliziert und die Last darauf verteilt werden kann.
 Reaktive Systeme unterstützen prädiktive, skalierende Algorithmen zur Ressourcenberechnung,
-indem sie die Live-Messungen von Performance relevanten Systemmetriken als Eingabe nutzen.
+indem sie die Live-Messungen von leistungsrelevanten Systemmetriken als Eingabe nutzen.
 
 \paragraph{Nachrichtenorientiert}Reaktive Systeme basieren auf dem asynchronen, nichtblockierendem Austausch von Nachrichten, um die Komponenten voneinander
 abzugrenzen und dadurch eine lose Kopplung, Isolation und eine transparente Lokalisierung der Komponenten zu ermöglichen.
@@ -336,7 +336,7 @@ Aufgrund der steigenden Popularität von reaktiven Anwendungen ist der Begriff \
 überladen und unterscheidet nicht zwischen \linebreak\verb|Reaktiver Programmierung| und \verb|Reaktiven Systemen|.
 
 \verb|Reaktive Programmierung| ist eine ideale Technik zur Abbildung der internen Logik innerhalb einer Komponente in Form von Transformationen
-auf Datenströmen, um sowohl Performance, Ressourceneffizienz und Code-Verständlichkeit zu optimieren.
+auf Datenströmen, um sowohl Leistungsfähigigkeit, Ressourceneffizienz und Code-Verständlichkeit zu optimieren.
 
 \verb|Reaktive Systeme| sind hingegen eine Menge von architektonischen Prinzipien, welche die verteilte Kommunikation hervorheben und
 Ansätze zur Realisierung von Fehlertoleranz und Elastizität liefern.
@@ -518,7 +518,7 @@ im Cloud-Umfeld gegenüber einer Java-Anwendung auf der JVM dar.
 Allerdings ist der maximal mögliche Durchsatz (noch) deutlich niedriger gegenüber Anwendungen im \verb|JVM-Mode|, da durch die AOT-Kompilierung
 auf adaptive Laufzeitoptimierungen wie JIT-Compiling verzichtet wird.
 Der Leiter des GraalVM-Projektes hat allerdings in einer Diskussion auf GitHub erwähnt, dass es durch Profile Guided Optimizations (PGO)
-theoretisch durchaus möglich sei, einen gleichwertigen Durchsatz und Laufzeitperformance zu erreichen\parencite{GraalWuerthinger}.
+theoretisch durchaus möglich sei, einen gleichwertigen Durchsatz zu erreichen\parencite{GraalWuerthinger}.
 
 Bei PGO handelt es sich, wie bei JIT-Compiling auch, um Profiling-Daten die zur Laufzeit des Programms gesammelt werden.
 Im Gegensatz zu einer JVM-Anwendung liegt ein native image jedoch als Maschinecode und nicht als Bytecode vor,

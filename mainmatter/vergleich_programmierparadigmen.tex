@@ -23,8 +23,8 @@ unterzogen. Ingesamt ergeben sich also 4 Testszenarien pro Anwendung.
 
 \subsection{Implementierung \& Systemaufbau}
 \label{section:implementierung}
-Die beiden Anwendungen implementieren mit dem Quarkus-Framework jeweils eine simple \acrshort{rest}-Schnittstelle mit HTTP-\acrshort{crud} Methoden,
-und einer angebundenen PostgreSQL-Datenbank.
+Die beiden Anwendungen implementieren mit dem Quarkus-Framework jeweils eine simple \acrshort{rest}-Schnittstelle (\acrlong{rest})
+mit HTTP-CRUD Methoden, und einer angebundenen PostgreSQL-Datenbank.
 Dabei ist vorallem die HTTP-Schicht von Interesse. Die HTTP-Unterstützung von Quarkus basiert auf einem reaktiven, nicht-blockierenden
 Unterbau: der \verb|Vert.x Engine| (siehe Kapitel \ref{subsubsec:reaktive_systeme}).
 Jede HTTP-Anfrage wird auf einem der \verb|event-loop threads| bzw. \verb|IO threads|
@@ -784,7 +784,7 @@ für jede Anfrage eine neue Datenbankverbindung erstellen.
 Die beschriebenen Tests mit dem in Kapitel \ref{section:vorgehen} und \ref{section:testumgebung} beschriebenen Testaufbau und Testumgebung
 basieren auf einer verhältnismäßig simplen Systemarchitektur mit einer sehr kleinen, nicht-optimierten Datenbank und verzichten auf mögliche Optimierungen.
 Dadurch wird die Anzahl der Einflussgrößen so gering wie möglich gehalten, um somit die Funktionsweise und die
-Performance-Auswirkungen der beiden Architektur-Ansätze zu verdeutlichen.
+Auswirkungen auf die Leistungsfähigkeit der beiden Architektur-Ansätze zu verdeutlichen.
 
 Darüber hinaus sind die Messungen der Benchmarks nicht exakt, da nahe der voraussichtlichen Extrema die \verb|workloads|
 nur in zwei- oder eintausender Schritten gemessen werden, statt in Hunderter oder Zehner Schritten.
@@ -810,7 +810,7 @@ Natürlich ist auch die Wahl der Datenbank-Software je nach Anwendungszweck ein 
 Ein weiterer Faktor ist die Größe und die Struktur der Tabellen, sowie die Komplexität der Queries.
 Die für die Tests mit dynamischen Daten verwendete Datenbank nutzt lediglich eine Tabelle mit einigen wenigen Datensätzen und die
 Datenbank-Operationen sind triviale Lese-Operationen,
-da die eigentliche Performance von Datenbanksystemen im Kontext von reaktiven Systemen nicht der Fokus dieser Arbeit ist.
+da die eigentliche Leistungsfähigkeit von Datenbanksystemen im Kontext von reaktiven Systemen nicht der Fokus dieser Arbeit ist.
 
 Es ist allerdings naheliegend, dass sehr große Datenbanken und verschachtelte Queries den maximal möglichen Durchsatz erheblich verringern.
 Die reaktive Anwendung würde dabei aber denoch deutlich besser skalieren als die blockierende Anwendung, da die Blockierungs-Dauer
@@ -840,12 +840,12 @@ Benchmarks mit trivialen Anwendungen auf einer sehr kleinen, unkonfigurierten Da
 die Unterschiede zwischen den Funktionsweisen und Limitierungen von reaktiven und nicht-reaktiven Anwendungen aufzuzeigen.
 Für realistischere \verb|workloads| mit konfigurierten Anwendungsservern, Datenbanken und weiteren Komponenten wie Load Balancern und
 Cache-Servern,  können die Ergebnisse deutlich abweichen.
-Des Weiteren ist die reine Performance kein alleiniger Faktor für den Einsatz von neuen Technologien, sondern auch deren
+Des Weiteren ist die reine Performanz kein alleiniger Faktor für den Einsatz von neuen Technologien, sondern auch deren
 Erlernbarkeit, Rentabilität und Integrationsfähigkeit in bestehende Lösungen.
 Gerade der deutlich vom klassischen, imperativen Modell abweichende Datenfluss und die Programmstruktur, sowie die weiteren Besonderheiten
 von asynchronen Programmen erschweren vielen Entwicklern das Verständnis und machen das Refactoring von bestehenden, nicht ausreichend
 skalierenden Programmen und Systemen komplex und sowohl zeitlich als auch finanziell schwer einschätzbar.
 Obwohl Frameworks wie Vert.x durch Mechanismen wie \verb|Dispatching| verhältnismäßig einfach in bestehende Systeme integriert werden
-können, wird die bestmögliche Performance nur erzielt, wenn alle, an der Abarbeitung einer Anfrage beteiligten, Komponenten und
+können, wird die bestmögliche Leistung nur erzielt, wenn alle, an der Abarbeitung einer Anfrage beteiligten, Komponenten und
 Anwendungsschichten reaktiv sind und ohne blockierende Anfragen bzw. \verb|Blocking I/O| auskommen. Dies ist gerade für
 große Enterprise-Anwendungen ein immenser Aufwand und sollte gegen die erhofften Vorteile abgewogen werden.
