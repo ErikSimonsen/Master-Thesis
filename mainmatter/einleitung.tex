@@ -13,7 +13,7 @@ Während geschäftskritische Anwendungen lange Zeit mit ein paar Tausend Anfrage
 galten, müssen solche Webanwendungen heutzutage in der Lage sein eine vielfach höhere Last bewältigen zu können.
 Darüber hinaus müssen sie \verb|skalierbar| sein, also ohne Leistungseinbußen auf variable Lasten reagieren können.
 
-Das Standardmodell für Java-basierte Webanwendungen ist das \verb|Thread per Request|-Modell.
+Das Standardmodell für Java-basierte Webanwendungen ist das \verb|Thread per request|-Modell.
 Dabei wird jede HTTP-Anfrage an einen Kernel-Thread gebunden, welcher anschließend die Anfrage sequentiell abarbeitet.
 Damit eine möglichst hohe Anzahl an Anfragen parallel abgearbeitet werden kann, wird jedem Thread nur ein Teil der verfügbaren
 CPU-Rechenzeit eines CPU-Kerns zugewiesen. Sobald die Rechenzeit eines Threads abgelaufen ist, oder er durch einen blockierenden
@@ -22,11 +22,11 @@ Funktionsaufruf in einen inaktiven Zustand versetzt wird, wird der nächste Thre
 Obwohl Threadwechsel, im Gegensatz zu Prozesswechseln, sehr kostengünstig sind, sind sie in diesem Modell ab einer kritischen Anzahl von HTTP-Anfragen
 pro Sekunde der begrenzende Skalierungsfaktor. Die Threadwechsel zwischen den Kernel-Threads des Betriebssystems erfolgen dann nicht mehr
 schnell genug um jede Anfrage bzw. jeden Thread innerhalb einer akzeptablen Zeit zu bearbeiten.
-Diese Begrenzung äußert sich letztendlich in einem nicht ausreichend skalierendem \Gls{durchsatz}(*) der Anwendung.
+Diese Begrenzung äußert sich letztendlich darin, dass der \Gls{durchsatz}(*) der Anwendung nicht ausreichend skaliert.
 
 \subsection{Ziel der Arbeit}
 \label{subsec:ziel}
-Um höhere Workloads zu bewältigen und Anwendungen skalierbarer zu machen existieren alternative
+Um höhere Workloads zu bewältigen und Anwendungen skalierbarer zu machen, existieren alternative
 Anwendungsmodelle, wie das in dieser Arbeit thematisierte \verb|Reactor-Pattern|.
 Das Modell nutzt einen Thread pro CPU-Kern und verzichtet somit auf anwendungsbedingte Threadwechsel.
 Die Voraussetzung dafür ist allerdings, dass die vorhandenen Threads niemals in einen inaktiven Zustand geraten.
@@ -54,7 +54,7 @@ Die Anwendungen werden sowohl auf der \acrshort{jvm}(*), als auch nativ ausgefü
 \label{subsec:aufbau}
 Zu Beginn der Arbeit werden in Kapitel \ref{sec:grundlagen} die Grundlagen der Thematik erläutert. Diese beinhalten
 Kernel- und User-Threads, blockierende und nicht-blockierende Ein-/Ausgabe-Operationen sowie die beiden darauf aufbauenden Design-Patterns
-\verb|Thread per Request| und \verb|Reactor|.
+\verb|Thread per request| und \verb|Reactor|.
 
 Anschließend wird in Kapitel \ref{section:reaktive_programmierung} die Funktionsweise von \verb|Reactive Programming|, und dessen
 zugrundeliegendes Konzept von reaktiven Datenströmen erläutert. Danach werden die Vor- und Nachteile des Programmierparadigmas

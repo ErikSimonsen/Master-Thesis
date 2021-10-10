@@ -1,8 +1,8 @@
 \section {Vergleich reaktive \& blockierende Anwendung}
 \label{section:vergleich_reaktiv_blockierend}
 Um zu prüfen, ob Leistungsfähigkeit und Skalierbarkeit einer reaktiven, auf dem \newline
-\verb|Multi-Reactor-Modell| und \verb|Nonblocking I/O| basierenden,
-Anwendung tatsächlich die einer traditionellen, auf dem \verb|Thread-per-Request Modell| und \verb|Blocking I/O| basierenden, Anwendung übertrifft, werden in
+\verb|Multi-Reactor-Modell| und \verb|Non-blocking I/O| basierenden,
+Anwendung tatsächlich die einer traditionellen, auf dem \verb|Thread per request Modell| und \verb|Blocking I/O| basierenden, Anwendung übertrifft, werden in
 diesem Kapitel beide Ansätze hinsichtlich verschiedener Metriken in einem festen Zeitintervall miteinander verglichen.
 
 Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung, in 5 Testreihen, jeweils zwei Lasttests unterzogen:
@@ -10,31 +10,28 @@ Dafür werden sowohl die reaktive, als auch die nicht-reaktive Anwendung, in 5 T
   \item Abfrage von statischen Daten
   \item Abfrage von dynamischen Daten (mit Datenbankanbindung)
 \end{enumerate}
-Dabei wird pro Lasttest eine Reihe an Lasten bzw. \textit{workloads} von einem Client generiert und über eine feste Dauer in kleinen Zeitinvervallen
-an einen ausgewählten HTTP-Endpunkt der Anwendung gesendet.
-In dieser Zeit wird das Zeitinvervall vom Starten der Anwendung bis zur Beantwortung der ersten Anfrage,
+Jeder Lasttest besteht darin, clientseitig eine Reihe an Lasten (workloads) zu generieren und jede Last, über die Dauer von einer Minute,
+sekündlich an einen ausgewählten HTTP-Endpunkt der Anwendung zu senden.
+Dabei wird das Zeitintervall vom Starten der Anwendung bis zur Beantwortung der ersten Anfrage,
 der benötigte Arbeitsspeicher und die CPU-Auslastung des Prozesses, der Durchsatz, sowie die Latenz gemessen.
-
-Primär aus Kostengründen eignen sich für Container- und Cloud-Umgebungen Anwendungen die, statt auf hohen Durchsatz und lange Laufzeiten,
-auf schnelle Startzeiten und geringen Ressourcenverbrauch setzen.
-Aus diesem Grund werden die beiden Anwendungen den beiden Lasttests sowohl im \textit{JVM mode}, als auch im \textit{native mode}
+Primär aus Kostengründen eignen sich für Container-, Cloud- und Serverless-Umgebungen Anwendungen die
+auf schnelle Startzeiten und geringen Ressourcenverbrauch, statt auf hohen Durchsatz und lange Laufzeiten, setzen.
+Aus diesem Grund werden die beiden Anwendungen den beiden Lasttests sowohl im \verb|JVM mode|, als auch im \verb|native mode|
 (siehe Absatz \verb|Quarkus und native image| in Kapitel \ref{subsubsec:frameworks})
-unterzogen. Ingesamt ergeben sich also 4 Testszenarien pro Anwendung.
+unterzogen. Insgesamt ergeben sich also 4 Testszenarien pro Anwendung.
 
 \subsection{Implementierung \& Systemaufbau}
 \label{section:implementierung}
 Die beiden Anwendungen implementieren mit dem Quarkus-Framework jeweils eine simple \acrshort{rest}-Schnittstelle (\acrlong{rest})
 mit HTTP-CRUD Methoden, und einer angebundenen PostgreSQL-Datenbank.
-Dabei ist vorallem die HTTP-Schicht von Interesse. Die HTTP-Unterstützung von Quarkus basiert auf einem reaktiven, nicht-blockierenden
+Dabei ist vor allem die HTTP-Schicht von Interesse. Die HTTP-Unterstützung von Quarkus basiert auf einem reaktiven, nicht-blockierenden
 Unterbau: der \verb|Vert.x Engine| (siehe Kapitel \ref{subsubsec:reaktive_systeme}).
-Jede HTTP-Anfrage wird auf einem der \verb|event-loop threads| bzw. \verb|IO threads|
+Jede HTTP-Anfrage wird auf einem der \verb|IO threads|
 verarbeitet, und durch eine Routing-Schicht an den Anwendungscode weitergeleitet.
-
 Abhängig vom verwendeten Ansatz zur Implementierung des jeweiligen HTTP-Endpunktes wird der Code auf unterschiedliche Art und Weise abgearbeitet.
-Der Code wird entweder auf einem blockierenden \verb|worker thread| aus dem \verb|worker thread pool| (Servlet, \Gls{jaxrsg}(*))
-, ganz nach dem \verb|Thread-Per-Request Modell|, oder weiterhin auf einem der \verb|IO threads| (Reactive Routes, Reactive Resteasy),
+Der Code wird entweder auf einem blockierenden \verb|Worker thread| aus dem \verb|Worker thread pool| (Servlet, \Gls{jaxrsg}(*)),
+ganz nach dem \verb|Thread per request|-Modell, oder weiterhin auf einem der \verb|IO threads| (Reactive Routes, Reactive Resteasy),
 nach dem \verb|Multi-Reactor-Modell|, ausgeführt.
-
 \newpage
 \begin{figure}[h]
   \centering
@@ -42,10 +39,7 @@ nach dem \verb|Multi-Reactor-Modell|, ausgeführt.
   \caption{Quarkus HTTP-Schicht \parencite{QuarkusReactiveRoutes}}
   \label{fig:quarkus_http_schicht}
 \end{figure}
-
-Die \verb|IO threads| sind dafür zuständig alle IO-Operationen asynchron auszuführen, und die jeweiligen EventListener bzw. Subscriber
-auszulösen sobald die Operationen abgeschlossen sind.
-Damit sich beide Anwendungen nahe an einer realen Java-EE CRUD REST-API orientieren, haben
+Damit sich beide Anwendungen nahe an einer realen REST-API mit \verb|Java EE| orientieren, haben
 sie, zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks, folgende Projekt-Abhängigkeiten:
 \begin{itemize}
   \item \acrshort{jax-rs} Implementierung
@@ -55,7 +49,7 @@ sie, zusätzlich zu den grundlegenden Abhängigkeiten des Quarkus-Frameworks, fo
 \end{itemize}
 
 Diese Abhängigkeiten wurden vom Quarkus Maven-Repository sowohl in blockierender,
-als auch in nicht-blockierender, reaktiver und \verb|native image|-kompatibler Form bereitgestellt: \parencite{MavenQuarkusIO}
+als auch in nicht-blockierender und \verb|native image|-kompatibler Form bereitgestellt: \parencite{MavenQuarkusIO}
 % space between the text and the left/right border of its containing cell is set to 18 pt
 \setlength{\tabcolsep}{18pt}
 % the height of each row is set to 1.5 relative to its default height
@@ -64,28 +58,28 @@ als auch in nicht-blockierender, reaktiver und \verb|native image|-kompatibler F
   \centering
   \begin{tabular}{| c | c | c |}
     \hline
-                                   & Blockierend      & Nicht-blockierend (reaktiv) \\
+                                  & Blockierend      & Nicht-blockierend (reaktiv) \\
     \hline
-    JAX-RS                         & Resteasy         & Resteasy Reactive           \\
+    JAX-RS                        & Resteasy         & Resteasy Reactive           \\
     \hline
-    \acrshort{json}                & Resteasy-Jackson & Resteasy-Reactive-Jackson   \\
+    \acrshort{json}               & Resteasy-Jackson & Resteasy-Reactive-Jackson   \\
     \hline
-    Datenbanktreiber               & JDBC-Postgresql  & Reactive-Pg-Client          \\
+    Datenbanktreiber              & JDBC-Postgresql  & Reactive-Pg-Client          \\
     \hline
-    \acrshort{jpa}-/\acrshort{orm} & Hibernate-ORM    & Hibernate-Reactive          \\
+    \acrshort{jpa}/\acrshort{orm} & Hibernate-ORM    & Hibernate-Reactive          \\
     \hline
   \end{tabular}
   \caption{Tabelle mit den Abhängigkeiten beider Applikationen}
   \label{table:dependencies}
 \end{table}
 
-In Listing \ref{lst:update_reactive} und \ref{lst:update_blocking} ist jeweils die Update Methode der REST-APIs abgebildet, um den
+In Listing \ref{lst:update_blocking} und \ref{lst:update_reactive} ist jeweils die Update Methode der REST-APIs abgebildet, um den
 Unterschied der beiden Paradigmen anhand von Code darzustellen.
 
 Dabei wird versucht eine Entity mit der übergebenen \verb|id| der HTTP-Anfrage
 aus der Datenbank abzurufen und, falls eine gefunden werden konnte, dessen Name mit dem Wert
 aus dem Request-Body der Anfrage zu überschreiben. Anschließend wird die Entity mit dem neuen Namen wieder in die Datenbank zurückgeschrieben
-und der HTTP-Statuscode 422 an den Client zurückgegeben. Falls keine Entity gefunden werden konnte, wird stattdessen
+und HTTP-Statuscode 422 an den Client zurückgegeben. Falls keine Entity gefunden werden konnte, wird stattdessen
 HTTP-Statuscode 404 zurückgegeben.
 
 In der reaktiven Anwendung ist die gesamte Logik, sowie Fehler- und Nullprüfung in einer einzigen Pipeline abgebildet.
@@ -94,8 +88,8 @@ angegeben. \verb|Uni| repräsentiert dabei einen Datenstrom der entweder ein Ele
 \verb|Multi| repräsentiert einen Datenstrom der entweder 0, 1, \verb|n| oder unendlich viele Elemente emittieren kann.
 Der \verb|Subscriber| ist in diesem Fall der Aufrufer der \verb|update|-Methode und sorgt dafür, dass die Pipeline überhaupt ausgeführt wird.
 
-Jede \verb|Pipe| bzw. \verb|Processor| der Pipeline gibt ein \verb|Uni|an den Downstream weiter.
-Dieses kann entweder vom Typ \verb|Void| (für null-Werte) oder von der jeweiligen Entität sein.
+Jede \verb|Pipe| der Pipeline gibt ein \verb|Uni| an den Downstream weiter.
+Dieses kann entweder vom Typ \verb|Void| für null-Werte oder vom Typ der jeweiligen Entität sein.
 \footnote{invoke() und call() in Listing \ref{lst:update_reactive} sind Abkürzungen, um die Lesbarkeit in Mutiny zu verbessern\parencite{MutinyShortcuts}}.
 
 \begin{lstlisting}[caption=Update Methode der nicht-reaktiven Anwendung, language=Java, captionpos=b, label=lst:update_blocking]
@@ -130,8 +124,8 @@ public Uni<Response> update(Long id, Fruit fruit) {
 			.onItem().ifNull().continueWith(Response.status(Status.NOT_FOUND).build());
 }
 \end{lstlisting}
-Der Projekt-Code dieser Arbeit kann von GitHub unter \url{https://github.com/ErikSimonsen/Master-Thesis-Sourcecode} abgerufen und modifiziert werden.
-
+Der Projekt-Code dieser Arbeit kann auf GitHub unter der URL \url{https://github.com/ErikSimonsen/Master-Thesis-Sourcecode} eingesehen und abgerufen werden.
+\newpage
 \subsection{Testumgebung}
 \label{section:testumgebung}
 Für die Testumgebung werden zwei Systeme benötigt: der Client-Host und der Server-Host.
@@ -146,30 +140,26 @@ jeweils einem Docker-Container mit fest definierten Ressourcen:
 \begin{itemize}
   \item Nutzung von 4 CPU-Kernen
   \item 1024 MB RAM
-  \item 256 MB Heap Größe für den Java-Prozess
-        \footnote{Seit Java 10 wird automatisch 1/4 des Speicher Limits des Containers genutzt \parencite{Java10ReleaseNotes}}
+  \item 256 MB JVM-Heap Größe\footnote{Seit Java 10 wird automatisch 1/4 des Speicherlimits des Containers genutzt \parencite{Java10ReleaseNotes}}
 \end{itemize}
-Der Docker-Container für dies Postgresql-Datenbank allokiert:
+Der Docker-Container für die PostgreSQL-Datenbank verwendet:
 \begin{itemize}
   \item 4 CPU-Kerne
   \item 2048 MB RAM
 \end{itemize}
 
-Die Größe des von Vert.x verwendeten \verb|Worker Thread Pools| (siehe Abbildung \ref{fig:quarkus_http_schicht}) beträgt standardmäßig 20 und bleibt
-unverändert. Die Größe des \verb|Event-Loop Thread Pools| hingegen wird manuell auf 8 gesetzt, da die Anwendung durch die Ressourcenallokation
-des Docker-Containers nur 4 CPU-Kerne nutzen darf und jeder dieser CPU-Kerne Hyperthreading unterstützt. \footnote{Wodurch jeder physische CPU-Kern über
-  zwei \glsplural{logische CPU}(*) verfügt}
-Damit kann die optimale Verteilung von einem \verb|Event-Loop Thread| bzw. \verb|IO-Thread| pro logischer CPU erreicht werden.
-Standardmäßig wird die Ressourcenbegrenzung durch Container von Vert.x nicht beachtet und die Anzahl der \verb|Event loop|-Threads wird auf die doppelte
-Anzahl der verfügbaren CPU-Kerne des Container-Hosts gesetzt, weswegen es für ressourcenbegrenzte Container der beschriebenen Anpassung bedarf.
+Die Größe des von Vert.x verwendeten \verb|Worker thread pools| (siehe Abbildung \ref{fig:quarkus_http_schicht}) beträgt standardmäßig 20 und bleibt
+unverändert. Die Größe des \verb|Event loop thread pools| hingegen wird manuell auf 8 gesetzt, da die Anwendung durch die Ressourcenallokation
+des Docker-Containers nur 4 CPU-Kerne nutzen darf und jeder dieser CPU-Kerne Hyper-Threading\footnote{Wodurch jeder physische CPU-Kern über
+  zwei \glsplural{logische CPU}(*) verfügt} unterstützt.
+Damit kann die optimale Verteilung von einem \verb|IO thread| pro logischer CPU erreicht werden.
+Standardmäßig wird die Ressourcenbegrenzung durch Container von Vert.x nicht beachtet und die Anzahl der \verb|IO threads| wird auf die doppelte
+Anzahl der verfügbaren CPU-Kerne des Container-Hosts gesetzt, weswegen es der beschriebenen Anpassung bedarf.
 
-Der \verb|worker thread pool| wird von der nicht-reaktiven, blockierenden Anwendung nach dem \verb|Thread-per-Request|-Modell genutzt.
-Die reaktive Anwendung nach dem \verb|Multi Reactor|-Modell nutzt hingegen den \verb|event-loop thread tool|.
-
-Die Anwendung die auf dem Client-Host die \textit{work load} für die beiden zu testenden Anwendungen generiert,
+Die Anwendung die auf dem Client-Host die \verb|workload| für die beiden zu testenden Anwendungen generiert,
 nutzt in dieser Testumgebung 4 Threads.
-\footnote{Welche Laufzeitumgebungen und Tools für die Tests auf den jeweiligen Hosts vorhanden sein müssen, und wie diese installiert werden
-  wird in der README.md-Datei des Projektverzeichnisses beschrieben.}
+Welche Laufzeitumgebungen und Tools für den Testaufbau auf den jeweiligen Hosts vorhanden sein müssen, und wie diese installiert werden,
+wird in der README.md-Datei des Projekts beschrieben.
 
 Da die Messergebnisse je nach verwendeter Hardware der Client- und Server-Hosts durchaus variieren können werden im Folgenden
 die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
@@ -181,7 +171,7 @@ die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
     \hline
     CPU's          & AMD Ryzen 7 2700x eight-core processor x 16 \\
     \hline
-    RAM            & 16GB                                        \\
+    RAM            & 16 GB                                       \\
     \hline
     Speicher       & 1,5 TB                                      \\
     \hline
@@ -190,7 +180,7 @@ die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
     Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64|   \\
     \hline
   \end{tabular}
-  \caption{Systemspezifikationen der verwendeten Server-Maschine}
+  \caption{Systemspezifikationen des verwendeten Server-Hosts}
   \label{table:system_host}
 \end{table}
 
@@ -202,7 +192,7 @@ die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
     \hline
     CPU            & Intel® Core™ i5-4210H CPU @ 2.90GHz × 4   \\
     \hline
-    RAM            & 8GB                                       \\
+    RAM            & 8 GB                                      \\
     \hline
     Speicher       & 500 GB                                    \\
     \hline
@@ -211,17 +201,17 @@ die Systemspezifikationen der verwendeten Systeme des Authors gelistet:
     Kernel         & Linux version \verb|5.12.14-300.fc34.x86_64| \\
     \hline
   \end{tabular}
-  \caption{Systemspezifikationen der verwendeten Client-Maschine}
+  \caption{Systemspezifikationen des verwendeten Client-Hosts}
   \label{table:system_client}
 \end{table}
 
-\subsection{Testvorgehen / Testaufbau}
-\label{section:vorgehen}
-Der im Folgenden erläuterte Versuchsaufbau basiert auf einer, vom Autor erweiterten, Architektur die vom Quarkus-Entwicklerteam
+\subsection{Testaufbau}
+\label{section:testaufbau}
+Der im Folgenden erläuterte Testaufbau basiert auf einer, vom Autor erweiterten, Architektur die vom Quarkus-Entwicklerteam
 zur Erstellung von verschiedenen Benchmarks für den Quarkus Technologie-Stack genutzt wurde.
 \parencite{QuarkusBlog, QuarkusJohnaohara}
 
-Um den gesamten Versuchsablauf zu automatisierenm, und über mehrere Server zu steuern wird ein Tool namens qDup eingesetzt.
+Um den gesamten Testablauf zu automatisieren, und über mehrere Hosts zu steuern wird ein Tool namens qDup eingesetzt.
 Damit können Shell-Kommandos als Skripte gruppiert, und verschiedenen Hosts je nach Rolle zugewiesen werden.
 \footnote{Die qDup Skripte mit dem gesamten Testablauf können im Verzeichnis \textit{/scripts/qDup} des Quellcodeverzeichnisses eingesehen und
   angepasst werden.}
@@ -231,36 +221,35 @@ weitere Skripte auszuführen.
 \footnote{Beispielsweise sollte der Server-Host erst anfangen den Java-Prozess zu überwachen, sobald der Client-Host die \textit{workload}
   generiert und nicht bereits davor}
 
-Wie bereits in \ref{section:testumgebung} angedeutet, nutzt qDup SSH um auf die jeweilige Hosts zuzugreifen.
+Wie bereits in Kapitel \ref{section:testumgebung} angedeutet, nutzt qDup SSH um auf die jeweilige Hosts zuzugreifen.
 Im ersten Schritt \textit{build applications} wird auf dem Server-Host das Quellcodeverzeichnis geklont und beide Anwendungen werden
 jeweils als \gls{uber-jar}(*), für ein einfaches Deployment in den Docker-Container, und als \verb|native image| gebaut.
 
 Anschließend wird über ein JavaScript-Skript, welches in der Laufzeitumgebung Node.js läuft,
-die \verb|Mean Start Time to First Request|, also das durchschnittliche Zeitintervall zwischem dem Start einer Anwendung bis
-zur Verarbeitung der ersten Anfrage, mehrfach gemessen und als Textdatei gespeichert.
-Dabei wird die gebaute Anwendung ohne Docker-Container auf dem Server-Host gestartet und die Zeitmessung gestartet. Anschließend werden in einer Schleife
-solange Anfragen an einen Endpunkt der Anwendung gestellt bis das Ergebnis ein Statuscode 200 ist, was den Endpunkt der Messung markiert.
-Aus den gemessenen Startzeiten wird in der Auswertung der Daten anschließend der Durchschnitt gebildet, um somit die \verb|Mean Start Time to First Request|
-der Anwendung zu erhalten.
-
-Darüber hinaus werden die Docker-Container der Datenbank
-\footnote{Nur beim Test mit dynamischen Daten} und der beiden REST-APIs gebaut.
+die \verb|Mean Start Time to First Request|, also das durchschnittliche Zeitintervall zwischen dem Start einer Anwendung bis
+zur Verarbeitung der ersten Anfrage gemessen.
+Dabei wird die Anwendung ohne Docker-Container auf dem Server-Host ausgeführt und die Zeitmessung gestartet. Anschließend werden in einer Schleife
+solange HTTP-Anfragen an einen Endpunkt der Anwendung geschickt bis der HTTP-Statuscode 200 zurückgeliefert wird, was das Ende der Messung markiert.
+Dieser Prozess wird mehrfach durchgeführt und die gemessenen Zeiten in einer Textdatei gespeichert.
+Aus diesen Werten wird in der Auswertung der Daten dann der Durchschnitt gebildet.
+Darüber hinaus werden in diesem Schritt die Docker-Container der Datenbank
+\footnote{Nur beim Test mit dynamischen Daten} und der beiden REST-APIs gebaut.\newline
 
 Beim zweiten Schritt \textit{run applications} wird der Docker-Container der jeweiligen Anwendung gestartet und anschließend signalisiert,
 dass die Anwendung nun bereit ist.
 Daraufhin wird auf dem Client-Host das Skript \textit{generate load} gestartet.
-Die \textit{workload} ist hier definiert als die Anzahl der an den Server-Host versendeten \textit{HTTP-Anfragen pro Sekunde}.
-Für das Generieren und Übermitteln der \textit{workload} wird das Werkzeug \textit{wrk2} genutzt, welches das
-bewährte HTTP-Benchmarking Tool \textit{wrk} um folgende Funktionen erweitert:\parencite{Wrk2, Wrk}
+Die \verb|workload| ist hier definiert als die Anzahl der an den Server-Host versendeten HTTP-Anfragen \textit{pro Sekunde}.
+Für das Generieren und Übermitteln der \verb|workload| wird das Werkzeug \verb|wrk2| genutzt, welches das
+bewährte HTTP-Benchmarking Tool \verb|wrk| um folgende Funktionen erweitert:\parencite{Wrk2, Wrk}
 \begin{enumerate}
-  \item Konstanter \textit{workload} Durchsatz
-  \item Korrekteres Messverfahren der Antwort-Latenz durch\linebreak Vermeidung von \verb|Coordinated Omission|
+  \item Definierbarer konstanter Durchsatz (workload)
+  \item Korrektere Messung der Antwort-Latenz durch\newline Vermeidung von \verb|Coordinated Omission|
   \item Hochexaktes Messen durch \Glsuseri{hdrHistogramm}(*)
 \end{enumerate}
 
 \paragraph{Coordinated Omission Problem}
 Der Begriff \verb|Coordinated Omission Problem| wurde von Gil Tene, CTO und Mitgründer von Azul Systems, um 2012 geprägt.
-Koordinierte Auslassung beschreibt in diesem Kontext das Problem, wenn ein Messsystem sich mit dem zu messenden System unabsichtlich so koordiniert,
+Koordinierte Auslassung beschreibt in diesem Kontext das Problem, dass sich ein Messsystem unabsichtlich so mit dem zu messenden System   koordiniert,
 dass es vermieden wird Ausreißer zu messen.
 
 Viele Lastgeneratoren (load generator) berechnen die Latenz für eine Anfrage als die vergangene Zeit zwischen dem Senden des ersten Bytes einer Anfrage
@@ -276,7 +265,7 @@ Um weitere Messungen während Phasen hoher Latenz zu vermeiden koordiniert sich 
 die der Server in einer solchen Phase abzuarbeiten hat, deutlich geringer ist als bei niedriger Latenz.
 
 Das Hauptproblem ist also, dass die Last die der Server empfängt
-nicht durchgehend \verb|konstant| ist, sondern von der Antwortszeit des Servers abhängt \parencite{mci/Friedrich2017}.
+nicht durchgehend \verb|konstant| ist, sondern von der Antwortzeit des Servers abhängt \parencite{mci/Friedrich2017}.
 
 \newpage
 \verb|Wrk2|, dessen Author auch Gil Tene ist, umgeht das \verb|Coordinated Omission Problem| in dem es eine konstante Durchsatzlast (als Befehlsargument) mit
@@ -288,7 +277,7 @@ gemäß dem konfigurierten konstanten Durchsatz, hätte erfolgen \textit{sollen}
 
 Pro Test (siehe Anfang des Kapitels \ref{section:vergleich_reaktiv_blockierend}) werden Benchmarks für eine ganze Reihe an \textit{workloads} gemessen.
 Jede \textit{workload} wird sekündlich über einen Zeitraum von 60 Sekunden über 100 offene HTTP-Verbindungen an den Server-Host übermittelt.
-In den Tests nutzt \verb|wrk2| 4 Threads für das Generieren und Übermitteln der \textit{workload}, sowie das Messen der Antwortszeit.
+In den Tests nutzt \verb|wrk2| 4 Threads für das Generieren und Übermitteln der \textit{workload}, sowie das Messen der Antwortzeit.
 \newline\newline
 Damit der Anwendungscode des angesteuerten HTTP-Endpunkts durch den JIT-Compiler der JVM (siehe Absatz \verb|Quarkus und native image| in Kapitel
 \ref{subsubsec:frameworks}) optimiert wird, findet pro \textit{workload} vor der eigentlichen Mess-Phase eine identische Warmup-Phase statt.
@@ -700,7 +689,7 @@ Obwohl die Ergebnisse der Testreihen geringfügig variieren bewegen sie sich in 
 Wie aus den gezeigten Resultaten (siehe Tabelle \ref{table:static_jvm_measurement_results} und
 \ref{table:static_native_measurement_results}) hervorgeht, ist der Durchsatz und der Ressourcenverbrauch bei der
 reaktiven Anwendung nach dem \verb|Multi Reactor|-Modell für rein \verb|statische Ressourcen| sowohl im JVM, als auch im native mode,
-deutlich besser gegenüber einer traditionellen, blockierenden Anwendung nach dem \verb|Thread-Per-Request|-Modell.\newline
+deutlich besser gegenüber einer traditionellen, blockierenden Anwendung nach dem \verb|Thread per request|-Modell.\newline
 So erreicht die reaktive Anwendung im \verb|JVM mode| einen 31,2\% geringeren Speicherverbrauch bei \textit{maximaler} Last
 sowie eine 11\% bessere \verb|Mean Start Time to First Request|.
 
@@ -732,12 +721,12 @@ etwa die Hälfte des Durchsatzes der Anwendungen im \verb|JVM mode|.
 In beiden Szenarien ist der niedrigere Speicherverbrauch der reaktiven Anwendung gegenüber der nicht-reaktiven Anwendung
 bei Maximallast darauf zurückzuführen, dass
 keine einziger blockierender Funktionsaufruf (\textit{pure io}) stattfindet, wodurch alle Anfragen über die wenigen
-Event Loops der \verb|IO Threads| abgearbeitet werden können und nicht auf \verb|Worker threads| aus dem \verb|Worker thread pool|
+Event Loops der \verb|IO threads| abgearbeitet werden können und nicht auf \verb|Worker threads| aus dem \verb|Worker thread pool|
 \textit{dispatched} (siehe \ref{subsubsec:frameworks} Abschnitt \textit{Eclipse Vert.x}) werden müssen.
 
 Die erst bei deutlich höheren Durchsätzen auftretende maximale CPU-Auslastung resultiert aus der sehr geringen Anzahl an Threadwechseln
 , da jeweils ein Thread aus dem \verb|Event loop thread pool| genau einem CPU-Kern zugeordnet ist, wodurch eine optimale Auslastung erreicht
-wird. Darüber hinaus werden die \verb|Event loop threads| zu keinem Zeitpunkt blockiert, da, wie in \ref{subsec:nonblocking-i/o}
+wird. Darüber hinaus werden die \verb|IO threads| zu keinem Zeitpunkt blockiert, da, wie in \ref{subsec:nonblocking-i/o}
 beschrieben, das Ausführen von beliebigen I/O-Operationen die Kontrolle an den Thread zurückgibt, anstatt ihn zu blockieren,
 wodurch direkt die nächste I/O-Operation gestartet werden kann.
 \subsubsection{Dynamische Ressourcen}
@@ -745,7 +734,7 @@ wodurch direkt die nächste I/O-Operation gestartet werden kann.
 Wie aus den gezeigten Resultaten (siehe Tabelle \ref{table:dynamic_jvm_measurement_results} und
 \ref{table:dynamic_native_measurement_results}) hervorgeht, ist der Durchsatz sowie der Ressourcenverbrauch bei der
 reaktiven Anwendung nach dem \verb|Multi Reactor| Modell für rein \verb|dynamische Ressourcen| sowohl im JVM als auch im native mode,
-besser gegenüber einer traditionellen, blockierenden Anwendung nach dem \verb|Thread-Per-Request|-Modell.
+besser gegenüber einer traditionellen, blockierenden Anwendung nach dem \verb|Thread per request|-Modell.
 Die Größenordnung des Unterschieds ist bei dynamischen Ressourcen allerdings deutlich geringer als bei statischen Resourcen.
 
 So erreicht die reaktive Anwendung im \verb|JVM mode| einen 24,1\% geringeren Speicherverbrauch bei \textit{maximaler} Last
@@ -773,15 +762,15 @@ von reaktiven Anwendungen gegenüber nicht-reaktiven Anwendungen im \verb|JVM mo
 Dazu kommt allerdings, dass die Datenbank und die Kommunikation zwischen der Anwendung und der Datenbank in den vorliegenden Testresultaten
 bei höheren Lasten der begrenzende Faktor ist, was sich bei beiden Modi in einem deutlich niedrigeren maximalen Durchsatz widerspiegelt.
 
-Der höhere Durchsatz der reaktiven Anwendungen ist zusätzlich damit zu erklären, dass pro aktivem IO-Thread lediglich eine
-Datenbankverbindung erstellt werden muss, und diese für die gesamte Laufzeit aktiv bleibt, da es durch die nichtblockierenden
-Aufrufe keine Threadwechsel gibt. Im Gegensatz dazu muss die nicht-reaktive Anwendung nach dem \verb|Thread-Per-Request|-Modell
+Der höhere Durchsatz der reaktiven Anwendungen ist zusätzlich damit zu erklären, dass pro aktivem \verb|IO thread| lediglich eine
+Datenbankverbindung erstellt werden muss, und diese für die gesamte Laufzeit aktiv bleibt, da es durch die nicht-blockierenden
+Aufrufe keine Threadwechsel gibt. Im Gegensatz dazu muss die nicht-reaktive Anwendung nach dem \verb|Thread per request|-Modell
 für jede Anfrage eine neue Datenbankverbindung erstellen.
 \newpage
 
 \subsubsection{Kritische Reflexion}
 \label{subsubsec:auswertung_kritische_reflexion}
-Die beschriebenen Tests mit dem in Kapitel \ref{section:vorgehen} und \ref{section:testumgebung} beschriebenen Testaufbau und Testumgebung
+Die beschriebenen Tests mit dem in Kapitel \ref{section:testaufbau} und \ref{section:testumgebung} beschriebenen Testaufbau und Testumgebung
 basieren auf einer verhältnismäßig simplen Systemarchitektur mit einer sehr kleinen, nicht-optimierten Datenbank und verzichten auf mögliche Optimierungen.
 Dadurch wird die Anzahl der Einflussgrößen so gering wie möglich gehalten, um somit die Funktionsweise und die
 Auswirkungen auf die Leistungsfähigkeit der beiden Architektur-Ansätze zu verdeutlichen.
@@ -796,7 +785,7 @@ In einer realistischen Anwendungsumgebung würden die Testresultate durch eine V
 So könnte ein größerer \verb|Worker thread pool| die Leistungsfähigkeit der nicht-reaktiven, blockierenden
 Anwendung bis zu einem gewissen Maße bei hohen Lasten steigern. Allerdings nur solange bis auch hier die Kosten der Threadwechsel
 überwiegen. Auch das Weglassen von Vert.x könnte die Leistung der blockierenden Anwendung verbessern, sofern weiterhin
-ein \verb|Worker thread pool| genutzt wird, da das \verb|Dispatching| der Anfragen von den \verb|Event loop threads| auf
+ein \verb|Worker thread pool| genutzt wird, da das \verb|Dispatching| der Anfragen von den \verb|IO threads| auf
 \verb|Worker threads| wegfiele. Darüber hinaus würden geschäftskritische Anwendungen deutlich mehr Speicherkapazitäten, CPU-Kerne und
 leistungsfähigere SSDs, und damit auch mehr I/O-Operationen, benötigen als die beschriebenen Docker-Container zur Verfügung haben.
 

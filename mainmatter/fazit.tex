@@ -2,8 +2,8 @@
 \label{sec:fazit}
 \subsection{Zusammenfassung}
 \label{subsec:zusammenfassung}
-Das Ziel der Masterarbeit war es, zu untersuchen ob reaktive, auf \verb|Nonblocking I/O| und dem \verb|Multi-Reactor|-Modell basierende
-Anwendungen das Problem der begrenzten Skalierbarkeit von nicht-reaktiven, auf \verb|Blocking I/O| und dem \verb|Thread per Request|-Modell
+Das Ziel der Masterarbeit war es, zu untersuchen ob reaktive, auf \verb|Non-blocking I/O| und dem \verb|Multi-Reactor|-Modell basierende
+Anwendungen das Problem der begrenzten Skalierbarkeit von nicht-reaktiven, auf \verb|Blocking I/O| und dem \verb|Thread per request|-Modell
 basierenden Anwendungen durch Vermeidung von Threadwechseln lösen können, sowie mögliche Alternativen zu beschreiben.
 
 Für diesen Zweck wurden zwei simple Anwendungen als REST-APIs geschrieben, jeweils reaktiv und nicht-reaktiv, deren
@@ -72,7 +72,7 @@ integriert wird und viele Java-APIs auf virtuelle Threads umstellt, wäre der Au
 
 Project Loom wird eine ernsthafte Alternative zu \verb|Reactive Programming|-Bibliotheken darstellen, da sowohl der Entwicklungs-, als auch
 der Integrationsaufwand in bestehende Anwendungen deutlich geringer ist.
-Konzepte wie \verb|backpressure| und Nachrichten-basierte Kommunikation zur Realisierung von reaktiven Systemen
+Konzepte wie \verb|Back-Pressure| und Nachrichten-basierte Kommunikation zur Realisierung von reaktiven Systemen
 bleiben aber auch weiterhin für hochskalierbare Systeme und Komponenten interessant, die in Zukunft kein \verb|Reactive Programming| nutzen.
 Dementsprechend werden auch Frameworks und Toolkits wie Vert.x für die Realisierung von reaktiven Systemkomponenten weiterhin
 relevant sein.

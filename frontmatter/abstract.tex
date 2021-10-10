@@ -3,12 +3,12 @@
     \noindent
     Das Ziel der vorliegenden Masterarbeit ist es, das Konzept von reaktiver Programmierung und reaktiven Systemen,
     speziell im Java Ökosystem, zu erläutern. Zudem wird untersucht, ob eine reaktive Anwendung nach dem \verb|Reactor Pattern| das, durch
-    Threadwechsel bedingte, Skalierungsproblem einer nicht-reaktiven, auf dem \verb|Thread per Request|-Pattern basierenden,
+    Threadwechsel bedingte, Skalierungsproblem einer nicht-reaktiven, auf dem \verb|Thread per request|-Pattern basierenden,
     Anwendung bei hohen Lasten lösen kann.\newline
 
     Dafür wurden in einem Versuchsaufbau eine Reihe von Lasttests mit stetig steigenden Lasten, jeweils mit und ohne Datenbankanbindung,
     an zwei konzeptionellen Anwendungen,
-    reaktiv und nicht-reaktiv, durchgeführt. Dabei werden leistungsrelevante Metriken wie Durchsatz, Speicherbedarf und CPU-Auslastung gemessen.
+    reaktiv und nicht-reaktiv, durchgeführt. Dabei wurden leistungsrelevante Metriken wie Durchsatz, Speicherbedarf und CPU-Auslastung gemessen.
     Anschließend wurden die Ergebnisse beider Anwendungen ausgewertet und miteinander verglichen.
     Beide Anwendungen wurden dabei mit dem Full-Stack, Kubernetes-nativen Java-Anwendungsframework \verb|Quarkus| implementiert.\newline
 
@@ -19,8 +19,8 @@
     Die Testergebnisse sind außerdem durch eine Vielzahl
     an Faktoren, wie Hardwareleistung oder Datenbankgröße, beeinflussbar, weswegen der Autor empfiehlt die Testumgebung
     an die eigenen Anforderungen anzupassen.
-    Darüber hinaus wurden Alternativen zum reaktiven Modell im Java-Umfeld dargestellt und bewertet.\newline
+    Darüber hinaus werden Alternativen zum reaktiven Modell im Java-Umfeld dargestellt und bewertet.\newline
 
-    Weiterführende Arbeiten in diesem Bereich könnten die genannten leistungsrelevanten Metriken von alternativen Ansätzen, wie der Nutzung von virtuellen Threads durch Project Loom,
+    Weiterführende Arbeiten in diesem Bereich könnten die genannten Metriken von alternativen Ansätzen, wie der Nutzung von virtuellen Threads durch Project Loom,
     in einem ähnlichen Versuchsaufbau untersuchen und mit einer reaktiven Anwendung vergleichen.
 \end{abstract}
