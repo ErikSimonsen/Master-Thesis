@@ -29,7 +29,6 @@ bis zu einer Senke, dem Subscriber der \verb|Pipeline|.
 Daher wird dieser Prozess auch als \verb|event flow| oder \verb|data flow| bezeichnet.
 Jede \verb|Pipe| kann ein Element ändern, löschen oder auch neue Elemente erstellen und dem \verb|flow| hinzufügen.
 
-
 Allgemein fließt ein Element immer stromabwärts, also von der Quelle zur Senke.
 \footnote{Es gibt aber auch Ausnahmefälle in denen ein Element stromaufwärts fließt, also von einer pipe oder Senke zur Quelle}
 Dabei wird die vorherige \verb|pipe| als \verb|upstream| bezeichnet und die nächste zu durchfließende \verb|pipe| als \verb|downstream|.
@@ -471,10 +470,11 @@ Konfiguration benötigt. Dabei werden nur die besten und hochwertigsten Java-Bib
 Dabei können die Anwendungen sowohl auf einer JVM (JVM mode) laufen, als auch, durch native Kompilierung mit vollständigem Stack,
 als nativ ausführbare Anwendung: dem \verb|native image| (native mode).
 
-Dafür nutzt Quarkus eine von Oracle entwickelte Technologie namens \verb|GraalVM|.
+Dafür wird eine von Oracle entwickelte Technologie names \verb|GraalVM| genutzt.
 Dabei handelt es sich um eine polyglotte, virtuelle Maschine und Laufzeitumgebung die auf dem OpenJDK basiert, und über
 JVMCI \footnote{Java Virtual Machine Compiler Interface} den C2-Compiler der zugrundeliegenden HotSpot-JVM durch den
 polyglotten Graal Compiler ersetzt.\parencite{GraalVM}
+
 Beim C2-Compiler handelt es sich um einen aggressiv optimierenden \verb|just-in-time|-Compiler (JIT) für Serveranwendungen, bei denen es nicht auf
 schnelle Startzeiten und geringen Ressourcenverbrauch, sondern auf höchsten Durchsatz ankommt.
 Dabei wird der unoptimierte Bytecode während der Laufzeit in Maschinencode übersetzt und ausgeführt. Sobald eine Methode hinreichend oft

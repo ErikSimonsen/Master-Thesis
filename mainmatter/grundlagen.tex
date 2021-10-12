@@ -94,7 +94,7 @@ einigen Sekunden (Abrufen eines Service oder komplexen Queries) oder länger (be
 Sobald ein Thread blockiert wird, wird er vom Kernel des Betriebssystems in den Sleep- bzw. Waiting-Zustand versetzt.
 Wie bereits in Kapitel \ref{subsubsec:threadwechsel} erwähnt, erfolgt ein Threadwechsel sobald der momentane Thread in einen solchen Zustand
 versetzt wird.
-Diese Art des Aufrufes einer I/O-Operation wird daher als \verb|Blocking I/O| bezeichnet.
+Diese Art des Aufrufs einer I/O-Operation wird daher als \verb|Blocking I/O| bezeichnet.
 Aus diesem Umstand wird schnell ersichtlich, dass ein auf \verb|Blocking I/O| basierender Webserver nicht in der Lage ist
 performant mehrere Anfragen in einem Thread zu bearbeiten, denn sobald der Thread blockiert, werden alle weiteren zu bearbeitenden Anfragen
 auch blockiert.
@@ -126,7 +126,7 @@ Der erreichbare Grad der Parallelität ist bei diesem Ansatz in jedem Fall durch
 \newpage
 \subsection{Non-blocking I/O}
 \label{subsec:nonblocking-i/o}
-APIs die auf \verb|Blocking I/O| basieren , blockieren den Thread bis die Operation abgeschlossen ist und verursachen somit
+APIs die auf \verb|Blocking I/O| basieren, blockieren den Thread bis die Operation abgeschlossen ist und verursachen somit
 immer einen Threadwechsel.
 Funktionsaufrufe mit nicht-blockierenden, asynchronen Ressourcenzugriffen kommen hingegen sofort zurück und blockieren den Thread nicht.
 Dieser kann dadurch den weiteren Code des Programms ausführen bzw. die nächste Anfrage bearbeiten.
