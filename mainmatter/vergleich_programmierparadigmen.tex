@@ -694,7 +694,7 @@ Darüber hinaus kann man, sowohl bei statischen als auch bei dynamischen Ressour
 CPU-Auslastung und der Latenz erkennen.
 Sobald die durchschnittliche CPU-Auslastung einen Wert von 100\% erreicht, steigt auch die Latenz merkbar an.
 Das erste, deutliche Ansteigen der Latenz zeigt also, dass die aktuelle \verb|workload| die CPU maximal auslastet,
-und jede Steigerung zu einer wachsenden Verzögerung beim Abarbeiten der Anfragen führt.
+und jede Steigerung zu einer wachsenden Latenz beim Abarbeiten der Anfragen führt.
 
 Im \verb|native mode| ist die Startzeit beider Anwendungen gleich, befindet sich aber im zweistelligen Millisekunden Bereich statt
 im Sekundenbereich.
@@ -716,9 +716,9 @@ Event Loops der \verb|IO threads| abgearbeitet werden können und nicht auf \ver
 
 Die erst bei deutlich höheren Durchsätzen auftretende maximale CPU-Auslastung resultiert aus der sehr geringen Anzahl an Threadwechseln,
 da jeweils ein \verb|IO thread| genau einem CPU-Kern zugeordnet ist, wodurch eine optimale Auslastung erreicht
-wird. Darüber hinaus werden die \verb|IO threads| zu keinem Zeitpunkt blockiert, da, wie in \ref{subsec:nonblocking-i/o}
+wird. Darüber hinaus werden die \verb|IO threads| zu keinem Zeitpunkt blockiert, da, wie in Kapitel \ref{subsec:nonblocking-i/o}
 beschrieben, das Ausführen von beliebigen I/O-Operationen die Kontrolle an den Thread zurückgibt anstatt ihn zu blockieren,
-wodurch direkt die nächste Abfrage bearbeitet werden kann.
+wodurch direkt die nächste HTTP-Anfrage bearbeitet werden kann.
 \subsubsection{Dynamische Ressourcen}
 \label{subsubsec:auswertung_dynamic}
 Wie aus den gezeigten Resultaten (siehe Tabelle \ref{table:dynamic_jvm_measurement_results} und
@@ -739,8 +739,8 @@ Der Speicherverbrauch bei Maximallast ist in diesem Modus zwischen beiden Anwend
 Da, im Gegensatz zu den statischen Ressourcen, bei dynamischen Daten für jede HTTP-Anfrage eine Datenbankabfrage abgesetzt werden
 muss, wirkt sich dieser Umstand auch auf die \verb|Mean Start Time to First Request| aus.
 Die schlechteren Werte der nicht-reaktiven Anwendung in dieser Metrik in beiden Modi sind auf den initialen, blockierenden
-Verbindungsaufbau mit der Datenbank zurückzuführen, sowie die in Kapitel \ref{subsubsec:auswertung_static} bereits
-beschriebenen unterschiedlichen Abhängigkeiten der Anwendungen.
+Verbindungsaufbau mit der Datenbank, sowie die in Kapitel \ref{subsubsec:auswertung_static} bereits
+beschriebenen unterschiedlichen Abhängigkeiten der Anwendungen zurückzuführen.
 
 Wie bei den Tests mit \textit{statischen Ressourcen} ist es auch bei \textit{dynamischen Ressourcen} der Fall, dass Anwendungen im
 \verb|native mode| nur etwa die Hälfte des maximalen Durchsatzes der jeweiligen Anwendungen im \verb|JVM mode| leisten können.
