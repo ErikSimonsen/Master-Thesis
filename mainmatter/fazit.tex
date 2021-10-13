@@ -22,25 +22,27 @@ Anschließend wurden die Vor- und Nachteile von reaktiver Programmierung erläut
 
 Als Nächstes wurden reaktive Datenströme und das Konzept von \verb|back-pressure| als grundlegendes Konzept von \verb|Reactive Programming|
 thematisiert. Dabei wurde auch die zugrundeliegende Spezifikation \verb|Reactive Streams| erwähnt und dessen Java-Implementierung: die Flow-API.
-Auf dieser Basis wurde dann das Architekturmuster eines reaktiven Systems und dessen Motivation beschrieben, sowie
+Auf dieser Basis wurde dann das Architekturmuster eines reaktiven Systems beschrieben, dessen Systemeigenschaften aus den
+Anforderungen an moderne Softwaresysteme hergeleitet wurden. Außerdem wurde auch die Motivation hinter einem solchen System, sowie
 das Zusammenspiel der verschiedenen Systemeigenschaften dargestellt. Zudem wurden die beiden Begriffe \verb|Reactive Programming| und Reaktives System
-voneinander abgegrenzt, wobei ermittelt wurde, dass reaktive Programmierung durchaus zur Realisierung von reaktiven Systemen genutzt werden kann.
+voneinander abgegrenzt, wobei ermittelt wurde, dass reaktive Programmierung zwar durchaus zur Realisierung von reaktiven Systemen genutzt werden kann,
+eine oder mehrere reaktive Anwendungen jedoch noch lange kein reaktives System bilden.
 Mithilfe dieser Abgrenzung erfolgte abschließend eine Einordnung des gesamten Themenkomplexes in das Java Ökosystem.
 
 In diesem Rahmen wurden für die Nutzung von \verb|Reactive Programming| die Bibliotheken RxJava, Project Reactor und Mutiny erwähnt, welche
-alle die Java Flow-API implementieren. Für die Entwicklung von reaktiven Systemen wurden die Toolkits Vert.x, Reactor-Netty und Akka
-genannt. Insbesondere Vert.x, welches auf Netty basiert, wurde anschließend näher beschrieben und dessen Erweiterung des \verb|Reactor|-Patterns
+allesamt die Java Flow-API implementieren. Für die Entwicklung von reaktiven Systemen wurden die Toolkits Vert.x, Reactor-Netty und Akka
+genannt. Insbesondere Vert.x, welches auf Netty basiert, wurde anschließend näher beschrieben sowie dessen Erweiterung des \verb|Reactor|-Patterns
 zum Multi-Reactor-Pattern thematisiert. Für die Realisierung von reaktiven Web-Applikationen wurden die beiden Frameworks Quarkus und
 SpringWebFlux vorgestellt.
 Sie bieten vorgefertigte Lösungen für alle Bereiche der Webentwicklung an und basieren auf einem reaktiven Unterbau durch die Nutzung
 von Toolkits wie Vert.x oder Reactor-Netty. Speziell auf Quarkus und die \verb|native image|-Funktionalität des integrierbaren Graal-Compilers
-wurde außerdem verstärkt eingegangen.
+wurde verstärkt eingegangen.
 Abschließend wurde \verb|Project Loom| als \textit{die} Alternative zu \verb|Reactive Programming| vorgestellt und dessen Anwendungsmodell, welches
 auf User-Threads mit Kooperativem Multitasking basiert, eingehend beschrieben.\newline
 
 Darüber hinaus wurde in dieser Arbeit untersucht ob reaktive, auf \verb|Non-blocking I/O| und dem \verb|Multi-Reactor|-Modell basierende
 Anwendungen das Problem der begrenzten Skalierbarkeit von nicht-reaktiven, auf \verb|Blocking I/O| und dem \verb|Thread per request|-Modell
-basierenden Anwendungen durch Vermeidung von Threadwechseln lösen können, sowie alternative Anwendungsmodelle zu beschreiben.
+basierenden Anwendungen durch Vermeidung von Threadwechseln lösen können.
 
 Für diesen Zweck wurden zwei simple Anwendungen mit dem Quarkus-Framework als REST-APIs implementiert, jeweils reaktiv und nicht-reaktiv, deren
 leistungsrelevante Metriken durch mehrere Reihen von Lasttests mit variierenden \verb|workloads| gemessen wurden.
@@ -51,23 +53,23 @@ Ressourcen, also einer Datenbankanbindung, getestet.
 Anschließend wurden die Testresultate der beiden Anwendungen im jeweiligen Modus für jeden Ressourcentyp ausgewertet und
 miteinander verglichen.\newline
 
-Zusammenfassend lassen sich folgende Ergebnisse nennen:
-Generell allokieren die \verb|native images| weniger Speicher und benötigen zum Starten nur wenige Millisekunden, was nur ein Bruchteil der Startzeit
-von \verb|JVM|-Anwendungen darstellt. Allerdings können sie nur einen deutlich
-geringeren maximalen Durchsatz aufweisen, da auf eine Vielzahl an Laufzeitoptimierungen verzichtet wird.
-Sowohl für statische, als auch für dynamische Ressourcen beträgt der maximale Durchsatz der Anwendungen im \verb|native mode|
-daher nur etwa die Hälfte der Anwendungen im \verb|JVM mode|.
-In beiden Modi weist die reaktive Anwendung jedoch bessere Werte in allen Metriken gegenüber der nicht-reaktiven Anwendung auf.
-
-So erreicht sie im \verb|JVM mode| für statische Daten mit 140.000 Anfragen pro Sekunde einen 102\% höheren maximalen Durchsatz.
+In beiden Modi wies die reaktive Anwendung deutliche bessere Werte in allen Metriken gegenüber der nicht-reaktiven Anwendung auf.
+So erreichte sie im \verb|JVM mode| für statische Daten mit 140.000 Anfragen pro Sekunde einen 102\% höheren maximalen Durchsatz.
 Außerdem einen 31\% geringeren Speicherbedarf sowie eine 11\% schnellere \verb|Mean Start Time to First Request|.
 
-Auch im \verb|JVM mode| für dynamische Daten erzielt sie mit 36.000 Anfragen/Sekunde einen 38\% höheren maximalen Durchsatz.
-Darüber hinaus hat sie einen 24\% geringeren Speicherbedarf und eine 17\% schnellere \verb|Mean Start Time to First Request|.\newline
-Der geringere maximale Durchsatz ist auf die Datenbank als begrenzenden Faktor zurückzuführen.
+Auch im \verb|JVM mode| für dynamische Daten erzielte die reaktive Anwendung mit 36.000 Anfragen/Sekunde einen 38\% höheren maximalen Durchsatz.
+Darüber hinaus hatte sie einen 24\% geringeren Speicherbedarf und eine 17\% schnellere \newline\verb|Mean Start Time to First Request|.
+Der geringere maximale Durchsatz gegenüber statischen Daten war dabei auf die Datenbank als begrenzenden Faktor zurückzuführen.
 
-Allerdings ist die reine Performanz kein alleiniger Faktor für den Einsatz von neuen Technologien, sondern auch deren
-Erlernbarkeit, Rentabilität und Integrationsfähigkeit in bestehende Lösungen.
+Generell allokierten die \verb|native images| für beide Ressourcentypen weniger Speicher als die Anwendungen im \verb|JVM mode|
+und benötigten zum Starten nur wenige Millisekunden,
+was nur ein Bruchteil der Startzeit der \verb|JVM|-Anwendungen darstellte. Allerdings konnten sie nur einen deutlich
+geringeren maximalen Durchsatz aufweisen, da sie auf Laufzeitoptimierungen wie JIT-Compiling verzichten.
+Sowohl für statische, als auch für dynamische Ressourcen betrug der maximale Durchsatz der Anwendungen im \verb|native mode|
+daher nur etwa die Hälfte der Anwendungen im \verb|JVM mode|.
+
+Die reine Performanz ist allerdings kein alleiniger Faktor für den Einsatz von neuen Technologien, sondern auch deren
+Erlernbarkeit, Rentabilität und Integrationsfähigkeit in bestehende Lösungen sind ein wichtiger Faktor.
 Gerade der deutlich vom klassischen, imperativen Modell abweichende Datenfluss und die Programmstruktur, sowie die weiteren Besonderheiten
 von asynchronen Programmen erschweren vielen Entwicklern das Verständnis und machen das Refactoring von bestehenden, nicht ausreichend
 skalierenden Programmen und Systemen komplex und sowohl zeitlich als auch finanziell schwer einschätzbar.
@@ -76,34 +78,34 @@ können, wird die bestmögliche Leistung nur erzielt, wenn alle, an der Abarbeit
 Anwendungsschichten reaktiv sind und ohne \verb|Blocking I/O| auskommen. Dies ist gerade für
 große Enterprise-Anwendungen ein immenser Aufwand und sollte gegen die erhofften Vorteile abgewogen werden.
 
-
 \subsection{Grenzen der Arbeit}
 \label{subsec:grenzen_der_arbeit}
-Eine umfassende Antwort der Frage, ob reaktive Anwendungen besser skalieren als nicht-reaktive Anwendungen
-mit \verb|Blocking I/O| kann nicht erfolgen, da die in dieser Arbeit verwendeten exemplarischen \verb|workloads|, sowie
-die Anwendungsarchitektur und die Datenbankkomplexität von realistischen Systemen abweichen, weswegen die gezeigten Benchmarks
+Eine umfassende Antwort auf die Frage, ob reaktive Anwendungen besser skalieren als nicht-reaktive Anwendungen
+mit \verb|Blocking I/O| kann nicht erfolgen, da die in dieser Arbeit verwendeten exemplarischen \verb|workloads| und deren Kontinuität, sowie
+die Anwendungsarchitektur und die Datenbankkomplexität von realistischen Systemen abweichen, weswegen die gezeigten Benchmarks auf solchen
 wahrscheinlich nicht zu halten wären.
 Darüber hinaus werden Komponenten wie Load Balancer und Cache-Server, welche die Gesamtleistung eines Systems erhöhen,
 nicht berücksichtigt.
 
 An dieser Stelle empfehlen sich weitere Untersuchungen mit definierten, praxisnahen Testumgebungen, um die Vorteile
 von reaktiven Anwendungen in der Praxis noch besser beurteilen zu können.
-Da Systemarchitekturen und Arbeitsweisen aber bei jedem Unternehmen variieren, ist eine individuelle Anpassung
+Da Systemarchitekturen und Arbeitsweisen bei jedem Unternehmen variieren, ist eine individuelle Anpassung
 für eine abschließende Beurteilung essentiell.
 
 \subsection{Ausblick}
 \label{subsec:ausblick}
 Wünschenswert für die Zukunft wäre ein Vergleich der Ergebnisse mit einem ähnlichen Versuchsaufbau unter Nutzung von Project Loom,
-also virtuellen Threads mit kooperativem Multitasking, die von der Laufzeitumgebung verwaltet werden und nur einen \verb|Kernel-Thread| pro CPU-Kern nutzen.
-Durch die virtuellen Threadwechsel entstehen nahezu keine Kosten. Darüber hinaus müsste der Programmablauf, wie es bei reaktiven Anwendungen
+also virtuellen Threads mit kooperativem Multitasking die von der Laufzeitumgebung verwaltet werden und nur einen \verb|Kernel-Thread| pro CPU-Kern nutzen.
+Durch die virtuellen Threadwechsel entstehen nahezu keine Kosten. Darüber hinaus müsste der Programmablauf, wie es häufig bei reaktiven Anwendungen
 der Fall ist, nicht komplett neu strukturiert werden.
 
 Allerdings ist ein Zeitpunkt für die Veröffentlichung von Project Loom zum derzeitigen Zeitpunkt noch nicht absehbar.
-Hinzu kommt, dass womöglich eine Vielzahl an Implementierungen der Jakarta EE-APIs an die Nutzung von virtuellen Threads angepasst werden müssen.
-Da Project Loom allerdings direkt in die Standard-Library
+Hinzu kommt, dass womöglich eine Vielzahl an Implementierungen der Jakarta EE-APIs, insbesondere die Servlet-API,
+an die Nutzung von virtuellen Threads angepasst werden müssen. Da Project Loom allerdings direkt in die Standard-Library
 integriert wird und viele Java-APIs auf virtuelle Threads umstellt, wäre der Aufwand vermutlich verhältnismäßig gering.
 
-Project Loom wird eine ernsthafte Alternative zu \verb|Reactive Programming|-Bibliotheken darstellen, da sowohl der Entwicklungsaufwand, als auch
+Project Loom wird eine ernsthafte Alternative zu \verb|Reactive Programming|-Bibliotheken und dem \verb|Multi-Reactor|-Pattern, zumindest
+im Java-Umfeld, darstellen, da sowohl der Entwicklungsaufwand, als auch
 der Integrationsaufwand in bestehende Anwendungen deutlich geringer ist.
 Konzepte für die Entwicklung von reaktiven Systemen wie \verb|back-pressure| und nachrichtenbasierte Kommunikation bleiben aber mit hoher
 Wahrscheinlichkeit auch in Zukunft für hoch skalierbare Systeme und Komponenten interessant, unabhängig davon ob sie \verb|Reactive Programming| nutzen.

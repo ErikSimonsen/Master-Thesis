@@ -781,7 +781,7 @@ Im Falle der Anbindung einer Datenbank gibt es außerdem eine ganze Reihe an Opt
 So würde besonders die nicht-reaktive Anwendung stark davon profitieren, wenn ein ausreichend großer Pool an Datenbankverbindungen
 im Voraus erzeugt würde, den die \verb|Worker threads| immer wieder nutzen könnten.
 Zudem könnte unter anderem die Anzahl der maximal zulässigen
-Datenbankverbindungen und die Größe des Shared Memory erhöht werden, sowie zusätzliche Cache-Mechanismen genutzt werden.
+Datenbankverbindungen und die Größe des Shared Memory erhöht, sowie zusätzliche Cache-Mechanismen genutzt werden.
 Natürlich ist auch die Wahl der Datenbank-Software je nach Anwendungszweck ein sehr einflussreicher Faktor.
 \newline\newline
 Ein weiterer Faktor ist die Größe und die Struktur der Tabellen, sowie die Komplexität der Queries.
@@ -792,8 +792,8 @@ da die eigentliche Leistungsfähigkeit von Datenbanksystemen im Kontext von reak
 Es ist allerdings naheliegend, dass sehr große Datenbanken und verschachtelte Queries den maximal möglichen Durchsatz erheblich verringern.
 Die reaktive Anwendung würde dabei aber voraussichtlich besser skalieren als die blockierende Anwendung, da die Blockierungs-Dauer
 eines Threads sich im Thread-per-Request Modell direkt auf die nachfolgenden Anfragen und die, bereits arbeitenden, parallelen Threads
-auswirkt. Umso mehr Zeit Datenbank-Queries also benötigen, umso länger sind die einzelnen Worker-Threads blockiert, verursachen damit
-mehrere Threadwechsel und begrenzen den Grad der Parallelität.
+auswirkt. Umso mehr Zeit Datenbank-Queries also benötigen umso länger sind die einzelnen Worker-Threads blockiert. Dadurch werden
+vermehrte Threadwechsel verursacht und der Grad der Parallelität wird begrenzt.
 
 Beim Multi-Reactor-Pattern hätte die Bearbeitungsdauer der Anfrage hingegen keinen direkten Einfluss auf die restlichen Anfragen, und der
 begrenzende Faktor wäre die Skalierbarkeit der Datenbank.
@@ -814,10 +814,12 @@ bevor die CPU-Auslastung maximal wird.
 Auch im \verb|JVM mode| für dynamische Daten mit Datenbankanbindung ist die reaktive Anwendung in jeder Metrik überlegen und erzielt
 mit 36.000 Anfragen/Sekunde einen 38\% höheren maximalen Durchsatz. Darüber hinaus hat sie einen 24\% geringeren Speicherbedarf, eine 17\% schnellere
 \verb|Mean Start Time to First Request| und kann 80\% mehr Anfragen bearbeiten, bevor die CPU-Auslastung maximal wird.\newline
+Bei höheren getesteten Lasten stieg die Latenz auf über eine Sekunde, wodurch der Durchsatz stagnierte. Darüber hinaus
+konnte die Korrelation zwischen einer maximalen CPU-Auslastung und der Steigerung der Latenz anschaulich gezeigt werden.
 
 Zudem hat sich bestätigt, dass Anwendungen im \verb|native mode| denen im \verb|JVM mode| in Startzeiten und Speicherverbrauch deutlich überlegen sind,
-wodurch sie sich hervorragend für Cloud- und Containerumgebungen eignen. So reduzieren sie die Startzeit auf
-einen zweistelligen Millisekundenbereich. Allerdings konnten sie in den Tests nur die nur die Hälfte des maximalen Durchsatzes von Anwendungen im
+wodurch sie sich hervorragend für Cloud- und Containerumgebungen eignen. So reduzieren sie die Startzeit von einer bis mehreren Sekunden auf
+einen zweistelligen Millisekundenbereich. Allerdings konnten sie in den Tests nur die Hälfte des maximalen Durchsatzes von Anwendungen im
 \verb|JVM mode| erzielen, da auf Laufzeitoptimierungen wie JIT-Compiling verzichtet wird.
 
 Wie in Kapitel \ref{subsubsec:auswertung_kritische_reflexion} allerdings bereits beschrieben, handelt es sich bei diesen Lasttests nur um
