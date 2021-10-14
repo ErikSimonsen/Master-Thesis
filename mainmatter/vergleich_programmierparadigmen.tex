@@ -386,7 +386,7 @@ Endpunkt mit statischen Daten, mehr als den doppelten Durchsatz.
 \newpage
 \begin{figure}[ht!]
   \includegraphics[width=1.0\textwidth]{run2/jvm-static/mean-response-vs-throughput}
-  \caption{Test im JVM mode mit statischen Ressourcen: Durchschnittliche Latenzen}
+  \caption{Test im JVM mode mit statischen Ressourcen: Durchschnittliche Latenz}
   \label{fig:jvm_static_mean_response}
 \end{figure}
 Abbildung \ref{fig:jvm_static_mean_rss} stellt den durchschnittlich allokierten Speicher des jeweiligen Anwendungsprozesses
@@ -525,7 +525,7 @@ Wie aus Listing \ref{lst:starttimes_jvm_dynamic} berechnet werden kann, liegt di
 mit Datenbankanbindung bei einer reaktiven Anwendung im \verb|JVM mode| bei 1349 ms und bei einer
 blockierenden Anwendung bei 1631,2 ms.
 
-\begin{lstlisting}[caption=Startzeiten im JVM mode mit dynamischen Ressourcen, captionpos=b, label=lst:starttimes_jvm_dynamic]
+\begin{lstlisting}[caption=Startzeiten im native mode mit dynamischen Ressourcen, captionpos=b, label=lst:starttimes_jvm_dynamic]
     1345 ms    1674 ms
     1366 ms    1617 ms
     1364 ms    1656 ms 
@@ -791,7 +791,7 @@ da die eigentliche Leistungsfähigkeit von Datenbanksystemen im Kontext von reak
 
 Es ist allerdings naheliegend, dass sehr große Datenbanken und verschachtelte Queries den maximal möglichen Durchsatz erheblich verringern.
 Die reaktive Anwendung würde dabei aber voraussichtlich besser skalieren als die blockierende Anwendung, da die Blockierungs-Dauer
-eines Threads sich im Thread-per-Request Modell direkt auf die nachfolgenden Anfragen und die, bereits arbeitenden, parallelen Threads
+eines Threads sich im Thread-per-Request Modell auf die nachfolgenden Anfragen und die, bereits arbeitenden, parallelen Threads
 auswirkt. Umso mehr Zeit Datenbank-Queries also benötigen umso länger sind die einzelnen Worker-Threads blockiert. Dadurch werden
 vermehrte Threadwechsel verursacht und der Grad der Parallelität wird begrenzt.
 

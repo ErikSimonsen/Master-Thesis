@@ -12,7 +12,7 @@ und bieten Entwicklern verhältnismäßig leichten Zugriff auf parallele Program
 \subsubsection{Kernel-Threads}
 \label{subsubsec:kernel-threads}
 Als \verb|Kernel-Threads|\footnote{Auch als nativer Thread bezeichnet} werden Threads bezeichnet, deren Ablaufplanung vom Betriebssystem übernommen wird.
-Konkret bedeutet das, dass die Zuweisung der Rechenzeit für einen Thread sowie die Threadwechsel (siehe \ref{subsubsec:threadwechsel})
+Konkret bedeutet das, dass die Zuweisung der Rechenzeit für einen Thread sowie die Threadwechsel (siehe Kapitel \ref{subsubsec:threadwechsel})
 vom Scheduler \& Dispatcher des Kernels geplant und durchgeführt werden.
 
 Mindestens ein \verb|Kernel-Thread|, der \verb|Main-Thread|, existiert innerhalb eines Prozesses. Kernel-Threads innerhalb eines Prozesses
@@ -119,7 +119,7 @@ führen.
 Aus diesem Grund wird das \verb|Thread per request|-Modell in der Regel um einen \verb|Threadpool| erweitert.
 Dabei wird eine begrenzte Anzahl an Threads bereits im Vorfeld erstellt und wiederverwendet.
 Dadurch amortisieren sich die Kosten der Erstellung der Threads während der Laufzeit und die benötigten Ressourcen werden begrenzt.
-Anfragen können solange parallel ausgeführt werden bis die Anzahl der gleichzeitigen Anfragen die Anzahl der Threads im \verb|Threadpool|
+Anfragen können solange parallel ausgeführt werden bis die Anzahl der gleichzeitigen Anfragen die der Threads im \verb|Threadpool|
 übersteigt.
 Ab diesem Punkt müssen eingehende Anfragen solange warten bis ein Thread wieder verfügbar ist.
 Der erreichbare Grad der Parallelität ist bei diesem Ansatz in jedem Fall durch die Größe des Threadpools begrenzt.
@@ -129,12 +129,12 @@ Der erreichbare Grad der Parallelität ist bei diesem Ansatz in jedem Fall durch
 APIs die auf \verb|Blocking I/O| basieren, blockieren den Thread bis die Operation abgeschlossen ist und verursachen somit
 immer einen Threadwechsel.
 Funktionsaufrufe mit nicht-blockierenden, asynchronen Ressourcenzugriffen kommen hingegen sofort zurück und blockieren den Thread nicht.
-Dieser kann dadurch den weiteren Code des Programms ausführen bzw. die nächste Anfrage bearbeiten.
+Dieser kann dadurch den weiteren Code des Programms ausführen oder die nächste Anfrage bearbeiten.
 Sobald das Ergebnis des Zugriffs bereit ist, wird der aufrufende Thread darüber informiert.
 Diese Art der Ressourcenzugriffe wird als \verb|Non-blocking I/O| bezeichnet.
 
 Die Grundlage für diese Funktionsweise wird durch einen Mechanismus namens \verb|Synchronous Event Demultiplexing|
-bzw. \verb|Event notification API| von jedem modernen Betriebssystem bereitgestellt.
+von jedem modernen Betriebssystem bereitgestellt.
 
 \subsubsection{Synchronous Event Demultiplexing}
 \label{subsubsec:event demultiplexing}
@@ -154,7 +154,7 @@ Dabei ist \verb|java.nio.channels.selector| der Dreh- und Angelpunkt und gibt Au
 beobachteten Ressourcen bereit für I/O-Operationen sind.
 
 Abbildung \ref{fig:nonblocking_single_thread} stellt dar, wie mehrere Ressourcen über die
-\verb|java.nio|-APIs überwacht werden können.
+\verb|java.nio|-APIs überwacht werden.
 
 Im Gegensatz zum beschriebenen \verb|Thread per request|-Modell, können durch \newline\verb|Non-blocking I/O|
 mehrere Anfragen parallel von einem Thread verarbeitet werden, daher die Bezeichnung \verb|Single Threaded|-Modell.
@@ -163,8 +163,7 @@ Darüber hinaus wird die Möglichkeit eines gleichzeitigen Ressourcenzugriffs vo
 durch die Nutzung eines einzigen Threads unterbunden, weswegen eine Thread-Synchronisation nicht erforderlich ist.
 
 Der Aufruf des \verb|Synchronous Event Demultiplexers| ist blockierend (daher auch der Zusatz \verb|Synchronous|)
-und zwar solange bis mindestens eine Ressource bereit für eine I/O-Operation ist
-\footnote{Ein typischer Polling-Algorithmus würde aufgrund der geringen Verfügbarkeit der Ressourcen
+und zwar solange bis mindestens eine Ressource bereit für eine I/O-Operation ist\footnote{Ein typischer Polling-Algorithmus würde aufgrund der geringen Verfügbarkeit der Ressourcen
   viel CPU-Rechenzeit verschwenden}.
 Sobald dies passiert wird der Aufruf beendet und eine Menge aus Events wird an den Aufrufer zurückgegeben.
 \begin{figure}[ht!]
@@ -204,7 +203,7 @@ gesamten Programmlaufzeit aktiv ist und dessen zurückgegebene Events in einer \
 wird in Listing \ref{lst:EventLoop_Pseudocode} als Pseudocode dargestellt.
 \newline
 
-\begin{lstlisting}[caption=Einfaches Pseudocode-Beispiel für Synchronous Event Demultiplexing mit Event Loop,
+\begin{lstlisting}[caption=Pseudocode-Beispiel für Synchronous Event Demultiplexing mit Event Loop,
 captionpos=b, label=lst:EventLoop_Pseudocode]
 //add resources to a data structure and associate them with a specific operation
 watchedList.add(socketA, FOR_READ)

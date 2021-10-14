@@ -37,8 +37,8 @@ veröffentlicht und von der nächsten \verb|pipe| als \verb|Subscriber| konsumie
 
 Jede \verb|Pipe| kann eine Vielzahl an konkreten Operatoren enthalten die in der jeweiligen Reactive Programming-Bibliothek definiert sind.
 Jeder Operator muss dabei wiederum einen Publisher zur Verfügung stellen, auf den sich der nachfolgende Operator registrieren kann
-um die transformierten Elementen zu erhalten.\footnote{Obwohl die Implementierungsdetails und die verwendete Terminologie unterschiedlich sind, abhängig von der verwendeten Reactive Programming-Bibliothek
-  und der Programmiersprache, ist der Arbeitsablauf immer ähnlich}
+um die transformierten Elementen zu erhalten.\footnote{Obwohl die Implementierungsdetails und die verwendete Terminologie, abhängig von der verwendeten Reactive Programming-Bibliothek
+  und der Programmiersprache, unterschiedlich sind ist der Programmablauf immer ähnlich}
 
 In Listing \ref{lst:eventflow_pseudocode} wird der Event-/Datenfluss anhand von Pseudocode dargestellt.
 \begin{lstlisting}[caption=Pseudocode Event-/Datenfluss, captionpos=b, label=lst:eventflow_pseudocode]
@@ -76,7 +76,7 @@ print("hello world")
 \end{lstlisting}
 In Listing \ref{lst:NIO_Pseudocode} kann durchaus zuerst \verb|hello world| ausgegeben werden da die gestarteten Datenbank-Abfragen die
 restliche Programmausführung nicht blockieren. Wenn statt \verb|hello world| versucht werden würde die Ergebnisse der Datenbank-Abfragen
-darzustellen, wäre das Ergebnis möglicherweise eine Exception oder \verb|null|, da die Anfragen zum Zeitpunkt der Ausführung von Zeile 3 noch nicht
+darzustellen, wäre das Ergebnis möglicherweise eine Exception oder \verb|null|, da die Abfragen zum Zeitpunkt der Ausführung von Zeile 3 noch nicht
 notwendigerweise abgeschlossen sind. Das ist ein gängiger Fehler beim Arbeiten mit asynchronen, nicht-blockierendem Programmcode.
 
 \subsection{Vorteile und Nachteile}
@@ -110,8 +110,7 @@ auf Daten eines Service zugegriffen wird die zu dem Zeitpunkt bei hoher Latenz n
 allerdings schon.
 
 Außerdem gibt es zum aktuellen Stand kaum allgemeine, herstellerunabhängige Fachliteratur zu dem Thema.
-Durch die Vielzahl an lange existierenden Reactive-Programming Bibliotheken
-\footnote{Diese sind größtenteils bereits vor der Entwicklung der \textit{Reactive Streams}-Spezifikation entstanden}
+Durch die Vielzahl an lange existierenden Reactive-Programming Bibliotheken\footnote{Diese sind größtenteils bereits vor der Entwicklung der \textit{Reactive Streams}-Spezifikation entstanden}
 haben sich darüber hinaus viele verschiedene Nomenklaturen und Vorgehensweisen etabliert.
 
 Ein weiteres Problem besteht bei der Integration in bestehende Enterprise Anwendungen.
